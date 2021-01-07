@@ -7,6 +7,9 @@ dist: xenial
 
 addons:
   chrome: stable
+  apt:
+    packages:
+      - xvfb
 
 cache:
   yarn: true
@@ -26,3 +29,8 @@ before_install:
 
 script:
   - yarn test
+install:
+  - npm install
+  - cd electron-app && npm install
+  - export DISPLAY=':99.0'
+  - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
