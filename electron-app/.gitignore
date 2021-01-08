@@ -88,6 +88,9 @@ typings/
 # Electron-Forge
 out/
 
+# TypeScript
+dist/
+
 # Ember build
 ember-dist/
 ember-test/

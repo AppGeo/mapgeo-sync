@@ -52,6 +52,7 @@ app.on('ready', async () => {
     width: 800,
     height: 600,
     webPreferences: {
+      // details https://github.com/electron/electron/issues/23506
       contextIsolation: true,
     },
   });
@@ -72,13 +73,15 @@ app.on('ready', async () => {
     mainWindow.loadURL(emberAppURL);
   });
 
-  mainWindow.webContents.on('crashed', () => {
-    console.log(
-      'Your Ember app (or other code) in the main window has crashed.'
-    );
-    console.log(
-      'This is a serious issue that needs to be handled and/or debugged.'
-    );
+  mainWindow.webContents.on('render-process-gone', (_event, details) => {
+    if (details.reason !== 'killed') {
+      console.log(
+        'Your Ember app (or other code) in the main window has crashed.'
+      );
+      console.log(
+        'This is a serious issue that needs to be handled and/or debugged.'
+      );
+    }
   });
 
   mainWindow.on('unresponsive', () => {
