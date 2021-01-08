@@ -7,9 +7,12 @@ The project uses an addon called `ember-electron` that facilitates the interacti
 
 ```sh
 -/ # Ember App
- |_package.json # Ember Deps
- |_electron-app/ # Electron Forge setup
+ |_ package.json # Ember Deps & Electron config
+   |_ app/ # Ember UI code lives here
+ |_ electron-app/ # Electron Forge setup
    |_ package.json # Electron deps
+   |_ src/ # Electron Code
+     |_ index.ts # Code entry point
 ```
 
 ## Prerequisites
