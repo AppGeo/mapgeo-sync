@@ -1,10 +1,24 @@
 'use strict';
 
 const EmberApp = require('ember-cli/lib/broccoli/ember-app');
+const tailwind = require('tailwindcss');
+const postcssNested = require('postcss-nested');
+const postcssImport = require('postcss-import');
+const plugins = {
+  before: [postcssNested()],
+  after: [
+    postcssImport({
+      path: ['node_modules'],
+    }),
+    tailwind('./app/tailwind/config.js'),
+  ],
+};
 
 module.exports = function (defaults) {
   let app = new EmberApp(defaults, {
-    // Add options here
+    cssModules: {
+      plugins: plugins,
+    },
   });
 
   // Use `app.import` to add additional libraries to the generated

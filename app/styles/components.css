@@ -1,0 +1,32 @@
+.ember-application {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: white;
+}
+
+/* Remove once issue fixed: https://github.com/josemarluedke/frontile/issues/71 */
+.ember-palette-dropdown {
+  position: absolute;
+  max-height: inherit;
+  /* over overlay (50z) */
+  z-index: 60;
+}
+
+.ember-power-select-dropdown {
+  /* over overlay (1001z) */
+  z-index: 1002;
+}
+
+/* fixes for frontile */
+.form-select-container .ember-power-select-selected-item,
+.form-select-container .ember-power-select-placeholder {
+  margin-right: 1.5rem;
+}
+.form-select-container .ember-power-select-trigger {
+  overflow-y: hidden;
+}
+
+.ember-power-select-options {
+  margin: 0;
+}

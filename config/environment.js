@@ -3,6 +3,7 @@
 module.exports = function (environment) {
   let ENV = {
     modulePrefix: 'mapgeo-sync',
+    podModulePrefix: 'mapgeo-sync/pods',
     environment,
     rootURL: process.env.EMBER_CLI_ELECTRON ? '' : '/',
     locationType: process.env.EMBER_CLI_ELECTRON ? 'hash' : 'auto',

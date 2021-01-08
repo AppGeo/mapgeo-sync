@@ -1,7 +1,7 @@
-const { fileURLToPath } = require('url');
-const path = require('path');
-const fs = require('fs');
-const { promisify } = require('util');
+import { fileURLToPath } from 'url';
+import * as path from 'path';
+import * as fs from 'fs';
+import { promisify } from 'util';
 
 const access = promisify(fs.access);
 
@@ -14,7 +14,7 @@ const access = promisify(fs.access);
 // interpreted as being relative to the root of the Ember app. If so, we return
 // that path, and if not we leave them as-is, as their absolute path.
 //
-async function getAssetPath(emberAppDir, url) {
+export async function getAssetPath(emberAppDir: string, url: string) {
   let urlPath = fileURLToPath(url);
   // Get the root of the path -- should be '/' on MacOS or something like
   // 'C:\' on Windows
@@ -31,12 +31,13 @@ async function getAssetPath(emberAppDir, url) {
   }
 }
 
-module.exports = function handleFileURLs(emberAppDir) {
+export default function handleFileURLs(emberAppDir: string) {
   const { protocol } = require('electron');
 
-  protocol.interceptFileProtocol('file', async ({ url }, callback) => {
-    callback(await getAssetPath(emberAppDir, url));
-  });
-};
-
-module.exports.getAssetPath = getAssetPath;
+  protocol.interceptFileProtocol(
+    'file',
+    async ({ url }: { url: string }, callback: Function) => {
+      callback(await getAssetPath(emberAppDir, url));
+    }
+  );
+}
