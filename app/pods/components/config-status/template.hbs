@@ -1,0 +1,23 @@
+Config:
+{{#if this.config}}
+  Loaded
+{{else}}
+  Loading..
+{{/if}}
+
+<button type='button' {{on 'click' this.selectNewConfig}}>
+  Select Config
+</button>
+
+<details>
+  <summary>
+    Config
+  </summary>
+  <pre class='text-xs'>
+    <code>
+      {{this.configString}}
+    </code>
+  </pre>
+</details>
+
+{{yield}}

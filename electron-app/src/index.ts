@@ -1,11 +1,14 @@
 /* eslint-disable no-console */
 // import installExtension, { EMBER_INSPECTOR } from 'electron-devtools-installer';
 import { pathToFileURL } from 'url';
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import * as fs from 'fs';
 import * as path from 'path';
 import * as isDev from 'electron-is-dev';
+import * as Store from 'electron-store';
 import handleFileUrls from './handle-file-urls';
 
+const store = new Store();
 const emberAppDir = path.resolve(__dirname, '..', 'ember-dist');
 const emberAppURL = pathToFileURL(
   path.join(emberAppDir, 'index.html')
@@ -53,7 +56,9 @@ app.on('ready', async () => {
     height: 600,
     webPreferences: {
       // details https://github.com/electron/electron/issues/23506
-      contextIsolation: true,
+      contextIsolation: false,
+      // to use ipcRenderer and events from main process (here)
+      nodeIntegration: true,
     },
   });
 
@@ -66,6 +71,30 @@ app.on('ready', async () => {
 
   // Load the ember application
   mainWindow.loadURL(emberAppURL);
+
+  // Ember app has loaded, send an event
+  mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow.webContents.send(
+      'config-loaded',
+      store.get('config') || { config: true }
+    );
+
+    ipcMain.on('select-config', async (event) => {
+      const result = await dialog.showOpenDialog({
+        message: 'Select config.json file',
+        properties: ['openFile'],
+      });
+      // Prompt cancelled
+      if (!result.filePaths[0]) {
+        return;
+      }
+      const configBuffer = await fs.promises.readFile(result.filePaths[0]);
+      const config = JSON.parse(configBuffer.toString());
+
+      store.set('config', config);
+      event.reply('config-loaded', config);
+    });
+  });
 
   // If a loading operation goes wrong, we'll send Electron back to
   // Ember App entry point
