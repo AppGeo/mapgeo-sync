@@ -13,7 +13,7 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
   constructor(owner: unknown, args: ConfigStatusArgs) {
     super(owner, args);
 
-    ipcRenderer.on('config-loaded', (event: IpcRendererEvent, config: any) => {
+    ipcRenderer.on('config-loaded', (_event: IpcRendererEvent, config: any) => {
       this.config = config;
     });
   }
