@@ -20,4 +20,16 @@ Config:
   </pre>
 </details>
 
+<ul>
+  {{#each this.config.UploadActions as |uploadAction index|}}
+    <li>
+      {{index}}: {{uploadAction.ActionType}} action
+      <br />
+      <button type='button' {{on 'click' (fn this.runAction uploadAction)}}>
+        Run Action
+      </button>
+    </li>
+  {{/each}}
+</ul>
+
 {{yield}}

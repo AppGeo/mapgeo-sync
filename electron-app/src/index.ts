@@ -1,12 +1,13 @@
 /* eslint-disable no-console */
 // import installExtension, { EMBER_INSPECTOR } from 'electron-devtools-installer';
-import { pathToFileURL } from 'url';
+import { URL, pathToFileURL } from 'url';
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as isDev from 'electron-is-dev';
 import * as Store from 'electron-store';
 import handleFileUrls from './handle-file-urls';
+import handleQueryAction, { QueryAction } from './action-handlers/query';
 
 const store = new Store();
 const emberAppDir = path.resolve(__dirname, '..', 'ember-dist');
@@ -93,6 +94,17 @@ app.on('ready', async () => {
 
       store.set('config', config);
       event.reply('config-loaded', config);
+    });
+
+    ipcMain.on('run-action', async (event, action: QueryAction) => {
+      const config: any = store.get('config');
+      if (!config?.MapGeoOptions?.Host) {
+        throw new Error('MapGeoOptions.Host is a required config property');
+      }
+      const url = new URL(config.MapGeoOptions.Host);
+      const subdomain = url.hostname.split('.')[0];
+      const result = await handleQueryAction(subdomain, action);
+      console.log(result);
     });
   });
 

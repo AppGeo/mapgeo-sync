@@ -30,4 +30,9 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
   selectNewConfig() {
     ipcRenderer.send('select-config');
   }
+
+  @action
+  runAction(uploadAction: any) {
+    ipcRenderer.send('run-action', uploadAction);
+  }
 }
