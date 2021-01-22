@@ -38,7 +38,7 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
       'action-result',
       (_event: IpcRendererEvent, result: any[]) => {
         this.notifications.add(
-          `Action succeeded with ${result.length} items`,
+          `Action succeeded. Query returned ${result.length} items`,
           this.options
         );
       }
