@@ -1,35 +1,62 @@
-Config:
-{{#if this.config}}
-  Loaded
-{{else}}
-  Loading..
-{{/if}}
+<div class='mt-10 w-3/4 md:w-1/2 bg-white p-4 shadow-lg rounded-2xl'>
+  <div class='flex justify-between items-start'>
+    <div class='flex-1'>
+      Config:
+      {{#if this.config}}
+        Loaded. Updated At
+        <br />
+        {{this.configUpdated}}
+      {{else}}
+        Loading..
+      {{/if}}
+    </div>
 
-<button type='button' {{on 'click' this.selectNewConfig}}>
-  Select Config
-</button>
+    <Button
+      @appearance='outlined'
+      @isXSmall={{true}}
+      {{on 'click' this.selectNewConfig}}
+    >
+      Select Config
+    </Button>
+  </div>
 
-<details>
-  <summary>
-    Config
-  </summary>
-  <pre class='text-xs'>
-    <code>
-      {{this.configString}}
-    </code>
-  </pre>
-</details>
+  <details>
+    <summary>
+      Config
+    </summary>
+    <pre class='text-xs overflow-auto'>
+      <code>
+        {{this.configString}}
+      </code>
+    </pre>
+  </details>
+</div>
 
-<ul>
-  {{#each this.config.UploadActions as |uploadAction index|}}
-    <li>
-      {{index}}: {{uploadAction.ActionType}} action
-      <br />
-      <button type='button' {{on 'click' (fn this.runAction uploadAction)}}>
-        Run Action
-      </button>
-    </li>
-  {{/each}}
-</ul>
+<div class='mt-8 w-3/4 md:w-1/2 bg-white p-4 shadow-lg rounded-2xl'>
+  <ul>
+    {{#each this.config.UploadActions as |uploadAction index|}}
+      <li class='flex flex-col'>
+        <div class='flex justify-between items-start'>
+          <div class='font-semibold'>
+            {{index}}: {{uploadAction.ActionType}} action
+          </div>
+
+          <Button
+            type='button'
+            @appearance='outlined'
+            @isXSmall={{true}}
+            {{on 'click' (fn this.runAction uploadAction)}}
+          >
+            Run Action
+          </Button>
+        </div>
+
+        <code class='text-left'>
+          {{uploadAction.Query}}
+        </code>
+      </li>
+    {{/each}}
+  </ul>
+</div>
 
 {{yield}}

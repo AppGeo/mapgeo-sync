@@ -21,7 +21,7 @@ module.exports = {
   },
   rules: {},
   globals: {
-    requireNode: true,
+    requireNode: 'readonly',
   },
   overrides: [
     // node files

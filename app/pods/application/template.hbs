@@ -12,6 +12,8 @@
   </nav>
 </header>
 
-<main class='h-full bg-gray-100'>
+<main class='flex flex-col flex-1 bg-gray-100'>
   {{outlet}}
 </main>
+
+<NotificationsContainer @placement='top-right' />

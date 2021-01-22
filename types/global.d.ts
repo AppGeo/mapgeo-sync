@@ -4,3 +4,5 @@ declare module 'mapgeo-sync/templates/*' {
   const tmpl: TemplateFactory;
   export default tmpl;
 }
+
+declare function requireNode(path: string): any;

@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 // import installExtension, { EMBER_INSPECTOR } from 'electron-devtools-installer';
 import { URL, pathToFileURL } from 'url';
-import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import { app, BrowserWindow, Tray, Menu, ipcMain, dialog } from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as isDev from 'electron-is-dev';
@@ -16,46 +16,16 @@ const emberAppURL = pathToFileURL(
 ).toString();
 
 let mainWindow: BrowserWindow | null = null;
+let tray: Tray | null;
 
-// Uncomment the lines below to enable Electron's crash reporter
-// For more information, see http://electron.atom.io/docs/api/crash-reporter/
-// electron.crashReporter.start({
-//     productName: 'YourName',
-//     companyName: 'YourCompany',
-//     submitURL: 'https://your-domain.com/url-to-submit',
-//     autoSubmit: true
-// });
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-});
-
-app.on('ready', async () => {
-  // Mostly broken: Because of some changes in Chrome, in recent Electron versions (>=9 I think) they can't be loaded with file: protocol https://github.com/electron/electron/issues/24011),
-  // and also devtron doesn't work for other reasons (https://github.com/electron/electron/issues/23676)
-  // and also devtron has been mostly abandoned (https://github.com/electron-userland/devtron/issues/200).
-  //
-  // if (isDev) {
-  //   try {
-  //     require('devtron').install();
-  //   } catch (err) {
-  //     console.log('Failed to install Devtron: ', err);
-  //   }
-  //   try {
-  //     await installExtension(EMBER_INSPECTOR);
-  //   } catch (err) {
-  //     console.log('Failed to install Ember Inspector: ', err);
-  //   }
-  // }
-
-  await handleFileUrls(emberAppDir);
-
+function createBrowserWindow() {
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
+
     webPreferences: {
+      // So we can use electron-store on the client
+      enableRemoteModule: true,
       // details https://github.com/electron/electron/issues/23506
       contextIsolation: false,
       // to use ipcRenderer and events from main process (here)
@@ -93,6 +63,7 @@ app.on('ready', async () => {
       const config = JSON.parse(configBuffer.toString());
 
       store.set('config', config);
+      store.set('configUpdated', new Date());
       event.reply('config-loaded', config);
     });
 
@@ -105,6 +76,7 @@ app.on('ready', async () => {
       const subdomain = url.hostname.split('.')[0];
       const result = await handleQueryAction(subdomain, action);
       console.log(result);
+      event.reply('action-result', result);
     });
   });
 
@@ -138,6 +110,74 @@ app.on('ready', async () => {
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
+
+  return mainWindow;
+}
+
+// Uncomment the lines below to enable Electron's crash reporter
+// For more information, see http://electron.atom.io/docs/api/crash-reporter/
+// electron.crashReporter.start({
+//     productName: 'YourName',
+//     companyName: 'YourCompany',
+//     submitURL: 'https://your-domain.com/url-to-submit',
+//     autoSubmit: true
+// });
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    console.log('closing because windows closed');
+    app.quit();
+  }
+});
+
+app.on('ready', async () => {
+  // Mostly broken: Because of some changes in Chrome, in recent Electron versions (>=9 I think) they can't be loaded with file: protocol https://github.com/electron/electron/issues/24011),
+  // and also devtron doesn't work for other reasons (https://github.com/electron/electron/issues/23676)
+  // and also devtron has been mostly abandoned (https://github.com/electron-userland/devtron/issues/200).
+  //
+  // if (isDev) {
+  //   try {
+  //     require('devtron').install();
+  //   } catch (err) {
+  //     console.log('Failed to install Devtron: ', err);
+  //   }
+  //   try {
+  //     await installExtension(EMBER_INSPECTOR);
+  //   } catch (err) {
+  //     console.log('Failed to install Ember Inspector: ', err);
+  //   }
+  // }
+
+  tray = new Tray(path.join(__dirname, '..', 'resources/icon-16.png'));
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Preferences',
+      type: 'normal',
+      click: () => {
+        if (!mainWindow) {
+          mainWindow = createBrowserWindow();
+        } else {
+          mainWindow.show();
+        }
+      },
+    },
+    {
+      type: 'separator',
+    },
+    {
+      label: 'Quit',
+      type: 'normal',
+      click: () => {
+        app.quit();
+      },
+    },
+  ]);
+  tray.setToolTip('MapGeo Sync');
+  tray.setContextMenu(contextMenu);
+
+  await handleFileUrls(emberAppDir);
+
+  mainWindow = createBrowserWindow();
 });
 
 // Handle an unhandled error in the main thread
