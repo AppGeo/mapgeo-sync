@@ -1,9 +1,9 @@
+import handleQueryAction from '../action-handlers/query';
+import { URL } from 'url';
+import { workerData, parentPort } from 'worker_threads';
+
 (async () => {
-  const handleQueryAction = require('../action-handlers/query').default;
-  const { URL } = require('url');
-  const { workerData, parentPort } = require('worker_threads');
   let { config, action } = workerData;
-  console.log(config);
   if (!config?.MapGeoOptions?.Host) {
     throw new Error('MapGeoOptions.Host is a required config property');
   }
