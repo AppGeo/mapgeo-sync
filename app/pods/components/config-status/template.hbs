@@ -41,14 +41,16 @@
             {{index}}: {{uploadAction.ActionType}} action
           </div>
 
-          <Button
-            type='button'
-            @appearance='outlined'
-            @isXSmall={{true}}
-            {{on 'click' (fn this.runAction uploadAction)}}
-          >
-            Run Action
-          </Button>
+          <div class='flex'>
+            <Button
+              type='button'
+              @appearance='outlined'
+              @isXSmall={{true}}
+              {{on 'click' (fn this.runAction uploadAction)}}
+            >
+              Run Action
+            </Button>
+          </div>
         </div>
 
         <code class='text-left'>

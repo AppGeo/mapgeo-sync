@@ -6,10 +6,20 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as isDev from 'electron-is-dev';
 import * as Store from 'electron-store';
+import { MessageChannel } from 'worker_threads';
+debugger;
+// @ts-ignore
+import * as Bree from 'bree';
 import handleFileUrls from './handle-file-urls';
-import handleQueryAction, { QueryAction } from './action-handlers/query';
+import handleQueryAction from './action-handlers/query';
+import type { QueryAction, SyncConfig } from 'mapgeo-sync-config';
 
+const { port1, port2 } = new MessageChannel();
 const store = new Store();
+const bree = new Bree({
+  root: path.join(__dirname, 'jobs'),
+  jobs: [],
+});
 const emberAppDir = path.resolve(__dirname, '..', 'ember-dist');
 const emberAppURL = pathToFileURL(
   path.join(emberAppDir, 'index.html')
@@ -45,10 +55,21 @@ function createBrowserWindow() {
 
   // Ember app has loaded, send an event
   mainWindow.webContents.on('did-finish-load', () => {
-    mainWindow.webContents.send(
-      'config-loaded',
-      store.get('config') || { config: true }
-    );
+    let currentConfig = store.get('config') as SyncConfig;
+    mainWindow.webContents.send('config-loaded', currentConfig);
+
+    if (currentConfig) {
+      bree.add([
+        {
+          name: 'query-action',
+          worker: {
+            transferList: [port1],
+            workerData: { config: currentConfig, port: port1 },
+          },
+        },
+      ]);
+    }
+    bree.run();
 
     ipcMain.on('select-config', async (event) => {
       const result = await dialog.showOpenDialog({
@@ -68,15 +89,35 @@ function createBrowserWindow() {
     });
 
     ipcMain.on('run-action', async (event, action: QueryAction) => {
-      const config: any = store.get('config');
-      if (!config?.MapGeoOptions?.Host) {
-        throw new Error('MapGeoOptions.Host is a required config property');
-      }
-      const url = new URL(config.MapGeoOptions.Host);
-      const subdomain = url.hostname.split('.')[0];
-      const result = await handleQueryAction(subdomain, action);
-      console.log(result);
-      event.reply('action-result', result);
+      const { port1, port2 } = new MessageChannel();
+      bree.remove('query-action');
+      bree.add([
+        {
+          name: 'query-action',
+          worker: {
+            transferList: [port1],
+            workerData: { config: store.get('config'), action, port: port1 },
+          },
+        },
+      ]);
+      port2.on('message', (message) => {
+        console.log(message);
+        event.reply('action-result', message);
+      });
+      bree.start('query-action');
+      // const config: any = store.get('config');
+      // if (!config?.MapGeoOptions?.Host) {
+      //   throw new Error('MapGeoOptions.Host is a required config property');
+      // }
+      // const url = new URL(config.MapGeoOptions.Host);
+      // const subdomain = url.hostname.split('.')[0];
+      // const result = await handleQueryAction(subdomain, action);
+      // console.log(result);
+      // event.reply('action-result', result);
+    });
+
+    ipcMain.on('schedule-action', async (event, action: QueryAction) => {
+      bree.start('query-action');
     });
   });
 

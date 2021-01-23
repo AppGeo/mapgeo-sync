@@ -11,8 +11,8 @@
     "resolveJsonModule": true,
     "typeRoots": ["./node_modules/**/*"],
     "paths": {
-      "*": ["types/*"]
+      "mapgeo-sync-config": ["../types/mapgeo-sync-config/index.d.ts"]
     }
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "../types/mapgeo-sync-config/*"]
 }
