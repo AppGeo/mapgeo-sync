@@ -1,6 +1,8 @@
-import handleQueryAction from '../action-handlers/query';
 import { URL } from 'url';
 import { workerData, parentPort } from 'worker_threads';
+import MapgeoService from '../mapgeo-service';
+import handleQueryAction from '../action-handlers/query';
+import upload from '../s3-service';
 
 (async () => {
   let { config, action } = workerData;
@@ -13,6 +15,15 @@ import { workerData, parentPort } from 'worker_threads';
     subdomain,
     action || config.UploadActions[0]
   );
+
+  const mapgeo = await MapgeoService.login(
+    config.MapGeoOptions.Host,
+    config.MapGeoOptions.Email,
+    config.MapGeoOptions.Password
+  );
+  let tokens = await mapgeo.getUploaderTokens();
+  await upload(tokens, '{ "test": true }');
+
   // console.log(result);
   workerData.port.postMessage(result);
   if (parentPort) {

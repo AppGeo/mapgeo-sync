@@ -1,9 +1,31 @@
+import { ok } from 'assert';
 import axios, { AxiosInstance } from 'axios';
+
+export type UploaderTokenResult = {
+  AccessKeyId: string;
+  SecretAccessKey: string;
+  SessionToken: string;
+  Expiration: string;
+};
 
 export default class MapgeoService {
   host: string;
   token: string;
   #axios: AxiosInstance;
+
+  static async login(host: string, email: string, password: string) {
+    try {
+      const result = await axios.post(`${host}/auth/login`, {
+        email,
+        password,
+      });
+      const service = new MapgeoService(host, result.data.token);
+      return service;
+    } catch (e) {
+      console.log('login error: ', e);
+      throw e;
+    }
+  }
 
   constructor(host: string, token: string) {
     this.host = host;
@@ -15,8 +37,9 @@ export default class MapgeoService {
     });
   }
 
-  private createError(message: string) {
-    return { ok: false, error: new Error(message) };
+  async getUploaderTokens() {
+    const result = await this.#axios.get(`/api/uploader/token`);
+    return result.data as UploaderTokenResult;
   }
 
   async deleteOptouts(datasetId: string, ids: string[]) {
@@ -31,22 +54,26 @@ export default class MapgeoService {
       }
 
       case 401: {
-        response = this.createError('Login: Unauthorized');
+        response = this.createError('deleteOptouts: Unauthorized');
         break;
       }
 
       case 404: {
-        response = this.createError('Login: Bad Host (404)');
+        response = this.createError('deleteOptouts: Bad Host (404)');
         break;
       }
 
       default: {
         response = this.createError(
-          `DeleteOptouts: (${result.statusText}) ${JSON.stringify(result.data)}`
+          `deleteOptouts: (${result.statusText}) ${JSON.stringify(result.data)}`
         );
       }
     }
 
     return response;
+  }
+
+  private createError(message: string) {
+    return { ok: false, error: new Error(message) };
   }
 }

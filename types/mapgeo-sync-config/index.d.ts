@@ -33,7 +33,7 @@ export interface QueryOutput {
 }
 
 export interface SyncConfig {
-  MapGeoOptions: { Host: string };
+  MapGeoOptions: { Host: string; Email: string; Password: string };
   UploadActions: QueryAction[];
   OptOutActions: OptoutAction[];
 }

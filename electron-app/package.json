@@ -49,6 +49,7 @@
     }
   },
   "dependencies": {
+    "aws-sdk": "^2.834.0",
     "axios": "^0.21.1",
     "bree": "^4.1.1",
     "electron-devtools-installer": "^3.1.1",

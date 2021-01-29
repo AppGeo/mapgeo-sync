@@ -58,18 +58,23 @@ function createBrowserWindow() {
     let currentConfig = store.get('config') as SyncConfig;
     mainWindow.webContents.send('config-loaded', currentConfig);
 
-    if (currentConfig) {
-      bree.add([
-        {
-          name: 'query-action',
-          worker: {
-            transferList: [port1],
-            workerData: { config: currentConfig, port: port1 },
-          },
-        },
-      ]);
-    }
+    // if (currentConfig) {
+    //   bree.add([
+    //     {
+    //       name: 'query-action',
+    //       worker: {
+    //         transferList: [port1],
+    //         workerData: { config: currentConfig, port: port1 },
+    //       },
+    //     },
+    //   ]);
+    // }
     bree.run();
+
+    bree.on('worker created', (name: string) => {
+      console.log('worker created', name);
+      console.log(bree.workers[name]);
+    });
 
     ipcMain.on('select-config', async (event) => {
       const result = await dialog.showOpenDialog({
@@ -90,7 +95,12 @@ function createBrowserWindow() {
 
     ipcMain.on('run-action', async (event, action: QueryAction) => {
       const { port1, port2 } = new MessageChannel();
-      bree.remove('query-action');
+      try {
+        bree.stop('query-action');
+        bree.remove('query-action');
+      } catch (e) {
+        //noop
+      }
       bree.add([
         {
           name: 'query-action',
@@ -101,7 +111,7 @@ function createBrowserWindow() {
         },
       ]);
       port2.on('message', (message) => {
-        console.log(message);
+        // console.log(message);
         event.reply('action-result', message);
       });
       bree.start('query-action');
