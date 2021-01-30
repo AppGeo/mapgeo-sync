@@ -22,7 +22,11 @@ import upload from '../s3-service';
     config.MapGeoOptions.Password
   );
   let tokens = await mapgeo.getUploaderTokens();
-  await upload(tokens, '{ "test": true }');
+  await upload(tokens, {
+    folder: 'ilya-test',
+    file: 'test.json',
+    data: JSON.stringify({ test: true }, null, 2),
+  });
 
   // console.log(result);
   workerData.port.postMessage(result);
