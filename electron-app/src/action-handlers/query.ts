@@ -9,12 +9,15 @@ export default async function handle(community: string, action: QueryAction) {
   const FileName = `${community}_${action.FileName}`;
   console.log(`Uploading query file ${FileName} to cloud`);
 
-  const output = await upload({ ...action, FileName });
-  output.fieldname = action.UploadType;
-  output.table = FileName.slice(0, FileName.lastIndexOf('.'));
-  output.typeId = action.FileName.slice(0, action.FileName.lastIndexOf('.'));
+  const rows = await upload({ ...action, FileName });
+  const res = {
+    rows,
+    fieldname: action.UploadType,
+    table: FileName.slice(0, FileName.lastIndexOf('.')),
+    typeId: action.FileName.slice(0, action.FileName.lastIndexOf('.')),
+  };
 
-  return output;
+  return res;
 }
 
 async function upload(action: QueryAction): Promise<QueryOutput> {

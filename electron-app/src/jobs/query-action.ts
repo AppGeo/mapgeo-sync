@@ -21,6 +21,7 @@ import { upload as uploadToS3 } from '../s3-service';
     config.MapGeoOptions.Password
   );
   let tokens = await mapgeo.getUploaderTokens();
+  console.log('action result: ', result);
   const { key, fileName } = await uploadToS3(tokens, {
     folder: `ilya-test-${subdomain}`,
     file: action.FileName,
