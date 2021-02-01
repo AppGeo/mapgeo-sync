@@ -27,6 +27,7 @@ const emberAppURL = pathToFileURL(
 
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null;
+let queryWorker: Worker | null = null;
 
 function createBrowserWindow() {
   mainWindow = new BrowserWindow({
@@ -58,22 +59,23 @@ function createBrowserWindow() {
     let currentConfig = store.get('config') as SyncConfig;
     mainWindow.webContents.send('config-loaded', currentConfig);
 
-    // if (currentConfig) {
-    //   bree.add([
-    //     {
-    //       name: 'query-action',
-    //       worker: {
-    //         transferList: [port1],
-    //         workerData: { config: currentConfig, port: port1 },
-    //       },
-    //     },
-    //   ]);
-    // }
-    bree.run();
+    if (currentConfig) {
+      bree.add([
+        {
+          name: 'query-action',
+          worker: {
+            transferList: [port1],
+            workerData: { config: currentConfig, port: port1 },
+          },
+        },
+      ]);
+    }
+    bree.start();
 
     bree.on('worker created', (name: string) => {
       console.log('worker created', name);
-      console.log(bree.workers[name]);
+      const worker = bree.workers[name];
+      queryWorker = worker;
     });
 
     ipcMain.on('select-config', async (event) => {
@@ -94,27 +96,13 @@ function createBrowserWindow() {
     });
 
     ipcMain.on('run-action', async (event, action: QueryAction) => {
-      const { port1, port2 } = new MessageChannel();
-      try {
-        bree.stop('query-action');
-        bree.remove('query-action');
-      } catch (e) {
-        //noop
-      }
-      bree.add([
-        {
-          name: 'query-action',
-          worker: {
-            transferList: [port1],
-            workerData: { config: store.get('config'), action, port: port1 },
-          },
-        },
-      ]);
+      queryWorker.postMessage({ event: 'handle-action', data: action });
+
       port2.on('message', (message) => {
         // console.log(message);
         event.reply('action-result', message);
       });
-      bree.start('query-action');
+
       // const config: any = store.get('config');
       // if (!config?.MapGeoOptions?.Host) {
       //   throw new Error('MapGeoOptions.Host is a required config property');

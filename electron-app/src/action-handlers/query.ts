@@ -26,6 +26,6 @@ async function upload(action: QueryAction): Promise<QueryOutput> {
     connection: action.ConnectionString,
   });
   let result = await db.raw(action.Query);
-  console.log(result);
+  console.log(`found ${result?.rows?.length} items`);
   return result?.rows;
 }
