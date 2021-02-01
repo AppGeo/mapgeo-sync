@@ -1,5 +1,19 @@
 # mapgeo-sync
 
+Rewrite of https://bitbucket.org/AppGeo/appgeo_mapgeo2.uploader as an Electron app that runs in the background and is self-updating.
+
+- self updating so we can deploy changes and not have to log into every client's machine.
+- scheduling will be built in (no windows scheduler)
+- support postgres as well
+- user gets a UI to debug issues
+- fix keep-alive at the same time
+- move away from technical debt which no one knew or maintained (.net uploader)
+- allow for future enhancements
+- move away from deprecated optouts api
+
+This uses MapGeo APIs and is built for MapGeo specifically. It is public because it runs on user's machines and
+we want to have transparency into what we run.
+
 ## Folder Structure
 
 The root folder is a default Ember app generated with `ember new`.

@@ -1,7 +1,12 @@
 import * as AWS from 'aws-sdk';
 import { UploaderTokenResult } from './mapgeo-service';
 
-export default async function upload(
+export type UploadedResults = {
+  key: string;
+  fileName: string;
+};
+
+export async function upload(
   tokens: UploaderTokenResult,
   { folder, file, data }: { folder: string; file: string; data: any }
 ) {
@@ -13,17 +18,18 @@ export default async function upload(
       Bucket: 'MapGeo',
     },
   });
-  await uploadFile(aws, folder, file, data);
+  const res = await uploadFile(aws, folder, file, data);
+  return res;
 }
 
 async function uploadFile(
   aws: AWS.S3,
   folder: string,
-  file: string,
+  fileName: string,
   data: any
-) {
+): Promise<UploadedResults> {
   // setup output path in bucket
-  let key = `tmp/${folder}/${file}`;
+  let key = `tmp/${folder}/${fileName}`;
   let uploadParams = {
     Key: key,
     ContentType: `application/json`,
@@ -33,13 +39,17 @@ async function uploadFile(
 
   return new Promise(function (resolve, reject) {
     // create upload object to handle the uploading of data
-    aws.upload(uploadParams, (err: Error, result: any) => {
-      if (err) {
-        console.log(err);
-        return reject(err);
+    aws.upload(
+      uploadParams,
+      (err: Error, result: AWS.S3.ManagedUpload.SendData) => {
+        if (err) {
+          console.log(err);
+          return reject(err);
+        }
+        console.log('result: ', result);
+        // resolve(result);
+        resolve({ key, fileName });
       }
-      console.log(result);
-      resolve(result);
-    });
+    );
   });
 }

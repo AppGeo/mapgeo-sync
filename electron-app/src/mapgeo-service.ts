@@ -1,11 +1,19 @@
 import { ok } from 'assert';
 import axios, { AxiosInstance } from 'axios';
+import { UploadedResults } from './s3-service';
 
 export type UploaderTokenResult = {
   AccessKeyId: string;
   SecretAccessKey: string;
   SessionToken: string;
   Expiration: string;
+};
+
+export type UploadedMetadata = {
+  key: string;
+  filename: string;
+  fieldname: string;
+  table: string;
 };
 
 export default class MapgeoService {
@@ -40,6 +48,25 @@ export default class MapgeoService {
   async getUploaderTokens() {
     const result = await this.#axios.get(`/api/uploader/token`);
     return result.data as UploaderTokenResult;
+  }
+
+  async notifyUploader({
+    uploads,
+    updateDate,
+    notificationEmail,
+  }: {
+    uploads: UploadedMetadata[];
+    notificationEmail: string;
+    updateDate: boolean;
+  }) {
+    const result = await this.#axios.post(`/api/uploader/cartodb/direct`, {
+      earlyFinish: true,
+      updateDate,
+      email: notificationEmail,
+      uploads,
+    });
+    console.log(result.data);
+    return result.data;
   }
 
   async deleteOptouts(datasetId: string, ids: string[]) {

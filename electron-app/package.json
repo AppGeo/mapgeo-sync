@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "electron-forge start",
-    "debug": "tsc && electron-forge start --inspect-electron",
+    "debug": "yarn build:ts && electron-forge start --inspect-electron",
     "build:ts": "tsc",
     "package": "electron-forge package",
     "make": "electron-forge make",

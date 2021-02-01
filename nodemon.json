@@ -1,6 +1,6 @@
 {
   "ignore": ["node_modules"],
   "watch": ["electron-app/src"],
-  "exec": "cd electron-app/ && tsc && cd .. && ember electron --- --inspect",
+  "exec": "cd electron-app/ && yarn debug",
   "ext": "ts"
 }

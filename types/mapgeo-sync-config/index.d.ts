@@ -30,10 +30,18 @@ export interface QueryOutput {
   fieldname: string;
   table: string;
   typeId: string;
+  rows: any[];
 }
 
 export interface SyncConfig {
-  MapGeoOptions: { Host: string; Email: string; Password: string };
+  MapGeoOptions: {
+    Host: string;
+    Email: string;
+    Password: string;
+    NotificationEmail: string;
+    UpdateDate: boolean;
+    UpdateIntersections: boolean;
+  };
   UploadActions: QueryAction[];
   OptOutActions: OptoutAction[];
 }
