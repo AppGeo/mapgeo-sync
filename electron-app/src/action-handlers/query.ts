@@ -1,6 +1,13 @@
 import * as knex from 'knex';
 import { QueryAction, QueryOutput } from 'mapgeo-sync-config';
 
+// TODO: update config instead?
+const typeConversion = new Map([
+  ['intersection', 'intersection'],
+  ['parcel', 'geometry'],
+  ['property', 'data'],
+]);
+
 export default async function handle(community: string, action: QueryAction) {
   if (!action.FileName) {
     throw new Error('FileName cannot be empty');
@@ -12,7 +19,7 @@ export default async function handle(community: string, action: QueryAction) {
   const rows = await upload({ ...action, FileName });
   const res = {
     rows,
-    fieldname: action.UploadType,
+    fieldname: typeConversion.get(action.UploadType),
     table: FileName.slice(0, FileName.lastIndexOf('.')),
     typeId: action.FileName.slice(0, action.FileName.lastIndexOf('.')),
   };

@@ -6,12 +6,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as isDev from 'electron-is-dev';
 import * as Store from 'electron-store';
+import * as windowStateKeeper from 'electron-window-state';
 import { MessageChannel } from 'worker_threads';
-debugger;
 // @ts-ignore
 import * as Bree from 'bree';
 import handleFileUrls from './handle-file-urls';
-import handleQueryAction from './action-handlers/query';
 import type { QueryAction, SyncConfig } from 'mapgeo-sync-config';
 
 const { port1, port2 } = new MessageChannel();
@@ -30,9 +29,18 @@ let tray: Tray | null;
 let queryWorker: Worker | null = null;
 
 function createBrowserWindow() {
+  // Load the previous state with fallback to defaults
+  const mainWindowState = windowStateKeeper({
+    defaultWidth: 1000,
+    defaultHeight: 800,
+  });
+
+  // Create the window using the state information
   mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    x: mainWindowState.x,
+    y: mainWindowState.y,
+    width: mainWindowState.width,
+    height: mainWindowState.height,
 
     webPreferences: {
       // So we can use electron-store on the client
@@ -43,6 +51,11 @@ function createBrowserWindow() {
       nodeIntegration: true,
     },
   });
+
+  // Registers listeners on the window, so we can update the state
+  // automatically (the listeners will be removed when the window is closed)
+  // and restore the maximized or full screen state
+  mainWindowState.manage(mainWindow);
 
   if (isDev) {
     mainWindow.webContents.openDevTools();
@@ -59,7 +72,10 @@ function createBrowserWindow() {
     let currentConfig = store.get('config') as SyncConfig;
     mainWindow.webContents.send('config-loaded', currentConfig);
 
-    if (currentConfig) {
+    if (
+      currentConfig &&
+      !bree.config.jobs.find((j: any) => j.name === 'query-action')
+    ) {
       bree.add([
         {
           name: 'query-action',
@@ -70,7 +86,12 @@ function createBrowserWindow() {
         },
       ]);
     }
-    bree.start();
+    try {
+      bree.start();
+    } catch (e) {
+      // If the UI was closed and then reopened the workers might have already been started
+      // so we ignore this error
+    }
 
     bree.on('worker created', (name: string) => {
       console.log('worker created', name);
