@@ -16,6 +16,10 @@ export type UploadedMetadata = {
   table: string;
 };
 
+export type CartoDirectResult = {
+  key: string;
+};
+
 export default class MapgeoService {
   host: string;
   token: string;
@@ -51,22 +55,32 @@ export default class MapgeoService {
   }
 
   async notifyUploader({
+    datasetId,
     uploads,
     updateDate,
     notificationEmail,
   }: {
+    datasetId: string;
     uploads: UploadedMetadata[];
     notificationEmail: string;
     updateDate: boolean;
   }) {
-    const result = await this.#axios.post(`/api/uploader/cartodb/direct`, {
-      earlyFinish: true,
-      updateDate,
-      email: notificationEmail,
-      uploads,
-    });
-    console.log(result.data);
-    return result.data;
+    try {
+      const result = await this.#axios.post(
+        `/api/uploader/${datasetId}/cartodb/direct`,
+        {
+          earlyFinish: true,
+          updateDate,
+          email: notificationEmail,
+          uploads,
+        }
+      );
+      console.log('notifyUploader: ', result.data);
+      return result.data as CartoDirectResult;
+    } catch (e) {
+      console.log('notifyUploader error: ', e.data);
+      throw e;
+    }
   }
 
   async deleteOptouts(datasetId: string, ids: string[]) {

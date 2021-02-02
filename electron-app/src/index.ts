@@ -113,6 +113,9 @@ function createBrowserWindow() {
 
       store.set('config', config);
       store.set('configUpdated', new Date());
+
+      updateWorkers(config);
+
       event.reply('config-loaded', config);
     });
 
@@ -262,3 +265,23 @@ process.on('uncaughtException', (err) => {
   );
   console.log(`Exception: ${err}`);
 });
+
+function updateWorkers(config: SyncConfig) {
+  try {
+    bree.stop('query-action');
+    bree.remove('query-action');
+  } catch (e) {
+    // Might not be running
+  }
+
+  bree.add([
+    {
+      name: 'query-action',
+      worker: {
+        transferList: [port1],
+        workerData: { config, port: port1 },
+      },
+    },
+  ]);
+  bree.start();
+}
