@@ -53,9 +53,26 @@
           </div>
         </div>
 
-        <code class='text-left'>
+        <code class='text-left text-sm'>
           {{uploadAction.Query}}
         </code>
+
+        {{#if this.running}}
+          <div class='text-sm text-gray-700'>
+            Running..
+          </div>
+        {{else if this.status}}
+          <details>
+            <summary>
+              Status
+            </summary>
+            <pre class='text-xs overflow-auto'>
+              <code>
+                {{this.statusString}}
+              </code>
+            </pre>
+          </details>
+        {{/if}}
       </li>
     {{/each}}
   </ul>

@@ -17,7 +17,9 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
   @service electronStore!: ElectronStore;
   @service notifications!: NotificationsService;
 
+  @tracked running = false;
   @tracked config: any;
+  @tracked status: any;
   @tracked configUpdated?: Date = this.electronStore.getValue('configUpdated');
   @tracked options: NotificationOptions = {
     appearance: 'info',
@@ -32,15 +34,24 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
     ipcRenderer.on('config-loaded', (_event: IpcRendererEvent, config: any) => {
       this.config = config;
       this.configUpdated = this.electronStore.getValue('configUpdated');
+      this.status = undefined;
     });
 
     ipcRenderer.on(
       'action-result',
-      (_event: IpcRendererEvent, result: { rows: any[] }) => {
+      (_event: IpcRendererEvent, result: { status: any; rows: any[] }) => {
         this.notifications.add(
-          `Action succeeded. Query returned ${result.rows.length} items`,
+          `Action ${
+            result.status.ok ? 'succeeded' : 'failed'
+          }. Query returned ${result.rows.length} items`,
           this.options
         );
+        console.table(result.rows.slice(0, 3));
+        this.running = false;
+
+        if (!result.status.ok) {
+          this.status = result.status;
+        }
       }
     );
   }
@@ -53,6 +64,14 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
     }
   }
 
+  get statusString() {
+    try {
+      return JSON.stringify(this.status, null, 2).trim();
+    } catch (e) {
+      return e;
+    }
+  }
+
   @action
   selectNewConfig() {
     ipcRenderer.send('select-config');
@@ -60,6 +79,8 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
 
   @action
   runAction(uploadAction: any) {
+    this.status = undefined;
+    this.running = true;
     ipcRenderer.send('run-action', uploadAction);
   }
 }

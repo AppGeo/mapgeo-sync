@@ -29,6 +29,16 @@ The project uses an addon called `ember-electron` that facilitates the interacti
      |_ index.ts # Code entry point
 ```
 
+## How It Works
+
+If you want to update the main table of a single table setup, the action must set `FormatAsGeoJson` to `true`, this way the geometry is inserted.
+
+## Changed Config
+
+- `UploadActions` now requires a `DbType` filed, valid values include 'pg'
+- `UploadActions` can now specify a `DatasetId` (defaults to 'properties' if not specified)
+- `UploadActions` requires a `GeometryColumn` if `FormatAsGeoJson` is set to true.
+
 ## Prerequisites
 
 You will need the following things properly installed on your computer.
