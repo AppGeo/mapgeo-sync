@@ -2,16 +2,20 @@
 // import installExtension, { EMBER_INSPECTOR } from 'electron-devtools-installer';
 import { URL, pathToFileURL } from 'url';
 import { app, BrowserWindow, Tray, Menu, ipcMain, dialog } from 'electron';
+import { Worker, MessageChannel, MessagePort } from 'worker_threads';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as isDev from 'electron-is-dev';
 import * as Store from 'electron-store';
 import * as windowStateKeeper from 'electron-window-state';
-import { Worker, MessageChannel, MessagePort } from 'worker_threads';
 import handleFileUrls from './handle-file-urls';
 import type { QueryAction, SyncConfig } from 'mapgeo-sync-config';
+import Scheduler from './scheduler';
 
 const store = new Store();
+const scheduler = new Scheduler({
+  store,
+});
 const emberAppDir = path.resolve(__dirname, '..', 'ember-dist');
 const emberAppURL = pathToFileURL(
   path.join(emberAppDir, 'index.html')
@@ -86,9 +90,10 @@ function createBrowserWindow() {
       store.set('config', config);
       store.set('configUpdated', new Date());
 
-      await initWorkers(currentConfig);
+      await initWorkers(config);
 
       event.reply('config-loaded', config);
+      currentConfig = config;
     });
 
     ipcMain.on('run-action', async (event, action: QueryAction) => {
@@ -100,9 +105,19 @@ function createBrowserWindow() {
       });
     });
 
-    ipcMain.on('schedule-action', async (event, action: QueryAction) => {
-      debugger;
-      console.log('scheduling...');
+    ipcMain.on('schedule-action', async (event, rule: string) => {
+      scheduler.schedule(rule, (done) => {
+        queryWorker.postMessage({
+          event: 'handle-action',
+          data: currentConfig.UploadActions[0],
+        });
+
+        port2.once('message', (message) => {
+          // console.log(message);
+          event.reply('action-result', message);
+          done();
+        });
+      });
     });
   });
 

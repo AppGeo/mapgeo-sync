@@ -4,7 +4,7 @@ import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 import ElectronStore from 'mapgeo-sync/services/electron-store';
 import type { IpcRendererEvent } from 'electron';
-import { SyncConfig } from 'mapgeo-sync-config';
+import type { SyncConfig } from 'mapgeo-sync-config';
 // Node modules
 const { ipcRenderer } = requireNode('electron');
 

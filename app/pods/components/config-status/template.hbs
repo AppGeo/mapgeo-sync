@@ -15,16 +15,20 @@
       {{/if}}
     </div>
 
-    <ButtonWithMore @onClick={{@selectNewConfig}}>
+    <ButtonWithMore @onClick={{this.scheduleAction}}>
       <:primary>
-        Select Config
+        Schedule
       </:primary>
 
       <:secondary as |s|>
         <ul>
           <li>
-            <Button class={{s.classNames}} @appearance='minimal'>
-              Test
+            <Button
+              class={{s.classNames}}
+              @appearance='minimal'
+              {{on 'click' @selectNewConfig}}
+            >
+              Select New Config
             </Button>
           </li>
         </ul>

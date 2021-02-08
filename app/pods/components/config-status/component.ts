@@ -77,6 +77,11 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
   }
 
   @action
+  scheduleAction() {
+    ipcRenderer.send('schedule-action', '30 * * * * *');
+  }
+
+  @action
   runAction(uploadAction: any) {
     this.status = undefined;
     this.running = true;
