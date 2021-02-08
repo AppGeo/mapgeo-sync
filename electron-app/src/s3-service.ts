@@ -65,7 +65,36 @@ export default class S3Service {
     });
   }
 
-  waitForFile(key: string) {
+  remove({
+    folder,
+    fileName,
+  }: {
+    folder: string;
+    fileName: string;
+  }): Promise<boolean> {
+    let key = `tmp/${folder}/${fileName}`;
+
+    return new Promise((resolve, _reject) => {
+      this.#aws.headObject({ Bucket, Key: key }, (e, res) => {
+        console.log('head: ', e, res);
+        // create upload object to handle the uploading of data
+        this.#aws.deleteObject(
+          { Bucket, Key: key },
+          (err: AWS.AWSError, result: AWS.S3.DeleteObjectOutput) => {
+            if (err) {
+              console.log('delete error: ', err);
+              resolve(false);
+              return;
+            }
+            console.log('delete result:', result);
+            resolve(true);
+          }
+        );
+      });
+    });
+  }
+
+  waitForFile(key: string): Promise<WaitResults> {
     return new Promise((resolve, reject) => {
       let data: AWS.S3.Body;
       let timer = setInterval(() => {

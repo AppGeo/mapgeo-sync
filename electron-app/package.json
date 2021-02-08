@@ -6,7 +6,8 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "electron-forge start",
-    "debug": "yarn build:ts && electron-forge start --inspect-electron",
+    "predebug": "yarn build:ts",
+    "debug": "electron-forge start",
     "build:ts": "tsc",
     "package": "electron-forge package",
     "make": "electron-forge make",
@@ -51,7 +52,6 @@
   "dependencies": {
     "aws-sdk": "^2.834.0",
     "axios": "^0.21.1",
-    "bree": "^4.1.1",
     "electron-devtools-installer": "^3.1.1",
     "electron-is-dev": "^1.2.0",
     "electron-squirrel-startup": "^1.0.0",
@@ -59,6 +59,7 @@
     "electron-window-state": "^5.0.3",
     "knex": "^0.21.15",
     "mssql": "^6.3.1",
+    "node-schedule": "^2.0.0",
     "oracledb": "^5.1.0",
     "pg": "^8.5.1"
   },

@@ -47,13 +47,40 @@ async function handleAction(action: QueryAction) {
 
   const result = await handleQueryAction(subdomain, action);
   const tokens = await mapgeo.getUploaderTokens();
+  const transformed = result.rows.map((row) => {
+    try {
+      return { ...row, the_geom: JSON.parse(row.the_geom) };
+    } catch (e) {
+      return row;
+    }
+  });
+  const geojson = action.FormatAsGeoJson
+    ? transformed.reduce(
+        (all, row) => {
+          const { the_geom, ...properties } = row;
+          all.features.push({
+            type: 'Feature',
+            properties,
+            geometry: the_geom,
+          });
+          return all;
+        },
+        { type: 'FeatureCollection', features: [] }
+      )
+    : undefined;
   // console.log('action result: ', result);
   const s3 = new S3Service(tokens);
+  const folder = `ilya-test-${subdomain}`;
+  const file = action.FormatAsGeoJson
+    ? action.FileName.replace('.json', '.geojson')
+    : action.FileName;
   const { key, fileName } = await s3.upload({
-    folder: `ilya-test-${subdomain}`,
-    fileName: action.FileName,
-    data: JSON.stringify(result.rows, null, 2),
+    folder,
+    fileName: file,
+    data: JSON.stringify(geojson || transformed, null, 2),
   });
+  // Lets MapGeo know, which validates and uploads to carto
+  // An upload-status.json is uploaded to s3 with results of process, failure or success
   const res = await mapgeo.notifyUploader({
     datasetId: action.DatasetId,
     updateDate: config.MapGeoOptions.UpdateDate,
@@ -68,8 +95,9 @@ async function handleAction(action: QueryAction) {
     ],
   });
   console.log('notify res: ', res);
+  // Poll for upload-status.json file to know if error or success
   const status = await s3.waitForFile(res.key);
   console.log('status res: ', status);
 
-  workerData.port.postMessage(result);
+  workerData.port.postMessage({ status: status.content, rows: result.rows });
 }

@@ -16,8 +16,8 @@ export default async function handle(community: string, action: QueryAction) {
   const FileName = `${community}_${action.FileName}`;
   console.log(`Uploading query file ${FileName} to cloud`);
 
-  const rows = await upload({ ...action, FileName });
-  const res = {
+  const rows = await query({ ...action, FileName });
+  const res: QueryOutput = {
     rows,
     fieldname: typeConversion.get(action.UploadType),
     table: FileName.slice(0, FileName.lastIndexOf('.')),
@@ -27,7 +27,7 @@ export default async function handle(community: string, action: QueryAction) {
   return res;
 }
 
-async function upload(action: QueryAction): Promise<QueryOutput> {
+async function query(action: QueryAction): Promise<any[]> {
   const db = knex({
     client: action.DbType,
     connection: action.ConnectionString,

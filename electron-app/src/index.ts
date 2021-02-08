@@ -7,18 +7,13 @@ import * as path from 'path';
 import * as isDev from 'electron-is-dev';
 import * as Store from 'electron-store';
 import * as windowStateKeeper from 'electron-window-state';
-import { MessageChannel } from 'worker_threads';
-// @ts-ignore
-import * as Bree from 'bree';
+import { Worker, MessageChannel } from 'worker_threads';
 import handleFileUrls from './handle-file-urls';
 import type { QueryAction, SyncConfig } from 'mapgeo-sync-config';
 
 const { port1, port2 } = new MessageChannel();
 const store = new Store();
-const bree = new Bree({
-  root: path.join(__dirname, 'jobs'),
-  jobs: [],
-});
+
 const emberAppDir = path.resolve(__dirname, '..', 'ember-dist');
 const emberAppURL = pathToFileURL(
   path.join(emberAppDir, 'index.html')
@@ -72,32 +67,9 @@ function createBrowserWindow() {
     let currentConfig = store.get('config') as SyncConfig;
     mainWindow.webContents.send('config-loaded', currentConfig);
 
-    if (
-      currentConfig &&
-      !bree.config.jobs.find((j: any) => j.name === 'query-action')
-    ) {
-      bree.add([
-        {
-          name: 'query-action',
-          worker: {
-            transferList: [port1],
-            workerData: { config: currentConfig, port: port1 },
-          },
-        },
-      ]);
+    if (currentConfig && !queryWorker) {
+      initWorkers(currentConfig);
     }
-    try {
-      bree.start();
-    } catch (e) {
-      // If the UI was closed and then reopened the workers might have already been started
-      // so we ignore this error
-    }
-
-    bree.on('worker created', (name: string) => {
-      console.log('worker created', name);
-      const worker = bree.workers[name];
-      queryWorker = worker;
-    });
 
     ipcMain.on('select-config', async (event) => {
       const result = await dialog.showOpenDialog({
@@ -114,7 +86,7 @@ function createBrowserWindow() {
       store.set('config', config);
       store.set('configUpdated', new Date());
 
-      updateWorkers(config);
+      await initWorkers(currentConfig);
 
       event.reply('config-loaded', config);
     });
@@ -126,20 +98,11 @@ function createBrowserWindow() {
         // console.log(message);
         event.reply('action-result', message);
       });
-
-      // const config: any = store.get('config');
-      // if (!config?.MapGeoOptions?.Host) {
-      //   throw new Error('MapGeoOptions.Host is a required config property');
-      // }
-      // const url = new URL(config.MapGeoOptions.Host);
-      // const subdomain = url.hostname.split('.')[0];
-      // const result = await handleQueryAction(subdomain, action);
-      // console.log(result);
-      // event.reply('action-result', result);
     });
 
     ipcMain.on('schedule-action', async (event, action: QueryAction) => {
-      bree.start('query-action');
+      debugger;
+      console.log('scheduling...');
     });
   });
 
@@ -170,7 +133,8 @@ function createBrowserWindow() {
     console.log('The main window has become responsive again.');
   });
 
-  mainWindow.on('closed', () => {
+  mainWindow.on('closed', (e: any) => {
+    e.preventDefault();
     mainWindow = null;
   });
 
@@ -266,22 +230,12 @@ process.on('uncaughtException', (err) => {
   console.log(`Exception: ${err}`);
 });
 
-function updateWorkers(config: SyncConfig) {
-  try {
-    bree.stop('query-action');
-    bree.remove('query-action');
-  } catch (e) {
-    // Might not be running
+async function initWorkers(config: SyncConfig) {
+  if (queryWorker) {
+    await queryWorker.terminate();
   }
-
-  bree.add([
-    {
-      name: 'query-action',
-      worker: {
-        transferList: [port1],
-        workerData: { config, port: port1 },
-      },
-    },
-  ]);
-  bree.start();
+  queryWorker = new Worker(path.join(__dirname, 'workers', 'query-action.js'), {
+    transferList: [port1],
+    workerData: { config, port: port1 },
+  });
 }
