@@ -8,10 +8,14 @@ import {
   NotificationsService,
 } from '@frontile/notifications';
 import type { IpcRendererEvent } from 'electron';
+import type { SyncConfig } from 'mapgeo-sync-config';
 // Node modules
 const { ipcRenderer } = requireNode('electron');
 
-interface ConfigStatusArgs {}
+interface ConfigStatusArgs {
+  config: SyncConfig;
+  selectNewConfig: () => void;
+}
 
 export default class ConfigStatus extends Component<ConfigStatusArgs> {
   @service electronStore!: ElectronStore;
@@ -30,12 +34,6 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
 
   constructor(owner: unknown, args: ConfigStatusArgs) {
     super(owner, args);
-
-    ipcRenderer.on('config-loaded', (_event: IpcRendererEvent, config: any) => {
-      this.config = config;
-      this.configUpdated = this.electronStore.getValue('configUpdated');
-      this.status = undefined;
-    });
 
     ipcRenderer.on(
       'action-result',
@@ -58,7 +56,7 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
 
   get configString() {
     try {
-      return JSON.stringify(this.config, null, 2).trim();
+      return JSON.stringify(this.args.config, null, 2).trim();
     } catch (e) {
       return e;
     }
@@ -73,8 +71,9 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
   }
 
   @action
-  selectNewConfig() {
-    ipcRenderer.send('select-config');
+  onConfigUpdated() {
+    this.configUpdated = this.electronStore.getValue('configUpdated');
+    this.status = undefined;
   }
 
   @action

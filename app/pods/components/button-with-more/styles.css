@@ -1,0 +1,32 @@
+.list-controls {
+  display: flex;
+
+  .primary {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .more {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-left: 0;
+  }
+}
+
+.dropdown {
+  border-radius: 4px;
+  background-color: white;
+  box-shadow: rgba(0, 0, 0, 0.198039) 1px 1px 3px 0;
+
+  :global(.btn) {
+    text-align: left;
+  }
+
+  :global(i.fa) {
+    margin-right: 0.5em;
+  }
+
+  :global(.btn-block + .btn-block) {
+    margin-top: 0;
+  }
+}

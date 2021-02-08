@@ -4,6 +4,8 @@ const EmberApp = require('ember-cli/lib/broccoli/ember-app');
 const tailwind = require('tailwindcss');
 const postcssNested = require('postcss-nested');
 const postcssImport = require('postcss-import');
+const autoprefixer = require('autoprefixer');
+
 const plugins = {
   before: [postcssNested()],
   after: [
@@ -11,6 +13,7 @@ const plugins = {
       path: ['node_modules'],
     }),
     tailwind('./app/tailwind/config.js'),
+    autoprefixer('last 2 versions'),
   ],
 };
 

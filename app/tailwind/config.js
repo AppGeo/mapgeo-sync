@@ -11,5 +11,6 @@ module.exports = {
     require('@frontile/core/tailwind'),
     require('@frontile/buttons/tailwind'),
     require('@frontile/notifications/tailwind'),
+    require('@frontile/forms/tailwind'),
   ],
 };

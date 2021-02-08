@@ -7,21 +7,21 @@ import * as path from 'path';
 import * as isDev from 'electron-is-dev';
 import * as Store from 'electron-store';
 import * as windowStateKeeper from 'electron-window-state';
-import { Worker, MessageChannel } from 'worker_threads';
+import { Worker, MessageChannel, MessagePort } from 'worker_threads';
 import handleFileUrls from './handle-file-urls';
 import type { QueryAction, SyncConfig } from 'mapgeo-sync-config';
 
-const { port1, port2 } = new MessageChannel();
 const store = new Store();
-
 const emberAppDir = path.resolve(__dirname, '..', 'ember-dist');
 const emberAppURL = pathToFileURL(
   path.join(emberAppDir, 'index.html')
 ).toString();
 
-let mainWindow: BrowserWindow | null = null;
-let tray: Tray | null;
-let queryWorker: Worker | null = null;
+let mainWindow: BrowserWindow;
+let tray: Tray;
+let queryWorker: Worker;
+let port1: MessagePort;
+let port2: MessagePort;
 
 function createBrowserWindow() {
   // Load the previous state with fallback to defaults
@@ -94,7 +94,7 @@ function createBrowserWindow() {
     ipcMain.on('run-action', async (event, action: QueryAction) => {
       queryWorker.postMessage({ event: 'handle-action', data: action });
 
-      port2.on('message', (message) => {
+      port2.once('message', (message) => {
         // console.log(message);
         event.reply('action-result', message);
       });
@@ -234,6 +234,10 @@ async function initWorkers(config: SyncConfig) {
   if (queryWorker) {
     await queryWorker.terminate();
   }
+  let { port1: p1, port2: p2 } = new MessageChannel();
+  port1 = p1;
+  port2 = p2;
+
   queryWorker = new Worker(path.join(__dirname, 'workers', 'query-action.js'), {
     transferList: [port1],
     workerData: { config, port: port1 },

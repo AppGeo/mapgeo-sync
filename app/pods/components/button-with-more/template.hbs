@@ -1,0 +1,31 @@
+<div local-class='list-controls'>
+  <Button
+    local-class='primary'
+    @appearance='outlined'
+    @intent='primary'
+    @isSmall={{true}}
+    @disabled={{@disabled}}
+    {{on 'click' @onClick}}
+  >
+    {{yield to='primary'}}
+  </Button>
+
+  <BasicDropdown @horizontalPosition='right' as |dd|>
+    <dd.Trigger>
+      <Button
+        local-class='more'
+        @appearance='outlined'
+        @intent='primary'
+        @isSmall={{true}}
+      >
+        <FaIcon @icon='ellipsis-v' />
+      </Button>
+    </dd.Trigger>
+    <dd.Content local-class='dropdown'>
+      {{yield
+        (hash close=dd.actions.close classNames='p-2 font-normal')
+        to='secondary'
+      }}
+    </dd.Content>
+  </BasicDropdown>
+</div>

@@ -1,3 +1,10 @@
 <div class='flex flex-col items-center p-4'>
-  <ConfigStatus />
+  {{#if this.config}}
+    <ConfigStatus
+      @config={{this.config}}
+      @selectNewConfig={{this.selectNewConfig}}
+    />
+  {{else}}
+    <WithoutConfig @selectNewConfig={{this.selectNewConfig}} />
+  {{/if}}
 </div>

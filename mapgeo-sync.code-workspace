@@ -13,6 +13,8 @@
       "devtron",
       "opto",
       "optouts",
+      "oracledb",
+      "predebug",
       "testem"
     ]
   }
