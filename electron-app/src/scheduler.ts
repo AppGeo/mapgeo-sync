@@ -10,7 +10,7 @@ export default class Scheduler {
     this.store = store;
   }
 
-  schedule(rule: string, run: (done: () => void) => void) {
+  schedule(rule: string, run: (done: () => { nextRunDate: Date }) => void) {
     if (job) {
       return job.reschedule(rule);
     }
@@ -28,7 +28,10 @@ export default class Scheduler {
         if (this.store.get('scheduleStarted')) {
           this.store.set('scheduleRunning', false);
         }
-        console.log('done');
+        let nextRunDate = job.nextInvocation();
+        console.log(`done. Next run ${nextRunDate}`);
+
+        return { nextRunDate };
       });
     });
   }

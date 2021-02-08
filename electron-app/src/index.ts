@@ -105,7 +105,7 @@ function createBrowserWindow() {
       });
     });
 
-    ipcMain.on('schedule-action', async (event, rule: string) => {
+    ipcMain.on('schedule-action', function (event, rule: string) {
       scheduler.schedule(rule, (done) => {
         queryWorker.postMessage({
           event: 'handle-action',
@@ -114,11 +114,30 @@ function createBrowserWindow() {
 
         port2.once('message', (message) => {
           // console.log(message);
-          event.reply('action-result', message);
-          done();
+          let { nextRunDate } = done();
+          event.reply('action-result', { ...message, nextRunDate });
         });
       });
     });
+
+    // Start on run if schedule rule set
+    const scheduleRule = store.get('scheduleRule');
+    if (typeof scheduleRule === 'string') {
+      scheduler.schedule(scheduleRule, (done) => {
+        queryWorker.postMessage({
+          event: 'handle-action',
+          data: currentConfig.UploadActions[0],
+        });
+
+        port2.once('message', (message) => {
+          let { nextRunDate } = done();
+          mainWindow.webContents.send('action-result', {
+            ...message,
+            nextRunDate,
+          });
+        });
+      });
+    }
   });
 
   // If a loading operation goes wrong, we'll send Electron back to
