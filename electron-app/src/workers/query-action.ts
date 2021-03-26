@@ -37,7 +37,7 @@ if (parentPort) {
       return;
     }
 
-    console.log(`Handling '${event}'...`);
+    console.log(`Handling '${msg.event}'...`);
 
     switch (msg.event) {
       case 'handle-action': {
