@@ -21,6 +21,8 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
   @service electronStore!: ElectronStore;
   @service notifications!: NotificationsService;
 
+  @tracked scheduleFormat? = '30 * * * * *';
+  @tracked isScheduleModalOpen = false;
   @tracked running = false;
   @tracked config: any;
   @tracked status: any;
@@ -77,8 +79,10 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
   }
 
   @action
-  scheduleAction() {
-    ipcRenderer.send('schedule-action', '30 * * * * *');
+  scheduleAction(event: Event) {
+    event.preventDefault();
+    ipcRenderer.send('schedule-action', this.scheduleFormat);
+    this.isScheduleModalOpen = false;
   }
 
   @action

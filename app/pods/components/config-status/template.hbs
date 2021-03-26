@@ -15,7 +15,7 @@
       {{/if}}
     </div>
 
-    <ButtonWithMore @onClick={{this.scheduleAction}}>
+    <ButtonWithMore @onClick={{set this.isScheduleModalOpen true}}>
       <:primary>
         Schedule
       </:primary>
@@ -103,3 +103,44 @@
 </div>
 
 {{yield}}
+
+<Modal
+  @isOpen={{this.isScheduleModalOpen}}
+  @onClose={{set this.isScheduleModalOpen}} as |m|
+>
+  <m.Header>
+    Schedule
+  </m.Header>
+  <form {{on 'submit' this.scheduleAction}}>
+    <m.Body>
+      <FormInput
+        required={{true}}
+        @value={{this.scheduleFormat}}
+        @onChange={{set this.scheduleFormat}}
+      />
+      <pre class='text-xs'>
+        *    *    *    *    *    *
+        ┬    ┬    ┬    ┬    ┬    ┬
+        │    │    │    │    │    │
+        │    │    │    │    │    └ day of week (0 - 7) (0 or 7 is Sun)
+        │    │    │    │    └───── month (1 - 12)
+        │    │    │    └────────── day of month (1 - 31)
+        │    │    └─────────────── hour (0 - 23)
+        │    └──────────────────── minute (0 - 59)
+        └───────────────────────── second (0 - 59, OPTIONAL)
+      </pre>
+    </m.Body>
+    <m.Footer class='justify-between'>
+      <Button
+        @appearance='minimal'
+        class='mr-4'
+        {{on 'click' (set this.isScheduleModalOpen false)}}
+      >
+        Cancel
+      </Button>
+      <Button @type='submit' @intent='primary'>
+        Start Schedule
+      </Button>
+    </m.Footer>
+  </form>
+</Modal>
