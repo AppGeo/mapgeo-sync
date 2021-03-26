@@ -123,6 +123,13 @@ function createBrowserWindow() {
       });
     });
 
+    ipcMain.on('get-schedule-details', (event) => {
+      event.reply('schedule-details', {
+        isScheduled: scheduler.isScheduled,
+        nextRunDate: scheduler.nextRunDate,
+      });
+    });
+
     // Start on run if schedule rule set
     const scheduleRule = store.get('scheduleRule');
     if (typeof scheduleRule === 'string') {

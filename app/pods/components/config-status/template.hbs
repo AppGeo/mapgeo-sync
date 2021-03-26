@@ -15,7 +15,7 @@
       {{/if}}
     </div>
 
-    <ButtonWithMore @onClick={{set this.isScheduleModalOpen true}}>
+    <ButtonWithMore @onClick={{this.openScheduleModal}}>
       <:primary>
         Schedule
       </:primary>
@@ -115,8 +115,8 @@
     <m.Body>
       <FormInput
         required={{true}}
-        @value={{this.scheduleFormat}}
-        @onChange={{set this.scheduleFormat}}
+        @value={{this.scheduleRule}}
+        @onChange={{set this.scheduleRule}}
       />
       <pre class='text-xs'>
         *    *    *    *    *    *
@@ -129,6 +129,12 @@
         │    └──────────────────── minute (0 - 59)
         └───────────────────────── second (0 - 59, OPTIONAL)
       </pre>
+
+      <p>
+        Is Scheduled: {{if this.isScheduled 'Yes' 'No'}}<br />
+
+        Next Run Date: {{format-date this.nextRunDate}}
+      </p>
     </m.Body>
     <m.Footer class='justify-between'>
       <Button

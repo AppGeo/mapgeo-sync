@@ -1,28 +1,30 @@
 import * as schedule from 'node-schedule';
 import * as Store from 'electron-store';
 
-let job: schedule.Job;
-
 export default class Scheduler {
-  store: Store;
+  private store: Store;
+  private job: schedule.Job;
 
   constructor({ store }: { store: Store }) {
     this.store = store;
   }
 
   schedule(rule: string, run: (done: () => { nextRunDate: Date }) => void) {
-    if (job) {
+    if (this.job) {
       console.log('rescheduling...');
-      job.reschedule(rule);
-      console.log(`Next run at ${job.nextInvocation()}`);
+      this.store.set('scheduleRule', rule);
+
+      this.job.reschedule(rule);
+      console.log(`Next run at ${this.job.nextInvocation()}`);
       return;
     }
 
     console.log('scheduling...');
+
     this.store.set('scheduleRule', rule);
     this.store.set('scheduleStarted', true);
 
-    job = schedule.scheduleJob(rule, () => {
+    this.job = schedule.scheduleJob(rule, () => {
       this.store.set('scheduleRunning', true);
       // worker.postMessage({
       //   event: 'handle-action',
@@ -32,13 +34,37 @@ export default class Scheduler {
         if (this.store.get('scheduleStarted')) {
           this.store.set('scheduleRunning', false);
         }
-        let nextRunDate = job.nextInvocation();
+        let nextRunDate = this.job.nextInvocation();
         console.log(`done. Next run ${nextRunDate}`);
 
         return { nextRunDate };
       });
     });
 
-    console.log(`Will run at ${job.nextInvocation()}`);
+    console.log(`Will run at ${this.job.nextInvocation()}`);
+  }
+
+  cancel() {
+    if (!this.job) {
+      return;
+    }
+
+    this.job.cancel();
+    this.job = undefined;
+  }
+
+  get isScheduled() {
+    return !!this.job;
+  }
+
+  get nextRunDate() {
+    if (!this.job) {
+      return;
+    }
+
+    // Actually returns a luxon date
+    let result = this.job.nextInvocation();
+
+    return result && (result as any).toDate();
   }
 }

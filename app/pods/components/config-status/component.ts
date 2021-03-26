@@ -21,9 +21,11 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
   @service electronStore!: ElectronStore;
   @service notifications!: NotificationsService;
 
-  @tracked scheduleFormat? = '30 * * * * *';
+  @tracked scheduleRule? = '30 * * * * *';
   @tracked isScheduleModalOpen = false;
+  @tracked isScheduled = false;
   @tracked running = false;
+  @tracked nextRunDate?: Date;
   @tracked config: any;
   @tracked status: any;
   @tracked configUpdated?: Date = this.electronStore.getValue('configUpdated');
@@ -66,6 +68,17 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
         });
       }
     );
+
+    ipcRenderer.on(
+      'schedule-details',
+      (
+        _event: IpcRendererEvent,
+        result: { isScheduled: boolean; nextRunDate?: Date }
+      ) => {
+        this.isScheduled = result.isScheduled;
+        this.nextRunDate = result.nextRunDate;
+      }
+    );
   }
 
   get configString() {
@@ -91,9 +104,15 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
   }
 
   @action
+  openScheduleModal() {
+    ipcRenderer.send('get-schedule-details');
+    this.isScheduleModalOpen = true;
+  }
+
+  @action
   scheduleAction(event: Event) {
     event.preventDefault();
-    ipcRenderer.send('schedule-action', this.scheduleFormat);
+    ipcRenderer.send('schedule-action', this.scheduleRule);
     this.isScheduleModalOpen = false;
   }
 
