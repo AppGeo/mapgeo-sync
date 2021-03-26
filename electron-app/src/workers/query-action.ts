@@ -37,19 +37,18 @@ if (parentPort) {
       return;
     }
 
-    const { event } = msg;
     console.log(`Handling '${event}'...`);
 
-    switch (event) {
+    switch (msg.event) {
       case 'handle-action': {
         try {
-          await handleAction((msg as HandleActionMessage).data);
+          await handleAction(msg.data);
         } catch (error) {
           respond({
             errors: [
               {
                 message: error.toString(),
-                event,
+                event: msg.event,
               },
             ],
           });
@@ -62,7 +61,7 @@ if (parentPort) {
         break;
       }
       default:
-        const _exhaustiveCheck: never = event;
+        const _exhaustiveCheck: never = msg;
     }
   });
 }
