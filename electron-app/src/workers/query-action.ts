@@ -3,23 +3,57 @@ import { workerData, parentPort } from 'worker_threads';
 import MapgeoService from '../mapgeo-service';
 import handleQueryAction from '../action-handlers/query';
 import S3Service from '../s3-service';
-import { QueryAction } from 'mapgeo-sync-config';
+import { SyncConfig, QueryAction } from 'mapgeo-sync-config';
 
-const { config } = workerData;
+interface WorkerData {
+  config: SyncConfig;
+  port: MessagePort;
+}
+
+type HandleActionMessage = {
+  event: 'handle-action';
+  data: QueryAction;
+};
+type CloseMessage = { event: 'close' };
+type Message = HandleActionMessage | CloseMessage;
+type FinishedResponse = {
+  status: string;
+  rows: any[];
+};
+type ErrorResponse = {
+  errors: {
+    message: string;
+    event: Message['event'];
+  }[];
+};
+type Response = FinishedResponse | ErrorResponse;
+
+const { config, port } = workerData as WorkerData;
 
 if (parentPort) {
-  parentPort.on('message', async (msg: string | unknown) => {
+  parentPort.on('message', async (msg: string | Message) => {
     if (typeof msg !== 'object') {
       console.log('Low-level event: ', msg);
       return;
     }
 
-    const { event, data } = msg as any;
+    const { event } = msg;
     console.log(`Handling '${event}'...`);
 
     switch (event) {
       case 'handle-action': {
-        await handleAction(data as QueryAction);
+        try {
+          await handleAction((msg as HandleActionMessage).data);
+        } catch (error) {
+          respond({
+            errors: [
+              {
+                message: error.toString(),
+                event,
+              },
+            ],
+          });
+        }
         break;
       }
 
@@ -27,6 +61,8 @@ if (parentPort) {
         parentPort.postMessage('done');
         break;
       }
+      default:
+        const _exhaustiveCheck: never = event;
     }
   });
 }
@@ -99,5 +135,9 @@ async function handleAction(action: QueryAction) {
   const status = await s3.waitForFile(res.key);
   console.log('status res: ', status);
 
-  workerData.port.postMessage({ status: status.content, rows: result.rows });
+  respond({ status: status.content as string, rows: result.rows });
+}
+
+function respond(response: Response) {
+  port.postMessage(response);
 }

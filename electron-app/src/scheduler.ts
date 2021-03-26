@@ -12,8 +12,12 @@ export default class Scheduler {
 
   schedule(rule: string, run: (done: () => { nextRunDate: Date }) => void) {
     if (job) {
-      return job.reschedule(rule);
+      console.log('rescheduling...');
+      job.reschedule(rule);
+      console.log(`Next run at ${job.nextInvocation()}`);
+      return;
     }
+
     console.log('scheduling...');
     this.store.set('scheduleRule', rule);
     this.store.set('scheduleStarted', true);
@@ -34,5 +38,7 @@ export default class Scheduler {
         return { nextRunDate };
       });
     });
+
+    console.log(`Will run at ${job.nextInvocation()}`);
   }
 }

@@ -54,6 +54,18 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
         }
       }
     );
+
+    ipcRenderer.on(
+      'action-error',
+      (
+        _event: IpcRendererEvent,
+        result: { errors: { message: string; event: string }[] }
+      ) => {
+        this.notifications.add(result.errors.mapBy('message').join('/n'), {
+          appearance: 'error',
+        });
+      }
+    );
   }
 
   get configString() {

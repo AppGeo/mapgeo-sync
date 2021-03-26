@@ -114,6 +114,9 @@ function createBrowserWindow() {
 
         port2.once('message', (message) => {
           // console.log(message);
+          if (message.errors) {
+            return event.reply('action-error', message);
+          }
           let { nextRunDate } = done();
           event.reply('action-result', { ...message, nextRunDate });
         });
