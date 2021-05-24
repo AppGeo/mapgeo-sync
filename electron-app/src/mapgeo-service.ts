@@ -83,6 +83,36 @@ export default class MapgeoService {
     }
   }
 
+  async getOptouts(datasetId: string) {
+    const result = await this.#axios.get(`/api/optouts/${datasetId}`);
+    let response;
+
+    switch (result.status) {
+      case 200: {
+        response = result.data;
+        break;
+      }
+
+      case 401: {
+        response = this.createError('getOptouts: Unauthorized');
+        break;
+      }
+
+      case 404: {
+        response = this.createError('getOptouts: Bad Host (404)');
+        break;
+      }
+
+      default: {
+        response = this.createError(
+          `getOptouts: (${result.statusText}) ${JSON.stringify(result.data)}`
+        );
+      }
+    }
+
+    return response;
+  }
+
   async deleteOptouts(datasetId: string, ids: string[]) {
     const result = await this.#axios.put(`/api/optouts/${datasetId}`, ids);
     let response;
