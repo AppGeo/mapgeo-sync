@@ -2,7 +2,7 @@
 
 module.exports = {
   root: true,
-  parser: 'babel-eslint',
+  parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 2018,
     sourceType: 'module',
@@ -10,18 +10,25 @@ module.exports = {
       legacyDecorators: true,
     },
   },
-  plugins: ['ember'],
+  plugins: ['@typescript-eslint', 'ember'],
   extends: [
     'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
     'plugin:ember/recommended',
-    'plugin:prettier/recommended',
   ],
   env: {
     browser: true,
   },
-  rules: {},
-  globals: {
-    requireNode: 'readonly',
+  rules: {
+    '@typescript-eslint/explicit-module-boundary-types': 0,
+    // don't follow this in any apps since I don't want auto
+    'ember/routes-segments-snake-case': 0,
+    // routes with index nested implicit index route
+    '@typescript-eslint/no-empty-function': 0,
+    // generated components with no args
+    '@typescript-eslint/no-empty-interface': 0,
+    // allow ts-ignore in tests
+    '@typescript-eslint/ban-ts-comment': 0,
   },
   overrides: [
     // node files
@@ -32,12 +39,11 @@ module.exports = {
         '.template-lintrc.js',
         'ember-cli-build.js',
         'testem.js',
-        'testem-electron.js',
-
         'blueprints/*/index.js',
         'config/**/*.js',
         'lib/*/index.js',
         'server/**/*.js',
+        'app/tailwind/tailwind.config.js',
       ],
       parserOptions: {
         sourceType: 'script',

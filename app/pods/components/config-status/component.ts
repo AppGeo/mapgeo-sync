@@ -18,17 +18,18 @@ interface ConfigStatusArgs {
 }
 
 export default class ConfigStatus extends Component<ConfigStatusArgs> {
-  @service electronStore!: ElectronStore;
-  @service notifications!: NotificationsService;
+  @service declare electronStore: ElectronStore;
+  @service declare notifications: NotificationsService;
 
-  @tracked scheduleRule? = '30 * * * * *';
+  @tracked scheduleRule?: string = '30 * * * * *';
   @tracked isScheduleModalOpen = false;
   @tracked isScheduled = false;
   @tracked running = false;
   @tracked nextRunDate?: Date;
   @tracked config: any;
   @tracked status: any;
-  @tracked configUpdated?: Date = this.electronStore.getValue('configUpdated');
+  @tracked errors?: string[];
+  @tracked configUpdated?: Date;
   @tracked options: NotificationOptions = {
     appearance: 'info',
     preserve: false,
@@ -39,20 +40,31 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
   constructor(owner: unknown, args: ConfigStatusArgs) {
     super(owner, args);
 
+    this.configUpdated = this.electronStore.getValue('configUpdated');
+
     ipcRenderer.on(
       'action-result',
-      (_event: IpcRendererEvent, result: { status: any; rows: any[] }) => {
-        this.notifications.add(
-          `Action ${
-            result.status.ok ? 'succeeded' : 'failed'
-          }. Query returned ${result.rows.length} items`,
-          this.options
-        );
-        console.table(result.rows.slice(0, 3));
+      (
+        _event: IpcRendererEvent,
+        result: { status: any; rows: any[]; errors?: { message: string }[] }
+      ) => {
         this.running = false;
+        const returnedError = result.errors || !result.status?.ok;
 
-        if (!result.status.ok) {
+        if (returnedError) {
           this.status = result.status;
+          this.errors = result.errors?.map((e) => e.message);
+          const error = this.errors?.join(', ') ?? '';
+
+          this.notifications.add(`Action failed. ${error}`, {
+            appearance: 'warning',
+          });
+        } else {
+          this.notifications.add(
+            `Action succeeded. Query returned ${result.rows?.length} items`,
+            this.options
+          );
+          console.table(result.rows.slice(0, 3));
         }
       }
     );

@@ -9,8 +9,10 @@
   ],
   "settings": {
     "cSpell.words": [
+      "camelcase",
       "delete",
       "devtron",
+      "fieldname",
       "opto",
       "optouts",
       "oracledb",

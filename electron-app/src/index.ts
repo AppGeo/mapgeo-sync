@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
 // import installExtension, { EMBER_INSPECTOR } from 'electron-devtools-installer';
-import { URL, pathToFileURL } from 'url';
+import { pathToFileURL } from 'url';
 import { app, BrowserWindow, Tray, Menu, ipcMain, dialog } from 'electron';
-import { Worker, MessageChannel, MessagePort } from 'worker_threads';
+import { Worker } from 'worker_threads';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as isDev from 'electron-is-dev';
@@ -24,8 +24,16 @@ const emberAppURL = pathToFileURL(
 let mainWindow: BrowserWindow;
 let tray: Tray;
 let queryWorker: Worker;
-let port1: MessagePort;
-let port2: MessagePort;
+
+async function initWorkers(config: SyncConfig) {
+  if (queryWorker) {
+    await queryWorker.terminate();
+  }
+
+  queryWorker = new Worker(path.join(__dirname, 'workers', 'query-action.js'), {
+    workerData: { config },
+  });
+}
 
 function createBrowserWindow() {
   // Load the previous state with fallback to defaults
@@ -99,7 +107,7 @@ function createBrowserWindow() {
     ipcMain.on('run-action', async (event, action: QueryAction) => {
       queryWorker.postMessage({ event: 'handle-action', data: action });
 
-      port2.once('message', (message) => {
+      queryWorker.once('message', (message) => {
         // console.log(message);
         event.reply('action-result', message);
       });
@@ -112,12 +120,12 @@ function createBrowserWindow() {
           data: currentConfig.UploadActions[0],
         });
 
-        port2.once('message', (message) => {
+        queryWorker.once('message', (message) => {
           // console.log(message);
           if (message.errors) {
             return event.reply('action-error', message);
           }
-          let { nextRunDate } = done();
+          const { nextRunDate } = done();
           event.reply('action-result', { ...message, nextRunDate });
         });
       });
@@ -139,8 +147,8 @@ function createBrowserWindow() {
           data: currentConfig.UploadActions[0],
         });
 
-        port2.once('message', (message) => {
-          let { nextRunDate } = done();
+        queryWorker.once('message', (message) => {
+          const { nextRunDate } = done();
           mainWindow.webContents.send('action-result', {
             ...message,
             nextRunDate,
@@ -177,7 +185,7 @@ function createBrowserWindow() {
     console.log('The main window has become responsive again.');
   });
 
-  mainWindow.on('closed', (e: any) => {
+  mainWindow.on('closed', (e: Electron.IpcRendererEvent) => {
     e.preventDefault();
     mainWindow = null;
   });
@@ -273,17 +281,3 @@ process.on('uncaughtException', (err) => {
   );
   console.log(`Exception: ${err}`);
 });
-
-async function initWorkers(config: SyncConfig) {
-  if (queryWorker) {
-    await queryWorker.terminate();
-  }
-  let { port1: p1, port2: p2 } = new MessageChannel();
-  port1 = p1;
-  port2 = p2;
-
-  queryWorker = new Worker(path.join(__dirname, 'workers', 'query-action.js'), {
-    transferList: [port1],
-    workerData: { config, port: port1 },
-  });
-}

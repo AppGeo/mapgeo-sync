@@ -7,7 +7,6 @@ import { SyncConfig, QueryAction } from 'mapgeo-sync-config';
 
 interface WorkerData {
   config: SyncConfig;
-  port: MessagePort;
 }
 
 type HandleActionMessage = {
@@ -28,42 +27,10 @@ type ErrorResponse = {
 };
 type Response = FinishedResponse | ErrorResponse;
 
-const { config, port } = workerData as WorkerData;
+const { config } = workerData as WorkerData;
 
-if (parentPort) {
-  parentPort.on('message', async (msg: string | Message) => {
-    if (typeof msg !== 'object') {
-      console.log('Low-level event: ', msg);
-      return;
-    }
-
-    console.log(`Handling '${msg.event}'...`);
-
-    switch (msg.event) {
-      case 'handle-action': {
-        try {
-          await handleAction(msg.data);
-        } catch (error) {
-          respond({
-            errors: [
-              {
-                message: error.toString(),
-                event: msg.event,
-              },
-            ],
-          });
-        }
-        break;
-      }
-
-      case 'close': {
-        parentPort.postMessage('done');
-        break;
-      }
-      default:
-        const _exhaustiveCheck: never = msg;
-    }
-  });
+function respond(response: Response) {
+  parentPort.postMessage(response);
 }
 
 async function handleAction(action: QueryAction) {
@@ -137,6 +104,40 @@ async function handleAction(action: QueryAction) {
   respond({ status: status.content as string, rows: result.rows });
 }
 
-function respond(response: Response) {
-  port.postMessage(response);
+if (parentPort) {
+  parentPort.on('message', async (msg: string | Message) => {
+    if (typeof msg !== 'object') {
+      console.log('Low-level event: ', msg);
+      return;
+    }
+
+    console.log(`Handling '${msg.event}'...`);
+
+    switch (msg.event) {
+      case 'handle-action': {
+        try {
+          await handleAction(msg.data);
+        } catch (error) {
+          respond({
+            errors: [
+              {
+                message: error.toString(),
+                event: msg.event,
+              },
+            ],
+          });
+        }
+        break;
+      }
+
+      case 'close': {
+        parentPort.postMessage('done');
+        break;
+      }
+      default:
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // eslint-disable-next-line no-case-declarations
+        const _exhaustiveCheck: never = msg;
+    }
+  });
 }
