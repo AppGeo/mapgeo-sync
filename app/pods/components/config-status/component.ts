@@ -8,7 +8,7 @@ import {
   NotificationsService,
 } from '@frontile/notifications';
 import type { IpcRendererEvent } from 'electron';
-import type { QueryAction, SyncConfig } from 'mapgeo-sync-config';
+import type { Action, QueryAction, SyncConfig } from 'mapgeo-sync-config';
 // Node modules
 const { ipcRenderer } = requireNode('electron');
 
@@ -96,6 +96,15 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
         this.nextRunDate = result.nextRunDate;
       }
     );
+  }
+
+  get actionConfigs() {
+    if (!this.args.config.UploadActions) {
+      return [];
+    }
+    console.log(this.args.config);
+    const actions: Action[] = this.args.config.UploadActions;
+    return actions.concat(this.args.config.OptOutActions);
   }
 
   get configString() {

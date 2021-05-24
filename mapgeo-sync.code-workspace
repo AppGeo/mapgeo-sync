@@ -18,6 +18,7 @@
       "optouts",
       "oracledb",
       "predebug",
+      "semibold",
       "testem"
     ]
   }
