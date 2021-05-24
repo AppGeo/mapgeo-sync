@@ -1,6 +1,8 @@
 export type Action = QueryAction | OptoutAction;
 
 export type OptoutAction = {
+  DatasetId: string;
+
   /** New field, since connection string could be a number of databases */
   DbType: 'pg';
   ConnectionString: string;

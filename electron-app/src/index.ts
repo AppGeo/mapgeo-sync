@@ -114,6 +114,8 @@ function createBrowserWindow() {
     });
 
     ipcMain.on('schedule-action', function (event, rule: string) {
+      store.set('scheduleRule', rule);
+
       scheduler.schedule(rule, (done) => {
         queryWorker.postMessage({
           event: 'handle-action',

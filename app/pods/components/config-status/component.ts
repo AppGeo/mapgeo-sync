@@ -8,7 +8,7 @@ import {
   NotificationsService,
 } from '@frontile/notifications';
 import type { IpcRendererEvent } from 'electron';
-import type { SyncConfig } from 'mapgeo-sync-config';
+import type { QueryAction, SyncConfig } from 'mapgeo-sync-config';
 // Node modules
 const { ipcRenderer } = requireNode('electron');
 
@@ -41,12 +41,17 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
     super(owner, args);
 
     this.configUpdated = this.electronStore.getValue('configUpdated');
+    this.scheduleRule = this.electronStore.getValue('scheduleRule');
 
     ipcRenderer.on(
       'action-result',
       (
         _event: IpcRendererEvent,
-        result: { status: any; rows: any[]; errors?: { message: string }[] }
+        result: {
+          status: { ok: boolean };
+          rows: Record<string, unknown>[];
+          errors?: { message: string }[];
+        }
       ) => {
         this.running = false;
         const returnedError = result.errors || !result.status?.ok;
@@ -129,7 +134,7 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
   }
 
   @action
-  runAction(uploadAction: any) {
+  runAction(uploadAction: QueryAction) {
     this.status = undefined;
     this.running = true;
     ipcRenderer.send('run-action', uploadAction);
