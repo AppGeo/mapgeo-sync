@@ -37,7 +37,7 @@
 
     {{!-- <Button
       @appearance='outlined'
-      @isXSmall={{true}}
+      @size='sm'
       {{on 'click' this.selectNewConfig}}
     >
       Select Config
@@ -69,7 +69,7 @@
             <Button
               type='button'
               @appearance='outlined'
-              @isXSmall={{true}}
+              @size='xs'
               {{on 'click' (fn this.runAction actionItem)}}
             >
               Run Action
@@ -129,6 +129,7 @@
         │    └──────────────────── minute (0 - 59)
         └───────────────────────── second (0 - 59, OPTIONAL)
       </pre>
+
       <p>
         Is Scheduled: {{if this.isScheduled 'Yes' 'No'}}<br />
 

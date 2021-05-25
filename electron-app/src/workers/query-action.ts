@@ -1,6 +1,6 @@
 import { URL } from 'url';
 import { workerData, parentPort } from 'worker_threads';
-import MapgeoService from '../mapgeo-service';
+import MapgeoService from '../mapgeo/service';
 import handleQueryAction from '../action-handlers/query';
 import S3Service from '../s3-service';
 import { SyncConfig, QueryAction } from 'mapgeo-sync-config';

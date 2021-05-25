@@ -1,4 +1,4 @@
-import * as knex from 'knex';
+import knex from 'knex';
 import { QueryAction, QueryOutput } from 'mapgeo-sync-config';
 
 // TODO: update config instead?

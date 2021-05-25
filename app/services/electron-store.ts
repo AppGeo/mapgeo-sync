@@ -1,10 +1,11 @@
 import Service from '@ember/service';
-const Store = requireNode('electron-store');
-const store = new Store();
+const { ipcRenderer } = requireNode('electron');
 
 export default class ElectronStore extends Service {
-  getValue(key: string) {
-    return store.get(key);
+  async getValue(key: string) {
+    const value = await ipcRenderer.invoke('getStoreValue', key);
+
+    return value;
   }
 }
 

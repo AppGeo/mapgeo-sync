@@ -1,5 +1,5 @@
 import * as AWS from 'aws-sdk';
-import { UploaderTokenResult } from './mapgeo-service';
+import { UploaderTokenResult } from './mapgeo/service';
 
 export type UploadedResults = {
   key: string;

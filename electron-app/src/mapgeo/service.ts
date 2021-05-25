@@ -52,6 +52,13 @@ export default class MapgeoService {
     return result.data as UploaderTokenResult;
   }
 
+  async getDatasets() {
+    const result = await this.#axios.get('/api/config/datasets', {
+      headers: {},
+    });
+    debugger;
+  }
+
   async notifyUploader({
     datasetId,
     uploads,

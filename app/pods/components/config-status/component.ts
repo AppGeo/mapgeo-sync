@@ -14,6 +14,8 @@ const { ipcRenderer } = requireNode('electron');
 
 interface ConfigStatusArgs {
   config: SyncConfig;
+  configUpdated?: Date;
+  scheduleRule?: string;
   selectNewConfig: () => void;
 }
 
@@ -21,7 +23,8 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
   @service declare electronStore: ElectronStore;
   @service declare notifications: NotificationsService;
 
-  @tracked scheduleRule?: string = '30 * * * * *';
+  @tracked scheduleRule?: string = this.args.scheduleRule ?? '30 * * * * *';
+  @tracked configUpdated?: Date = this.args.configUpdated;
   @tracked isScheduleModalOpen = false;
   @tracked isScheduled = false;
   @tracked running = false;
@@ -29,7 +32,6 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
   @tracked config: any;
   @tracked status: any;
   @tracked errors?: string[];
-  @tracked configUpdated?: Date;
   @tracked options: NotificationOptions = {
     appearance: 'info',
     preserve: false,
@@ -39,9 +41,6 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
 
   constructor(owner: unknown, args: ConfigStatusArgs) {
     super(owner, args);
-
-    this.configUpdated = this.electronStore.getValue('configUpdated');
-    this.scheduleRule = this.electronStore.getValue('scheduleRule');
 
     ipcRenderer.on(
       'action-result',
@@ -124,8 +123,8 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
   }
 
   @action
-  onConfigUpdated() {
-    this.configUpdated = this.electronStore.getValue('configUpdated');
+  async onConfigUpdated() {
+    this.configUpdated = await this.electronStore.getValue('configUpdated');
     this.status = undefined;
   }
 

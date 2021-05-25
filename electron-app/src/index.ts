@@ -25,6 +25,10 @@ let mainWindow: BrowserWindow;
 let tray: Tray;
 let queryWorker: Worker;
 
+ipcMain.handle('getStoreValue', (event, key) => {
+  return store.get(key);
+});
+
 async function initWorkers(config: SyncConfig) {
   if (queryWorker) {
     await queryWorker.terminate();
