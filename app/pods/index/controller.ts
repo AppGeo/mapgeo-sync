@@ -1,24 +1,25 @@
 import Controller from '@ember/controller';
 import { inject as service } from '@ember/service';
 import { action } from '@ember/object';
-import { tracked } from '@glimmer/tracking';
 import ElectronStore from 'mapgeo-sync/services/electron-store';
 import type { IpcRendererEvent } from 'electron';
 import type { SyncConfig } from 'mapgeo-sync-config';
+import { Model } from './route';
 // Node modules
 const { ipcRenderer } = requireNode('electron');
 
 export default class Index extends Controller {
-  @service electronStore!: ElectronStore;
+  @service declare electronStore: ElectronStore;
 
-  @tracked config = this.electronStore.getValue('configUpdated');
+  declare model: Model;
 
-  init() {
-    super.init();
+  constructor() {
+    super();
+
     ipcRenderer.on(
       'config-loaded',
       (_event: IpcRendererEvent, config: SyncConfig) => {
-        this.config = config;
+        this.model.config = config;
       }
     );
   }

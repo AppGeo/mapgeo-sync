@@ -1,7 +1,7 @@
 <div class='flex flex-col items-center p-4'>
-  {{#if this.config}}
+  {{#if @model.config}}
     <ConfigStatus
-      @config={{this.config}}
+      @config={{@model.config}}
       @selectNewConfig={{this.selectNewConfig}}
     />
   {{else}}

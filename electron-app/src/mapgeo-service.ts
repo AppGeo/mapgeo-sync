@@ -1,6 +1,4 @@
-import { ok } from 'assert';
 import axios, { AxiosInstance } from 'axios';
-import { UploadedResults } from './s3-service';
 
 export type UploaderTokenResult = {
   AccessKeyId: string;

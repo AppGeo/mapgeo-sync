@@ -93,7 +93,7 @@ function createBrowserWindow() {
         return;
       }
       const configBuffer = await fs.promises.readFile(result.filePaths[0]);
-      const config = JSON.parse(configBuffer.toString());
+      const config = JSON.parse(configBuffer.toString()) as SyncConfig;
 
       store.set('config', config);
       store.set('configUpdated', new Date());
