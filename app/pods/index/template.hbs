@@ -1,4 +1,4 @@
-<div class='flex flex-col items-center p-4'>
+<div class='flex flex-col items-center p-4' {{did-insert this.waitForConfig}}>
   {{#if @model.config}}
     <ConfigStatus
       @config={{@model.config}}

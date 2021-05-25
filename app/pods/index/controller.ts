@@ -13,9 +13,9 @@ export default class Index extends Controller {
 
   declare model: Model;
 
-  constructor() {
-    super();
-
+  @action
+  waitForConfig() {
+    console.log(this.model);
     ipcRenderer.on(
       'config-loaded',
       (_event: IpcRendererEvent, config: SyncConfig) => {
