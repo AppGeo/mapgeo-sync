@@ -41,11 +41,8 @@ async function handleAction(action: QueryAction) {
   }
   const url = new URL(config.MapGeoOptions.Host);
   const subdomain = url.hostname.split('.')[0];
-  const mapgeo = await MapgeoService.login(
-    config.MapGeoOptions.Host,
-    config.MapGeoOptions.Email,
-    config.MapGeoOptions.Password
-  );
+  const mapgeo = await MapgeoService.fromUrl(config.MapGeoOptions.Host);
+  await mapgeo.login(config.MapGeoOptions.Email, config.MapGeoOptions.Password);
 
   const result = await handleQueryAction(subdomain, action);
   const tokens = await mapgeo.getUploaderTokens();

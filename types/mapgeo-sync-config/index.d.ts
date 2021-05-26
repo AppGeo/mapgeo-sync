@@ -49,3 +49,11 @@ export interface SyncConfig {
   UploadActions: QueryAction[];
   OptOutActions: OptoutAction[];
 }
+
+export interface SetupData {
+  mapgeoUrl: string;
+}
+export interface LoginData {
+  email: string;
+  password: string;
+}

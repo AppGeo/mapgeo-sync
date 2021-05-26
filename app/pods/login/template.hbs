@@ -3,19 +3,32 @@
     <div class='flex justify-between items-start'>
       <div class='flex-1'>
         <h2>
-          Setup Sync
+          Login
         </h2>
 
         <ChangesetForm
           class='mt-4'
-          @changeset={{changeset (hash mapgeoUrl='')}}
-          @onSubmit={{this.checkMapgeo}} as |Form changeset|
+          @changeset={{changeset (hash password='' email='')}}
+          @onSubmit={{this.login}} as |Form changeset|
         >
           <Form.Input
-            @label='MapGeo URL'
-            @fieldName='mapgeoUrl'
+            @label='Email'
+            @type='email'
+            @fieldName='email'
+            placeholder='me@example.com'
             required={{true}}
-            placeholder='https://gloucesterma.mapgeo.io'
+            autocomplete='email'
+            class='mt-2'
+            data-test-login-email
+          />
+          <Form.Input
+            @label='Password'
+            @type='password'
+            @fieldName='password'
+            placeholder='**********'
+            required={{true}}
+            class='mt-2'
+            data-test-login-password
           />
 
           <div class='flex justify-end mt-4'>
@@ -24,7 +37,7 @@
               @intent='primary'
               disabled={{changeset.isInvalid}}
             >
-              Continue
+              Login
             </Button>
           </div>
         </ChangesetForm>

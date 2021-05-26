@@ -21,20 +21,11 @@
     "module": "es6",
     "experimentalDecorators": true,
     "paths": {
-      "mapgeo-sync/tests/*": [
-        "tests/*"
-      ],
-      "mapgeo-sync/*": [
-        "app/*"
-      ],
-      "*": [
-        "types/*"
-      ]
+      "fetch": ["node_modules/ember-fetch"],
+      "mapgeo-sync/tests/*": ["tests/*"],
+      "mapgeo-sync/*": ["app/*"],
+      "*": ["types/*"]
     }
   },
-  "include": [
-    "app/**/*",
-    "tests/**/*",
-    "types/**/*"
-  ]
+  "include": ["app/**/*", "tests/**/*", "types/**/*"]
 }

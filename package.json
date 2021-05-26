@@ -29,6 +29,7 @@
     "@ember/optional-features": "^2.0.0",
     "@ember/test-helpers": "^2.2.5",
     "@frontile/buttons": "^0.11.0",
+    "@frontile/changeset-form": "^0.11.0",
     "@frontile/core": "^0.11.0",
     "@frontile/forms": "^0.11.0",
     "@frontile/notifications": "^0.11.0",

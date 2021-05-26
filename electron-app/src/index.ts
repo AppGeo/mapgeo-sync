@@ -9,8 +9,14 @@ import * as isDev from 'electron-is-dev';
 import * as Store from 'electron-store';
 import * as windowStateKeeper from 'electron-window-state';
 import handleFileUrls from './handle-file-urls';
-import type { QueryAction, SyncConfig } from 'mapgeo-sync-config';
+import type {
+  LoginData,
+  QueryAction,
+  SetupData,
+  SyncConfig,
+} from 'mapgeo-sync-config';
 import Scheduler from './scheduler';
+import MapgeoService from './mapgeo/service';
 
 const store = new Store();
 const scheduler = new Scheduler({
@@ -24,9 +30,36 @@ const emberAppURL = pathToFileURL(
 let mainWindow: BrowserWindow;
 let tray: Tray;
 let queryWorker: Worker;
+let mapgeoService: MapgeoService;
 
-ipcMain.handle('getStoreValue', (event, key) => {
+ipcMain.handle('getStoreValue', (event, key: string) => {
   return store.get(key);
+});
+
+ipcMain.handle('checkMapgeo', async (event, data: SetupData) => {
+  try {
+    let service = await MapgeoService.fromUrl(data.mapgeoUrl);
+
+    if (service) {
+      mapgeoService = service;
+      store.set('mapgeo.host', data.mapgeoUrl);
+      return true;
+    }
+
+    return false;
+  } catch (e) {
+    return false;
+  }
+});
+
+ipcMain.handle('login', async (event, data: LoginData) => {
+  if (!mapgeoService) {
+    throw new Error('MapGeoService has not been setup');
+  }
+
+  const isAuthenticated = await mapgeoService.login(data.email, data.password);
+
+  return isAuthenticated;
 });
 
 async function initWorkers(config: SyncConfig) {
@@ -286,4 +319,5 @@ process.on('uncaughtException', (err) => {
     'This is a serious issue that needs to be handled and/or debugged.'
   );
   console.log(`Exception: ${err}`);
+  console.log(err.stack);
 });

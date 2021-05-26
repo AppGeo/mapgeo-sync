@@ -21,30 +21,56 @@ export type CartoDirectResult = {
 export default class MapgeoService {
   host: string;
   token: string;
+  config: Record<string, unknown>;
   #axios: AxiosInstance;
 
-  static async login(host: string, email: string, password: string) {
+  static async fromUrl(host: string) {
     try {
-      const result = await axios.post(`${host}/auth/login`, {
-        email,
-        password,
-      });
-      const service = new MapgeoService(host, result.data.token);
-      return service;
+      const result = await axios.get<{ community: Record<string, unknown> }>(
+        `${host}/api/config/current`
+      );
+      const config = result.status < 400 && result.data;
+
+      if (config) {
+        return new MapgeoService(host, config);
+      }
+      throw new Error('URL is either incorrect or service is down');
     } catch (e) {
-      console.log('login error: ', e);
+      console.log('ping error: ', e);
       throw e;
     }
   }
 
-  constructor(host: string, token: string) {
+  constructor(host: string, config: Record<string, unknown>) {
+    const headers: Record<string, string> = {};
+
     this.host = host;
-    this.token = token;
+    this.config = config;
     this.#axios = axios.create({
       baseURL: host,
       // timeout: 1000,
-      headers: { Authorization: `Bearer ${token}` },
+      headers,
     });
+  }
+
+  async login(email: string, password: string) {
+    try {
+      const result = await this.#axios.post(`/auth/login`, {
+        email,
+        password,
+      });
+
+      this.token = result.data.token;
+      this.#axios = axios.create({
+        baseURL: this.host,
+        // timeout: 1000,
+        headers: { Authorization: `Bearer ${this.token}` },
+      });
+      return true;
+    } catch (e) {
+      console.log('login error: ', e);
+      throw e;
+    }
   }
 
   async getUploaderTokens() {
