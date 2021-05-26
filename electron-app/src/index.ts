@@ -124,15 +124,29 @@ function createBrowserWindow() {
 
   // Ember app has loaded, send an event
   mainWindow.webContents.on('did-finish-load', async () => {
+    console.log('did-finish-load');
+
     const mapgeoConfig = store.get('mapgeo');
 
-    if (!mapgeoService && mapgeoConfig.login) {
-      mapgeoService = await MapgeoService.fromUrl(mapgeoConfig.host);
-      await mapgeoService.login(
-        mapgeoConfig.login.email,
-        mapgeoConfig.login.password
-      );
-      mainWindow.webContents.send('authenticated');
+    // Restore authenticated state
+    try {
+      if (!mapgeoService) {
+        mapgeoService = await MapgeoService.fromUrl(mapgeoConfig.host);
+      }
+
+      if (mapgeoConfig.login) {
+        await mapgeoService.login(
+          mapgeoConfig.login.email,
+          mapgeoConfig.login.password
+        );
+        mainWindow.webContents.send('authenticated', { isAuthenticated: true });
+      } else {
+        mainWindow.webContents.send('authenticated', {
+          isAuthenticated: false,
+        });
+      }
+    } catch (e) {
+      mainWindow.webContents.send('authenticated', { isAuthenticated: false });
     }
 
     let currentConfig = store.get('config') as SyncConfig;
