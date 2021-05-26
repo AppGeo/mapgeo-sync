@@ -5,7 +5,7 @@ export default class Scheduler {
   private store: Store;
   private job: schedule.Job;
 
-  constructor({ store }: { store: Store }) {
+  constructor({ store }: { store: Store<any> }) {
     this.store = store;
   }
 

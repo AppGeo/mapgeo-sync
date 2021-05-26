@@ -5,6 +5,7 @@ import { SyncConfig } from 'mapgeo-sync-config';
 import ElectronStore from 'mapgeo-sync/services/electron-store';
 import Transition from '@ember/routing/-private/transition';
 import { hash } from 'rsvp';
+import Session from 'mapgeo-sync/services/session';
 
 export interface Model {
   config: SyncConfig;
@@ -15,6 +16,7 @@ export interface Model {
 export default class Index extends Route {
   @service('electron-store') declare electronStore: ElectronStore;
   @service('router') declare router: RouterService;
+  @service('session') declare session: Session;
 
   config?: SyncConfig;
 
@@ -22,7 +24,7 @@ export default class Index extends Route {
     const config = (await this.electronStore.getValue('config')) as SyncConfig;
     this.config = config;
 
-    if (!this.config) {
+    if (!this.session.isAuthenticated) {
       transition.abort();
       return this.router.transitionTo('setup');
     }

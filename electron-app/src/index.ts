@@ -18,7 +18,15 @@ import type {
 import Scheduler from './scheduler';
 import MapgeoService from './mapgeo/service';
 
-const store = new Store();
+const store = new Store<{
+  mapgeo: {
+    host?: string;
+    login?: {
+      email: string;
+      password: string;
+    };
+  };
+}>();
 const scheduler = new Scheduler({
   store,
 });
@@ -59,6 +67,9 @@ ipcMain.handle('login', async (event, data: LoginData) => {
 
   const isAuthenticated = await mapgeoService.login(data.email, data.password);
 
+  if (isAuthenticated) {
+    store.set('mapgeo.login', data);
+  }
   return isAuthenticated;
 });
 
@@ -112,7 +123,18 @@ function createBrowserWindow() {
   mainWindow.loadURL(emberAppURL);
 
   // Ember app has loaded, send an event
-  mainWindow.webContents.on('did-finish-load', () => {
+  mainWindow.webContents.on('did-finish-load', async () => {
+    const mapgeoConfig = store.get('mapgeo');
+
+    if (!mapgeoService && mapgeoConfig.login) {
+      mapgeoService = await MapgeoService.fromUrl(mapgeoConfig.host);
+      await mapgeoService.login(
+        mapgeoConfig.login.email,
+        mapgeoConfig.login.password
+      );
+      mainWindow.webContents.send('authenticated');
+    }
+
     let currentConfig = store.get('config') as SyncConfig;
     mainWindow.webContents.send('config-loaded', currentConfig);
 
