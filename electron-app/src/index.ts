@@ -1,7 +1,15 @@
 /* eslint-disable no-console */
 // import installExtension, { EMBER_INSPECTOR } from 'electron-devtools-installer';
 import { pathToFileURL } from 'url';
-import { app, BrowserWindow, Tray, Menu, ipcMain, dialog } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  Tray,
+  Menu,
+  ipcMain,
+  dialog,
+  Notification,
+} from 'electron';
 import { Worker } from 'worker_threads';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -17,6 +25,8 @@ import type {
 } from 'mapgeo-sync-config';
 import Scheduler from './scheduler';
 import MapgeoService from './mapgeo/service';
+import { interpret, Interpreter } from 'xstate';
+import { authMachine } from './auth.machine';
 
 const store = new Store<{
   mapgeo: {
@@ -44,22 +54,6 @@ ipcMain.handle('getStoreValue', (event, key: string) => {
   return store.get(key);
 });
 
-ipcMain.handle('checkMapgeo', async (event, data: SetupData) => {
-  try {
-    let service = await MapgeoService.fromUrl(data.mapgeoUrl);
-
-    if (service) {
-      mapgeoService = service;
-      store.set('mapgeo.host', data.mapgeoUrl);
-      return true;
-    }
-
-    return false;
-  } catch (e) {
-    return false;
-  }
-});
-
 ipcMain.handle('login', async (event, data: LoginData) => {
   if (!mapgeoService) {
     throw new Error('MapGeoService has not been setup');
@@ -73,6 +67,33 @@ ipcMain.handle('login', async (event, data: LoginData) => {
   return isAuthenticated;
 });
 
+async function waitForState(
+  interpreter: Interpreter<any, any, any>,
+  states: string[],
+  timeout: number = 4000
+) {
+  return new Promise((resolve, reject) => {
+    let time = 0;
+    const timer = setInterval(() => {
+      let match = states.find((state) => interpreter.state.matches(state));
+      if (match) {
+        clearInterval(timer);
+        resolve(match);
+        return;
+      }
+      time += 50;
+      if (time >= timeout) {
+        clearInterval(timer);
+        reject(
+          new Error(
+            `waitForState [${states.join(', ')}] timed out after ${time}ms`
+          )
+        );
+      }
+    }, 50);
+  });
+}
+
 async function initWorkers(config: SyncConfig) {
   if (queryWorker) {
     await queryWorker.terminate();
@@ -82,6 +103,59 @@ async function initWorkers(config: SyncConfig) {
     workerData: { config },
   });
 }
+
+const authService = interpret(
+  authMachine
+    .withContext({
+      host: store.get('mapgeo.host'),
+      login: store.get('mapgeo.login'),
+    })
+    .withConfig({
+      guards: {
+        needsMapgeoService() {
+          return mapgeoService === undefined && store.get('mapgeo.host');
+        },
+        hasLogin() {
+          const mapgeo = store.get('mapgeo');
+          return !!mapgeo.login;
+        },
+      },
+      actions: {
+        authenticated() {
+          mainWindow.webContents.send('authenticated', {
+            isAuthenticated: true,
+          });
+        },
+        authenticationFailed() {
+          mainWindow.webContents.send('authenticated', {
+            isAuthenticated: false,
+          });
+        },
+        needsSetup() {
+          mainWindow.webContents.send('authenticated', {
+            isAuthenticated: false,
+          });
+        },
+        setupMapgeoFailed() {},
+      },
+      services: {
+        async setupMapgeoService(context) {
+          mapgeoService = await MapgeoService.fromUrl(context.host);
+        },
+        loginMapgeo(context) {
+          return mapgeoService.login(
+            context.login.email,
+            context.login.password
+          );
+        },
+      },
+    })
+).onTransition((state) => console.log(state.value));
+
+ipcMain.handle('checkMapgeo', async (event, data: SetupData) => {
+  authService.send({ type: 'SETUP', payload: data });
+  return waitForState(authService, ['login', 'askForLogin']);
+});
 
 function createBrowserWindow() {
   // Load the previous state with fallback to defaults
@@ -126,28 +200,8 @@ function createBrowserWindow() {
   mainWindow.webContents.on('did-finish-load', async () => {
     console.log('did-finish-load');
 
-    const mapgeoConfig = store.get('mapgeo');
-
-    // Restore authenticated state
-    try {
-      if (!mapgeoService) {
-        mapgeoService = await MapgeoService.fromUrl(mapgeoConfig.host);
-      }
-
-      if (mapgeoConfig.login) {
-        await mapgeoService.login(
-          mapgeoConfig.login.email,
-          mapgeoConfig.login.password
-        );
-        mainWindow.webContents.send('authenticated', { isAuthenticated: true });
-      } else {
-        mainWindow.webContents.send('authenticated', {
-          isAuthenticated: false,
-        });
-      }
-    } catch (e) {
-      mainWindow.webContents.send('authenticated', { isAuthenticated: false });
-    }
+    // Start the service
+    authService.start();
 
     let currentConfig = store.get('config') as SyncConfig;
     mainWindow.webContents.send('config-loaded', currentConfig);
@@ -263,6 +317,8 @@ function createBrowserWindow() {
   mainWindow.on('closed', (e: Electron.IpcRendererEvent) => {
     e.preventDefault();
     mainWindow = null;
+    // Stop the service
+    authService.stop();
   });
 
   return mainWindow;
