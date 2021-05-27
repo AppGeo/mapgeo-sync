@@ -12,7 +12,7 @@ const plugins = {
     postcssImport({
       path: ['node_modules'],
     }),
-    tailwind('./app/tailwind/config.js'),
+    tailwind('./app/tailwind/tailwind.config.js'),
     autoprefixer('last 2 versions'),
   ],
 };

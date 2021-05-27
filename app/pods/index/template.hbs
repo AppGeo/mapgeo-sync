@@ -1,4 +1,18 @@
-<div class='flex flex-col items-center p-4' {{did-insert this.waitForConfig}}>
+<div class='p-4 space-y-2'>
+  <h2 class='font-semibold'>
+    Datasets
+  </h2>
+
+  <ul class='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3'>
+    {{#each @model.community.datasets as |dataset|}}
+      <li class='bg-white p-4 shadow-lg rounded-2xl'>
+        {{dataset.name}}
+      </li>
+    {{/each}}
+  </ul>
+</div>
+
+{{!-- <div class='flex flex-col items-center p-4' {{did-insert this.waitForConfig}}>
   {{#if @model.config}}
     <ConfigStatus
       @config={{@model.config}}
@@ -9,4 +23,4 @@
   {{else}}
     <WithoutConfig @selectNewConfig={{this.selectNewConfig}} />
   {{/if}}
-</div>
+</div> --}}

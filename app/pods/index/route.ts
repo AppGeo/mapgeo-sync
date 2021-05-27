@@ -6,6 +6,7 @@ import ElectronStore from 'mapgeo-sync/services/electron-store';
 import Transition from '@ember/routing/-private/transition';
 import { hash } from 'rsvp';
 import Session from 'mapgeo-sync/services/session';
+import Platform from 'mapgeo-sync/services/platform';
 
 export interface Model {
   config: SyncConfig;
@@ -15,6 +16,7 @@ export interface Model {
 
 export default class Index extends Route {
   @service('electron-store') declare electronStore: ElectronStore;
+  @service('platform') declare platform: Platform;
   @service('router') declare router: RouterService;
   @service('session') declare session: Session;
 
@@ -34,6 +36,7 @@ export default class Index extends Route {
 
   model(): Promise<Model> {
     return hash({
+      community: this.platform.fetchCommunity(),
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       config: this.config!,
       configUpdated: this.electronStore.getValue(

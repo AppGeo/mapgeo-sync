@@ -1,0 +1,15 @@
+import * as Store from 'electron-store';
+
+export type SyncStoreType = {
+  mapgeo: {
+    host?: string;
+    login?: {
+      email: string;
+      password: string;
+    };
+  };
+};
+
+export type SyncStore = Store<SyncStoreType>;
+
+export const store = new Store<SyncStoreType>();

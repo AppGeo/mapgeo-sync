@@ -1,9 +1,30 @@
+import { SetupData } from 'mapgeo-sync-config';
 import { createMachine, assign } from 'xstate';
 
-export const authMachine = createMachine({
+export interface AuthContext {
+  config: any;
+  host: string;
+  login?: {
+    email: string;
+    password: string;
+  };
+}
+
+export type AuthEvent = { type: 'SETUP'; payload: SetupData };
+
+export type AuthState =
+  | { value: 'idle'; context: AuthContext }
+  | { value: 'finishSetup'; context: AuthContext & { host: string } }
+  | {
+      value: 'login';
+      context: AuthContext & { login: { email: string; password: string } };
+    };
+
+export const authMachine = createMachine<AuthContext, AuthEvent, AuthState>({
   // Machine identifier
   id: 'auth',
   context: {
+    config: undefined,
     host: undefined,
     login: undefined,
   },
@@ -27,7 +48,7 @@ export const authMachine = createMachine({
             host: (context, event) => {
               debugger;
               console.log(event);
-              return (event as any).payload;
+              return event.payload.mapgeoUrl;
             },
           }),
         },
@@ -41,6 +62,13 @@ export const authMachine = createMachine({
           {
             target: 'login',
             cond: 'hasLogin',
+            actions: assign({
+              config: (context, event) => {
+                console.log(event);
+
+                return event.data;
+              },
+            }),
           },
           {
             actions: 'askForLogin',

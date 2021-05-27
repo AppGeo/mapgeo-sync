@@ -1,5 +1,5 @@
 import Service from '@ember/service';
-const { ipcRenderer } = requireNode('electron');
+const { ipcRenderer } = requireNode('electron/renderer');
 
 export default class ElectronStore extends Service {
   async getValue(key: string) {

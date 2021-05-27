@@ -14,7 +14,6 @@ import { Worker } from 'worker_threads';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as isDev from 'electron-is-dev';
-import * as Store from 'electron-store';
 import * as windowStateKeeper from 'electron-window-state';
 import handleFileUrls from './handle-file-urls';
 import type {
@@ -25,18 +24,12 @@ import type {
 } from 'mapgeo-sync-config';
 import Scheduler from './scheduler';
 import MapgeoService from './mapgeo/service';
-import { interpret, Interpreter } from 'xstate';
+import { interpret } from 'xstate';
 import { authMachine } from './auth.machine';
+import { store } from './store';
+import { register as registerMapgeoHandlers } from './mapgeo/rpc';
+import { waitForState } from './utils/wait-for-state';
 
-const store = new Store<{
-  mapgeo: {
-    host?: string;
-    login?: {
-      email: string;
-      password: string;
-    };
-  };
-}>();
 const scheduler = new Scheduler({
   store,
 });
@@ -49,6 +42,8 @@ let mainWindow: BrowserWindow;
 let tray: Tray;
 let queryWorker: Worker;
 let mapgeoService: MapgeoService;
+
+registerMapgeoHandlers(ipcMain);
 
 ipcMain.handle('getStoreValue', (event, key: string) => {
   return store.get(key);
@@ -67,33 +62,6 @@ ipcMain.handle('login', async (event, data: LoginData) => {
   return isAuthenticated;
 });
 
-async function waitForState(
-  interpreter: Interpreter<any, any, any>,
-  states: string[],
-  timeout: number = 4000
-) {
-  return new Promise((resolve, reject) => {
-    let time = 0;
-    const timer = setInterval(() => {
-      let match = states.find((state) => interpreter.state.matches(state));
-      if (match) {
-        clearInterval(timer);
-        resolve(match);
-        return;
-      }
-      time += 50;
-      if (time >= timeout) {
-        clearInterval(timer);
-        reject(
-          new Error(
-            `waitForState [${states.join(', ')}] timed out after ${time}ms`
-          )
-        );
-      }
-    }, 50);
-  });
-}
-
 async function initWorkers(config: SyncConfig) {
   if (queryWorker) {
     await queryWorker.terminate();
@@ -107,6 +75,7 @@ async function initWorkers(config: SyncConfig) {
 const authService = interpret(
   authMachine
     .withContext({
+      config: store.get('mapgeo.config'),
       host: store.get('mapgeo.host'),
       login: store.get('mapgeo.login'),
     })
@@ -141,6 +110,8 @@ const authService = interpret(
       services: {
         async setupMapgeoService(context) {
           mapgeoService = await MapgeoService.fromUrl(context.host);
+          store.set('mapgeo.config', mapgeoService.config.community);
+          return mapgeoService.config.community;
         },
         loginMapgeo(context) {
           return mapgeoService.login(
@@ -153,7 +124,7 @@ const authService = interpret(
 ).onTransition((state) => console.log(state.value));
 
 ipcMain.handle('checkMapgeo', async (event, data: SetupData) => {
-  authService.send({ type: 'SETUP', payload: data });
+  authService.send({ type: 'SETUP', payload: data } as any);
   return waitForState(authService, ['login', 'askForLogin']);
 });
 
