@@ -27,7 +27,7 @@ import MapgeoService from './mapgeo/service';
 import { interpret } from 'xstate';
 import { authMachine } from './auth.machine';
 import { store } from './store';
-import { register as registerMapgeoHandlers } from './mapgeo/rpc';
+import { register as registerMapgeoHandlers } from './mapgeo/handlers';
 import { waitForState } from './utils/wait-for-state';
 
 const scheduler = new Scheduler({
