@@ -9,11 +9,13 @@ export default class Application extends Route {
   @service('session') declare session: Session;
   @service('platform') declare platform: Platform;
 
-  async beforeModel() {
-    const isAuthenticated = await this.session.waitForAuthentication();
+  beforeModel() {
+    return this.session.waitForAuthentication().then((isAuthenticated) => {
+      if (!isAuthenticated) {
+        return this.router.transitionTo('setup');
+      }
 
-    if (!isAuthenticated) {
-      return this.router.transitionTo('setup');
-    }
+      return;
+    });
   }
 }

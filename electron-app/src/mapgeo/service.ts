@@ -1,5 +1,15 @@
 import axios, { AxiosInstance } from 'axios';
 
+let service: MapgeoService;
+
+export const getService = () => {
+  if (!service) {
+    throw new Error('MapGeo service not setup');
+  }
+
+  return service;
+};
+
 export type UploaderTokenResult = {
   AccessKeyId: string;
   SecretAccessKey: string;
@@ -25,6 +35,11 @@ export default class MapgeoService {
   #axios: AxiosInstance;
 
   static async fromUrl(host: string) {
+    // cached instance
+    if (host && service?.host === host) {
+      return service;
+    }
+
     try {
       const result = await axios.get<{ community: Record<string, unknown> }>(
         `${host}/api/config/current`
@@ -32,7 +47,9 @@ export default class MapgeoService {
       const config = result.status < 400 && result.data;
 
       if (config) {
-        return new MapgeoService(host, config);
+        const instance = new MapgeoService(host, config);
+        service = instance;
+        return instance;
       }
       throw new Error('URL is either incorrect or service is down');
     } catch (e) {
@@ -78,11 +95,10 @@ export default class MapgeoService {
     return result.data as UploaderTokenResult;
   }
 
-  async getDatasets() {
-    const result = await this.#axios.get('/api/config/datasets', {
-      headers: {},
-    });
+  async findDataset(id: string) {
+    const result = await this.#axios.get(`/api/config/datasets/${id}`);
     debugger;
+    return result.data.dataset;
   }
 
   async notifyUploader({

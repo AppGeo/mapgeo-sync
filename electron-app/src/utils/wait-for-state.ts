@@ -5,6 +5,12 @@ export async function waitForState<T extends Interpreter<any, any, any>>(
   states: string[],
   timeout: number = 4000
 ) {
+  const match = states.find((stateKey) => interpreter.state.matches(stateKey));
+
+  if (match) {
+    return match;
+  }
+
   return new Promise((resolve, reject) => {
     let time = new Date().getTime();
 

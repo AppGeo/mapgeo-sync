@@ -2,7 +2,7 @@ import { action } from '@ember/object';
 import Service from '@ember/service';
 import { tracked } from '@glimmer/tracking';
 import type { IpcRendererEvent } from 'electron/renderer';
-import { Promise } from 'rsvp';
+// import { Promise } from 'rsvp';
 // Node modules
 const { ipcRenderer } = requireNode('electron');
 
@@ -16,9 +16,10 @@ export default class Session extends Service {
         'authenticated',
         (
           _event: IpcRendererEvent,
-          { isAuthenticated }: { isAuthenticated: boolean }
+          { isAuthenticated, error }: { isAuthenticated: boolean; error?: any }
         ) => {
           this.isAuthenticated = isAuthenticated;
+          console.log('authenticated', isAuthenticated, error);
           resolve(isAuthenticated);
         }
       );

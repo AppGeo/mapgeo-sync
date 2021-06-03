@@ -1,6 +1,6 @@
 'use strict';
 
-const browsers = ['last 1 Chrome versions'];
+const browsers = ['last 2 Chrome versions'];
 
 module.exports = {
   browsers,

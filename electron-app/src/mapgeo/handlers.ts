@@ -1,5 +1,6 @@
 import { IpcMain } from 'electron';
 import { store, SyncStore } from '../store';
+import { getService } from './service';
 
 export function register(ipcMain: IpcMain) {
   const add = (
@@ -18,10 +19,13 @@ export const fetchConfig = (store: SyncStore) => {
   return store.get('mapgeo.config');
 };
 
-export const findDataset = (store: SyncStore, id: string) => {
+export const findDataset = async (store: SyncStore, id: string) => {
   const mapgeo = store.get('mapgeo');
   if (!mapgeo?.config) {
     return;
   }
-  return mapgeo.config.datasets.find((dataset) => dataset.id === id);
+  const service = getService();
+
+  const dataset = await service.findDataset(id);
+  return dataset;
 };

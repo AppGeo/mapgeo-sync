@@ -1,0 +1,27 @@
+<div ...attributes>
+  <h3 class='font-semibold text-gray-800'>
+    Primary
+  </h3>
+
+  <div class='mt-4 grid grid-cols-3 gap-2'>
+    {{#each this.primary as |mapping|}}
+      <div class='shadow rounded-lg p-2 bg-white'>
+        {{mapping.name}}
+      </div>
+    {{/each}}
+  </div>
+
+  <h3 class='mt-8 font-semibold text-gray-800'>
+    Secondary
+  </h3>
+
+  <div class='mt-4 grid grid-cols-3 gap-2'>
+    {{#each @dataset.tableMappings as |mapping|}}
+      <div class='shadow rounded-lg p-2 bg-white'>
+        {{mapping.name}}
+      </div>
+    {{else}}
+      None
+    {{/each}}
+  </div>
+</div>

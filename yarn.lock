@@ -1269,10 +1269,10 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@electron-forge/async-ora@6.0.0-beta.53":
-  version "6.0.0-beta.53"
-  resolved "https://registry.yarnpkg.com/@electron-forge/async-ora/-/async-ora-6.0.0-beta.53.tgz#5f0d183adab5a564c5bdd4b919174d6054b041cf"
-  integrity sha512-OcYJvKYgUL/eGGHsvawELgT528hrnUmyAisESx8ZE06i+jEa/c/wfC6fUAFuBGDr8n+yqgOLbF4xfzAvW9jgZQ==
+"@electron-forge/async-ora@6.0.0-beta.54":
+  version "6.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/@electron-forge/async-ora/-/async-ora-6.0.0-beta.54.tgz#2bb9bec05486106b5fd6c45b9f392f1b4b5841a3"
+  integrity sha512-OCoHds0BIXaB54HgKw6pjlHC1cnaTcfJfVVkPSJl1GLC3VShZ5bETJfsitwbiP2kbfKLUQFayW27sqbwnwQR2w==
   dependencies:
     colors "^1.4.0"
     debug "^4.1.0"
@@ -1280,32 +1280,32 @@
     ora "^5.0.0"
     pretty-ms "^7.0.0"
 
-"@electron-forge/core@6.0.0-beta.53":
-  version "6.0.0-beta.53"
-  resolved "https://registry.yarnpkg.com/@electron-forge/core/-/core-6.0.0-beta.53.tgz#786de2c16a2180bbd09582f8a0e7be52b502e622"
-  integrity sha512-pobdG5LYzMyErPDDMK+IYcvlYueP+qTXNIneOqhp3ztnMJaH6ibvJXoBLP3SOu1miHvIktPqS0w44U9w/4AJ4g==
+"@electron-forge/core@6.0.0-beta.54":
+  version "6.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/@electron-forge/core/-/core-6.0.0-beta.54.tgz#76b739b6d28bdac8c3754f1f62b50cf33c765eef"
+  integrity sha512-yggZeiwRLnIsQYCT5jKhx2L7I02CwUCjnIzA+CqUZXD0AU1c2o0BA/26dNOGvY/+pr5yWjOXcrGy1hvj3dnLmQ==
   dependencies:
-    "@electron-forge/async-ora" "6.0.0-beta.53"
-    "@electron-forge/installer-base" "6.0.0-beta.53"
-    "@electron-forge/installer-deb" "6.0.0-beta.53"
-    "@electron-forge/installer-dmg" "6.0.0-beta.53"
-    "@electron-forge/installer-exe" "6.0.0-beta.53"
-    "@electron-forge/installer-rpm" "6.0.0-beta.53"
-    "@electron-forge/installer-zip" "6.0.0-beta.53"
-    "@electron-forge/maker-base" "6.0.0-beta.53"
-    "@electron-forge/plugin-base" "6.0.0-beta.53"
-    "@electron-forge/publisher-base" "6.0.0-beta.53"
-    "@electron-forge/shared-types" "6.0.0-beta.53"
-    "@electron-forge/template-base" "6.0.0-beta.53"
-    "@electron-forge/template-typescript" "6.0.0-beta.53"
-    "@electron-forge/template-typescript-webpack" "6.0.0-beta.53"
-    "@electron-forge/template-webpack" "6.0.0-beta.53"
+    "@electron-forge/async-ora" "6.0.0-beta.54"
+    "@electron-forge/installer-base" "6.0.0-beta.54"
+    "@electron-forge/installer-deb" "6.0.0-beta.54"
+    "@electron-forge/installer-dmg" "6.0.0-beta.54"
+    "@electron-forge/installer-exe" "6.0.0-beta.54"
+    "@electron-forge/installer-rpm" "6.0.0-beta.54"
+    "@electron-forge/installer-zip" "6.0.0-beta.54"
+    "@electron-forge/maker-base" "6.0.0-beta.54"
+    "@electron-forge/plugin-base" "6.0.0-beta.54"
+    "@electron-forge/publisher-base" "6.0.0-beta.54"
+    "@electron-forge/shared-types" "6.0.0-beta.54"
+    "@electron-forge/template-base" "6.0.0-beta.54"
+    "@electron-forge/template-typescript" "6.0.0-beta.54"
+    "@electron-forge/template-typescript-webpack" "6.0.0-beta.54"
+    "@electron-forge/template-webpack" "6.0.0-beta.54"
     "@electron/get" "^1.9.0"
     "@malept/cross-spawn-promise" "^1.1.0"
     colors "^1.4.0"
     debug "^4.1.0"
     electron-packager "^15.0.0"
-    electron-rebuild "^2.0.0"
+    electron-rebuild "^2.0.3"
     find-up "^5.0.0"
     fs-extra "^9.0.1"
     glob "^7.1.5"
@@ -1320,144 +1320,144 @@
     username "^5.1.0"
     yarn-or-npm "^3.0.1"
 
-"@electron-forge/installer-base@6.0.0-beta.53":
-  version "6.0.0-beta.53"
-  resolved "https://registry.yarnpkg.com/@electron-forge/installer-base/-/installer-base-6.0.0-beta.53.tgz#e242a6235fcaa0a4ac310f8916e2605cc3b2ba04"
-  integrity sha512-4oQmPNssL52/jUWvxqOC7R16VAtbOlh+/NnDqLmUk6fPClxd28mHipGhAGtrJVlwlU9aTsHHESagstiUID138Q==
+"@electron-forge/installer-base@6.0.0-beta.54":
+  version "6.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/@electron-forge/installer-base/-/installer-base-6.0.0-beta.54.tgz#a5fa721556a226836c027957fa2e9c28c0a5caa2"
+  integrity sha512-q6Z5kBAE6StKqn+3Z5tXVHu7WGCb9OMeIomw9H9Q41UUIehF7V0J3tCWTkJdhZ8D6/tkXcis3GKptaj0wfMpyg==
   dependencies:
-    "@electron-forge/async-ora" "6.0.0-beta.53"
+    "@electron-forge/async-ora" "6.0.0-beta.54"
 
-"@electron-forge/installer-darwin@6.0.0-beta.53":
-  version "6.0.0-beta.53"
-  resolved "https://registry.yarnpkg.com/@electron-forge/installer-darwin/-/installer-darwin-6.0.0-beta.53.tgz#4f5ae234509eb9d3ba290e11c9417aa54f5ddf91"
-  integrity sha512-pT1Ek89NbLWSN5GS9cj439MGG4yP4SB41OcgVvaqtPkmZqjiWAriXSKaYPcMA791LhzNf6mbl8KVFfiIw6DpwA==
+"@electron-forge/installer-darwin@6.0.0-beta.54":
+  version "6.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/@electron-forge/installer-darwin/-/installer-darwin-6.0.0-beta.54.tgz#a8d94adf9fceaa05db54a53aaebde9decd8cf5ae"
+  integrity sha512-kRbH24+QBhbcIugnIvevnf43JGzLFLoyFsoY3YeyZeeDL3vfyg0vtSyUx0hfq1GpHG+zObDf3o18c3WbxdXlXA==
   dependencies:
-    "@electron-forge/async-ora" "6.0.0-beta.53"
-    "@electron-forge/installer-base" "6.0.0-beta.53"
+    "@electron-forge/async-ora" "6.0.0-beta.54"
+    "@electron-forge/installer-base" "6.0.0-beta.54"
     fs-extra "^9.0.1"
     sudo-prompt "^9.1.1"
 
-"@electron-forge/installer-deb@6.0.0-beta.53":
-  version "6.0.0-beta.53"
-  resolved "https://registry.yarnpkg.com/@electron-forge/installer-deb/-/installer-deb-6.0.0-beta.53.tgz#394cbe7d5c4fe98de8fbc7341b1a5f16bfcf3358"
-  integrity sha512-hqArASsii8ZGuKgKIn4uBoEV/YnXD+Xnl/HxkI0ciu6/zgliWNX+1d1PSsjKyZnPbyACCbgRrRIr3DAQGh2Fog==
+"@electron-forge/installer-deb@6.0.0-beta.54":
+  version "6.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/@electron-forge/installer-deb/-/installer-deb-6.0.0-beta.54.tgz#1f1350f9af863147c69a488d8973d29325616cac"
+  integrity sha512-UbJR2Md0SBqex5AIv9YZ56hY2Iz5gZ6f1iAx0q4PlYpCY19W9nRXdudLNhx1w5go26DsT53+h6EzX2NGpBLq3Q==
   dependencies:
-    "@electron-forge/installer-linux" "6.0.0-beta.53"
+    "@electron-forge/installer-linux" "6.0.0-beta.54"
 
-"@electron-forge/installer-dmg@6.0.0-beta.53":
-  version "6.0.0-beta.53"
-  resolved "https://registry.yarnpkg.com/@electron-forge/installer-dmg/-/installer-dmg-6.0.0-beta.53.tgz#ef7bc069fef15e6450fa342171b27ed6c9a50b9c"
-  integrity sha512-kNPpDbCsaD+tgw/NwMZDKU7XYCO44M8DZmZW7b5+miNhRtr01yI5ftR51yBknjNG26c+6qWo3rUdndep9C0J7Q==
+"@electron-forge/installer-dmg@6.0.0-beta.54":
+  version "6.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/@electron-forge/installer-dmg/-/installer-dmg-6.0.0-beta.54.tgz#8534b5dbaf90569f8afc4ddf97164c0d7a61c33a"
+  integrity sha512-F9jwhUTzdFNlbLus7RQ8paoGPryr79JFYDLi42f0dyuFwlOjwlrA1wN5xWqrvcMeqFlc3DfjjeRWZ+10RQyorA==
   dependencies:
-    "@electron-forge/installer-darwin" "6.0.0-beta.53"
+    "@electron-forge/installer-darwin" "6.0.0-beta.54"
     "@malept/cross-spawn-promise" "^1.1.0"
     debug "^4.1.0"
     fs-extra "^9.0.1"
 
-"@electron-forge/installer-exe@6.0.0-beta.53":
-  version "6.0.0-beta.53"
-  resolved "https://registry.yarnpkg.com/@electron-forge/installer-exe/-/installer-exe-6.0.0-beta.53.tgz#8f4d2f903eda86bc2888f23b643e2da7d16df1e4"
-  integrity sha512-be/thRJVNk+MvZSRsw83kcvZ4XbGPD3m5hppQNi8S5vkCI2Jn5rT3rYS+017ch0S6pF64OGhcvuASCk9KXMRLg==
+"@electron-forge/installer-exe@6.0.0-beta.54":
+  version "6.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/@electron-forge/installer-exe/-/installer-exe-6.0.0-beta.54.tgz#03a10d456b37aecd3b82687343b9a666431c6ea5"
+  integrity sha512-PE7RBPerSenNcSkKXJWpervKNl7AVT+JeMzx61OHUQSw3h63NHRvXWh31llxk32mmJcaKRgGle2GsWob87Lv/w==
   dependencies:
-    "@electron-forge/installer-base" "6.0.0-beta.53"
-    open "^7.2.0"
+    "@electron-forge/installer-base" "6.0.0-beta.54"
+    open "^7.2.1"
 
-"@electron-forge/installer-linux@6.0.0-beta.53":
-  version "6.0.0-beta.53"
-  resolved "https://registry.yarnpkg.com/@electron-forge/installer-linux/-/installer-linux-6.0.0-beta.53.tgz#07a41cd622ed0c8a0f14019015771c6692194467"
-  integrity sha512-odtrSeKnlcK+EgH/3tgRthxVcET288i1gHRKItkhfrRo+8dPuSFapRPaiQ1ToVHlAtTlosyjIKrDznm/6EIaPQ==
+"@electron-forge/installer-linux@6.0.0-beta.54":
+  version "6.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/@electron-forge/installer-linux/-/installer-linux-6.0.0-beta.54.tgz#92a8ed2b4b28776cacfc03f45ba0c3a6774a9870"
+  integrity sha512-WQVV5fitsfTyktjb18m9Bx+Dho6rCFvVILqFNZAu1RfXIsjLl/h0WdkozdGDccfeDMqlRYmaNs3e5THn5swnAg==
   dependencies:
-    "@electron-forge/installer-base" "6.0.0-beta.53"
+    "@electron-forge/installer-base" "6.0.0-beta.54"
     sudo-prompt "^9.1.1"
 
-"@electron-forge/installer-rpm@6.0.0-beta.53":
-  version "6.0.0-beta.53"
-  resolved "https://registry.yarnpkg.com/@electron-forge/installer-rpm/-/installer-rpm-6.0.0-beta.53.tgz#27ba2b8b4988753a31d95b69d4d7a2e7739b1bc3"
-  integrity sha512-v7hmthGdxeKuZ7JKzgM9mMrhA7+xcUWndhn9ndWxxYQ1iy372OvjAoxDTAWW+TwZstK058gElmZ57iY4BsKJAw==
+"@electron-forge/installer-rpm@6.0.0-beta.54":
+  version "6.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/@electron-forge/installer-rpm/-/installer-rpm-6.0.0-beta.54.tgz#d2537dd5a6638a7a2fa1277856ca75e3cf5948eb"
+  integrity sha512-8gaJA2m8+Y/ZhV4xEeijXz8UksrliMEzyUAdwM5ZdAsmfmGlnhchGr0L6rI23D66dQP9DeyvUIuUwXrsTlj1nQ==
   dependencies:
-    "@electron-forge/installer-linux" "6.0.0-beta.53"
+    "@electron-forge/installer-linux" "6.0.0-beta.54"
 
-"@electron-forge/installer-zip@6.0.0-beta.53":
-  version "6.0.0-beta.53"
-  resolved "https://registry.yarnpkg.com/@electron-forge/installer-zip/-/installer-zip-6.0.0-beta.53.tgz#04d058cab6a6dc637ea73d7a7ea2a23b1ac9f2a4"
-  integrity sha512-x8Y/dQPJ7OWBCF6CQud/ERT7+e8Pk7T24MFwUnOPbSwNaDagD/RwtZuUzuDz9PYnS6+KLKr5rCyIYt4ny5vaIA==
+"@electron-forge/installer-zip@6.0.0-beta.54":
+  version "6.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/@electron-forge/installer-zip/-/installer-zip-6.0.0-beta.54.tgz#11a54130989d61fb1cf983a54092e1976566472a"
+  integrity sha512-KCY5zreA79wjZODhLmtrbFweTWdlh9JgmW9WruIrmHm3sK19rRhCdaZ+Dg5ZWUhMx2A79d5a2C7r78lWGcHl7A==
   dependencies:
-    "@electron-forge/installer-darwin" "6.0.0-beta.53"
+    "@electron-forge/installer-darwin" "6.0.0-beta.54"
     "@malept/cross-spawn-promise" "^1.1.0"
     fs-extra "^9.0.1"
 
-"@electron-forge/maker-base@6.0.0-beta.53":
-  version "6.0.0-beta.53"
-  resolved "https://registry.yarnpkg.com/@electron-forge/maker-base/-/maker-base-6.0.0-beta.53.tgz#d5b5cadfd5d0ff24babcdb92ee70a4e6ab0fa7ae"
-  integrity sha512-3Q77O1ivfKXZDqvOX7UmsUoSBMDokkWvRqPGy9sF1OELYLymnqNLPLoIWKqyfVXTAdnfiEQhoSUS7VTIJ1W6Gg==
+"@electron-forge/maker-base@6.0.0-beta.54":
+  version "6.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/@electron-forge/maker-base/-/maker-base-6.0.0-beta.54.tgz#f5679d6c472d9c3ada4eb0b210ea28067f95f568"
+  integrity sha512-4y0y15ieb1EOR5mibtFM9tZzaShbAO0RZu6ARLCpD5BgKuJBzXRPfWvEmY6WeDNzoWTJ+mQdYikLAeOL2E9mew==
   dependencies:
-    "@electron-forge/shared-types" "6.0.0-beta.53"
+    "@electron-forge/shared-types" "6.0.0-beta.54"
     fs-extra "^9.0.1"
     which "^2.0.2"
 
-"@electron-forge/plugin-base@6.0.0-beta.53":
-  version "6.0.0-beta.53"
-  resolved "https://registry.yarnpkg.com/@electron-forge/plugin-base/-/plugin-base-6.0.0-beta.53.tgz#d6430ec3cb51f9bfe7386ea6b4a54a582fade8d9"
-  integrity sha512-yF5XKoerM+wNIrpDlFnrVrlQZL7AaFeO85Krt8k97JqUILoMJSlltkB7vw3+o1or2speowMknjAHiM+/lVBKiw==
+"@electron-forge/plugin-base@6.0.0-beta.54":
+  version "6.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/@electron-forge/plugin-base/-/plugin-base-6.0.0-beta.54.tgz#1847eeee00e9558d61ef9ff7c2d7c9f5dbf1109c"
+  integrity sha512-8HwGzgNCHo2PgUfNnTch3Gvj7l6fqOgjnARK1y056UfsxFy+hwvHaAO+7LLfr7ktNwU/bH3hGhOpE+ZmBSwSqQ==
   dependencies:
-    "@electron-forge/shared-types" "6.0.0-beta.53"
+    "@electron-forge/shared-types" "6.0.0-beta.54"
 
-"@electron-forge/publisher-base@6.0.0-beta.53":
-  version "6.0.0-beta.53"
-  resolved "https://registry.yarnpkg.com/@electron-forge/publisher-base/-/publisher-base-6.0.0-beta.53.tgz#36fcef0037e57ed57075b6117c88c918bf94aa35"
-  integrity sha512-ZwQmQuaDtcoltncqEs3qTXPqJQvCAnavfHm/aS889FaiEc5B1lpdzcSFoobiJIVODP4dKJ3PFMDALeNmVu7iGw==
+"@electron-forge/publisher-base@6.0.0-beta.54":
+  version "6.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/@electron-forge/publisher-base/-/publisher-base-6.0.0-beta.54.tgz#1a2543494dc48c87519f7dd8007e6a69d1bbe16a"
+  integrity sha512-Dny0jW0N8QcNYKHTtzQFZD4pBWJ7tclJWf3ZCX031vUKG7RhThdA06IPNzV6JtWJswrvAE9TPndzZONMza2V7g==
   dependencies:
-    "@electron-forge/shared-types" "6.0.0-beta.53"
+    "@electron-forge/shared-types" "6.0.0-beta.54"
 
-"@electron-forge/shared-types@6.0.0-beta.53":
-  version "6.0.0-beta.53"
-  resolved "https://registry.yarnpkg.com/@electron-forge/shared-types/-/shared-types-6.0.0-beta.53.tgz#0a039a2f60bf66c40115a5c99cc611a624f8470d"
-  integrity sha512-9aurSLerLV/xnmOca6wj1oeYZOtLfJAxZcXmKcz/MYsMz1RoiHR/bdN47JfzvJ4f0o3lb12perxhS8mZTTVfnA==
+"@electron-forge/shared-types@6.0.0-beta.54":
+  version "6.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/@electron-forge/shared-types/-/shared-types-6.0.0-beta.54.tgz#61ceb5e0754314035dc934e86eb21b29f893ac19"
+  integrity sha512-6CzWKFR17rxxeIqm1w5ZyT9uTAHSVAjhqL8c+TmizF2703GyCEusUkjP2UXt/tZNY4MJlukZoJM66Bct6oZJ+w==
   dependencies:
-    "@electron-forge/async-ora" "6.0.0-beta.53"
+    "@electron-forge/async-ora" "6.0.0-beta.54"
     electron-packager "^15.0.0"
-    electron-rebuild "^2.0.0"
+    electron-rebuild "^2.0.3"
     ora "^5.0.0"
 
-"@electron-forge/template-base@6.0.0-beta.53":
-  version "6.0.0-beta.53"
-  resolved "https://registry.yarnpkg.com/@electron-forge/template-base/-/template-base-6.0.0-beta.53.tgz#1afcee65087a93b71d82d49f52ea792e218e15e9"
-  integrity sha512-EghExFKjwkUZMgXCrKZOdabMovU2AjGRyCDk841eJ77+Y/SrzP/mcnL3I59JZelE9T2GE/6aLjh0dzDIYx+4bw==
+"@electron-forge/template-base@6.0.0-beta.54":
+  version "6.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/@electron-forge/template-base/-/template-base-6.0.0-beta.54.tgz#a7f875ac3e70398d0310ee27f38057a566c6176a"
+  integrity sha512-LuSpeOiM6AzUbamz5U/NqRkn4y7dzof1JK1ISAb+6tORf7JU014aKqDcLdwgP8Lxaz6P1bdlMmNJTvg5+SBrEw==
   dependencies:
-    "@electron-forge/async-ora" "6.0.0-beta.53"
-    "@electron-forge/shared-types" "6.0.0-beta.53"
+    "@electron-forge/async-ora" "6.0.0-beta.54"
+    "@electron-forge/shared-types" "6.0.0-beta.54"
     debug "^4.1.0"
     fs-extra "^9.0.1"
     username "^5.1.0"
 
-"@electron-forge/template-typescript-webpack@6.0.0-beta.53":
-  version "6.0.0-beta.53"
-  resolved "https://registry.yarnpkg.com/@electron-forge/template-typescript-webpack/-/template-typescript-webpack-6.0.0-beta.53.tgz#cdb5a9008818ee9409a490253d6f603eed8c28d6"
-  integrity sha512-uYRR2NYPTyzU0WKUdQXU5dbyoql1yzMTMxOjuddTV4pv+iOTX9pA2SZq5kAVpcdfyzECzNV2wf2/bgo8kT9F0g==
+"@electron-forge/template-typescript-webpack@6.0.0-beta.54":
+  version "6.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/@electron-forge/template-typescript-webpack/-/template-typescript-webpack-6.0.0-beta.54.tgz#27dceac56850dbcf71d8075c61de0101b3e253ad"
+  integrity sha512-1MIw1eGlMZg7KLG4oAEE0rB28WDOtz01OSoW2a2NqkmUzmu4BxJdSvQ97Tp7xCU0naW0H1uU39B9QOjJQgLGCQ==
   dependencies:
-    "@electron-forge/async-ora" "6.0.0-beta.53"
-    "@electron-forge/shared-types" "6.0.0-beta.53"
-    "@electron-forge/template-base" "6.0.0-beta.53"
+    "@electron-forge/async-ora" "6.0.0-beta.54"
+    "@electron-forge/shared-types" "6.0.0-beta.54"
+    "@electron-forge/template-base" "6.0.0-beta.54"
     fs-extra "^9.0.1"
 
-"@electron-forge/template-typescript@6.0.0-beta.53":
-  version "6.0.0-beta.53"
-  resolved "https://registry.yarnpkg.com/@electron-forge/template-typescript/-/template-typescript-6.0.0-beta.53.tgz#5448b04136e9e267159e12f8ba432d9981d685b4"
-  integrity sha512-HS5IOq2UOjyFIsEU5tPRPzsC6C2m5RWh4XC5aD2rGV9qn9Z5G9zdsZts48hQpENJriVJ2PFIcGcoi2gMa55YHQ==
+"@electron-forge/template-typescript@6.0.0-beta.54":
+  version "6.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/@electron-forge/template-typescript/-/template-typescript-6.0.0-beta.54.tgz#455ad15da41547afbcf3e8308b121c34d3bd142a"
+  integrity sha512-7V87LWH+vJ1YibM9MsTttbz7upfwLrmXgchQ399EfLxK306g7q/ouyGkeTerhLr2gCUAvm/Oqx+sXQ7402ol9w==
   dependencies:
-    "@electron-forge/async-ora" "6.0.0-beta.53"
-    "@electron-forge/shared-types" "6.0.0-beta.53"
-    "@electron-forge/template-base" "6.0.0-beta.53"
+    "@electron-forge/async-ora" "6.0.0-beta.54"
+    "@electron-forge/shared-types" "6.0.0-beta.54"
+    "@electron-forge/template-base" "6.0.0-beta.54"
     fs-extra "^9.0.1"
 
-"@electron-forge/template-webpack@6.0.0-beta.53":
-  version "6.0.0-beta.53"
-  resolved "https://registry.yarnpkg.com/@electron-forge/template-webpack/-/template-webpack-6.0.0-beta.53.tgz#4315b29603098eb4c30cb56a8d0b3c526b00d182"
-  integrity sha512-8fONJQUlklXY+EDxbufdZHcZjPGLmSZBbjx1DmsFXyO4z7Wn/7ZAsBiWQNt8HnRch4HF2HbSK/JwlZJo2BNBVA==
+"@electron-forge/template-webpack@6.0.0-beta.54":
+  version "6.0.0-beta.54"
+  resolved "https://registry.yarnpkg.com/@electron-forge/template-webpack/-/template-webpack-6.0.0-beta.54.tgz#5ca4258703d729816d2668b9ef9d815ea2728370"
+  integrity sha512-4/zUOZ8MCZqs8PcUCeeG6ofpy6HT53tQiLknM23OPaFP6ckuE6kOunC6N/teijUrJuLpKl3P8d39SWPVacxEzg==
   dependencies:
-    "@electron-forge/async-ora" "6.0.0-beta.53"
-    "@electron-forge/shared-types" "6.0.0-beta.53"
-    "@electron-forge/template-base" "6.0.0-beta.53"
+    "@electron-forge/async-ora" "6.0.0-beta.54"
+    "@electron-forge/shared-types" "6.0.0-beta.54"
+    "@electron-forge/template-base" "6.0.0-beta.54"
     fs-extra "^9.0.1"
 
 "@electron/get@^1.0.1", "@electron/get@^1.6.0", "@electron/get@^1.9.0":
@@ -1476,63 +1476,63 @@
     global-agent "^2.0.2"
     global-tunnel-ng "^2.7.1"
 
-"@ember-data/adapter@3.26.0":
-  version "3.26.0"
-  resolved "https://registry.yarnpkg.com/@ember-data/adapter/-/adapter-3.26.0.tgz#c6e8f0e80edf798b573cf49a63857fa96547f354"
-  integrity sha512-l/sbaxu+llWq1bSAuUhhpDlI1BLigykXA5Fu1Hpj4KjQG/5vNu5D7o9kUxNBmWFzZqMyBV5Tv7o9+b0pynKGQg==
+"@ember-data/adapter@3.27.1":
+  version "3.27.1"
+  resolved "https://registry.yarnpkg.com/@ember-data/adapter/-/adapter-3.27.1.tgz#4258b138ae43f1329995b8fce54e866d0b9b79a3"
+  integrity sha512-g9JPXn2QvV47xFWbY7xRiVp4LEbE4vkVo/qu3NtrvD+MLHNmfWn6VHhx2+v5mQB0pBe8lK8nPZGoS8PM/3CMuA==
   dependencies:
-    "@ember-data/private-build-infra" "3.26.0"
-    "@ember-data/store" "3.26.0"
+    "@ember-data/private-build-infra" "3.27.1"
+    "@ember-data/store" "3.27.1"
     "@ember/edition-utils" "^1.2.0"
     "@ember/string" "^1.0.0"
-    ember-cli-babel "^7.26.3"
+    ember-cli-babel "^7.26.6"
     ember-cli-test-info "^1.0.0"
     ember-cli-typescript "^4.0.0"
 
-"@ember-data/canary-features@3.26.0":
-  version "3.26.0"
-  resolved "https://registry.yarnpkg.com/@ember-data/canary-features/-/canary-features-3.26.0.tgz#c1cb6a05aaba7ec72f4600503ce4f92bc8ec33c0"
-  integrity sha512-SYd5+4QY7DOYYEVueN3oqxrL8I0dVDz1HRSI9k4Pw/C743IIYlxERqL65VNf3BTr4Db56AaN/DSWq2nomABX4Q==
+"@ember-data/canary-features@3.27.1":
+  version "3.27.1"
+  resolved "https://registry.yarnpkg.com/@ember-data/canary-features/-/canary-features-3.27.1.tgz#fa589ff8a37f6dcc607f874303be024a4f7a186a"
+  integrity sha512-7RLYG1W1woBu116h4bE3zfEHCV+EVVzNZcgRD3tUH9cg/EvOfXfn3naAFNnoA7TIEl2ZShRPgNNi2SjkYYy52Q==
   dependencies:
-    ember-cli-babel "^7.26.3"
-    ember-cli-typescript "^4.0.0"
+    ember-cli-babel "^7.26.6"
+    ember-cli-typescript "^4.1.0"
 
-"@ember-data/debug@3.26.0":
-  version "3.26.0"
-  resolved "https://registry.yarnpkg.com/@ember-data/debug/-/debug-3.26.0.tgz#ad9ad2b1e73ba633b6f89248ad5c15a2ae863ea5"
-  integrity sha512-vZBvzWi7u1oi7rlyjjEK222Ewe8VBZRWG4PP63gpoXMywNrOVIihe9VpGa4G+17x2ATq12ADw1bFW7MZuI4WGQ==
+"@ember-data/debug@3.27.1":
+  version "3.27.1"
+  resolved "https://registry.yarnpkg.com/@ember-data/debug/-/debug-3.27.1.tgz#76ec39fd981ad9e97d140a30dfae6e3258144c0e"
+  integrity sha512-VWAzZFqKiheMc7Qx5yIekpdfamSBWURjNF5NKCQGGLRv7SsQe1eOjbW5iaq+gsnNr/gk4U95yLd225kUf6ubEQ==
   dependencies:
-    "@ember-data/private-build-infra" "3.26.0"
+    "@ember-data/private-build-infra" "3.27.1"
     "@ember/edition-utils" "^1.2.0"
     "@ember/string" "^1.0.0"
-    ember-cli-babel "^7.26.3"
+    ember-cli-babel "^7.26.6"
     ember-cli-test-info "^1.0.0"
     ember-cli-typescript "^4.0.0"
 
-"@ember-data/model@3.26.0":
-  version "3.26.0"
-  resolved "https://registry.yarnpkg.com/@ember-data/model/-/model-3.26.0.tgz#6db4dacb7761175f28fb3f77aa6bdd9d22bc04ae"
-  integrity sha512-zd9pmYNoJWOcwJraHQPmTRIGehzyCuGirbesURDMZe2mNFJfBCv66eor6eq8S3Om6mftQBDbBM6CxtK8222FAA==
+"@ember-data/model@3.27.1":
+  version "3.27.1"
+  resolved "https://registry.yarnpkg.com/@ember-data/model/-/model-3.27.1.tgz#e35730da811c21e85f2bd334eb4a741f5368ce50"
+  integrity sha512-GC5bf2wAad6ePCoreOj4JknJaJ62FBwR9q+/zFxADU1Ns68kyVm/Xg7KD1sDvcXEwLJebH09j9sN7LkwZaN3Og==
   dependencies:
-    "@ember-data/canary-features" "3.26.0"
-    "@ember-data/private-build-infra" "3.26.0"
-    "@ember-data/store" "3.26.0"
+    "@ember-data/canary-features" "3.27.1"
+    "@ember-data/private-build-infra" "3.27.1"
+    "@ember-data/store" "3.27.1"
     "@ember/edition-utils" "^1.2.0"
     "@ember/string" "^1.0.0"
-    ember-cli-babel "^7.26.3"
+    ember-cli-babel "^7.26.6"
     ember-cli-string-utils "^1.1.0"
     ember-cli-test-info "^1.0.0"
     ember-cli-typescript "^4.0.0"
     ember-compatibility-helpers "^1.2.0"
     inflection "1.12.0"
 
-"@ember-data/private-build-infra@3.26.0":
-  version "3.26.0"
-  resolved "https://registry.yarnpkg.com/@ember-data/private-build-infra/-/private-build-infra-3.26.0.tgz#ec0cec007799729e31f7f46c066307b60dac1154"
-  integrity sha512-X1VTlXXrnde00OTtErK4r4/CoTHzmj/MjFu9MqpAseqFpjNQ/ek7gVpsuO4t4I1Qe2HnErh8uVsBIT50aBdloA==
+"@ember-data/private-build-infra@3.27.1":
+  version "3.27.1"
+  resolved "https://registry.yarnpkg.com/@ember-data/private-build-infra/-/private-build-infra-3.27.1.tgz#040a9f646a1ca2764e67bf1108dc489d2008e7d5"
+  integrity sha512-Cox/CRovg1gFGuO2zn64JSAezbbO1XHP+tLWDXRIiB2Oqlk3CtNxEs9K02DxMCojK4C8itFDOVpBKLYCB5MbYQ==
   dependencies:
     "@babel/plugin-transform-block-scoping" "^7.8.3"
-    "@ember-data/canary-features" "3.26.0"
+    "@ember-data/canary-features" "3.27.1"
     "@ember/edition-utils" "^1.2.0"
     babel-plugin-debug-macros "^0.3.3"
     babel-plugin-filter-imports "^4.0.0"
@@ -1544,7 +1544,7 @@
     broccoli-rollup "^4.1.1"
     calculate-cache-key-for-tree "^2.0.0"
     chalk "^4.0.0"
-    ember-cli-babel "^7.26.3"
+    ember-cli-babel "^7.26.6"
     ember-cli-path-utils "^1.0.0"
     ember-cli-string-utils "^1.1.0"
     ember-cli-typescript "^3.1.3"
@@ -1558,17 +1558,17 @@
     semver "^7.1.3"
     silent-error "^1.1.1"
 
-"@ember-data/record-data@3.26.0":
-  version "3.26.0"
-  resolved "https://registry.yarnpkg.com/@ember-data/record-data/-/record-data-3.26.0.tgz#1ea213a04d54aa4999d9c82207e88ff662af9fe9"
-  integrity sha512-58Ny2PMtezVzdrAg/QeKaqEX49hQkS/JNINB2dakIm4cSYeFDDAv6TZIlp18dIv85MJ+UyPpWNZvsMKhmE5VjA==
+"@ember-data/record-data@3.27.1":
+  version "3.27.1"
+  resolved "https://registry.yarnpkg.com/@ember-data/record-data/-/record-data-3.27.1.tgz#2d9e35e36404790adebc24890ca0eb8ee1ecfb65"
+  integrity sha512-QSY7vJIbfCCpVNhAXkGc73UiXqX7UyELq0Mc3URoVCKRYZJOCSnydPYARLgN/NM99HV0Mw1aa+KP8Nco8Z/gFg==
   dependencies:
-    "@ember-data/canary-features" "3.26.0"
-    "@ember-data/private-build-infra" "3.26.0"
-    "@ember-data/store" "3.26.0"
+    "@ember-data/canary-features" "3.27.1"
+    "@ember-data/private-build-infra" "3.27.1"
+    "@ember-data/store" "3.27.1"
     "@ember/edition-utils" "^1.2.0"
     "@ember/ordered-set" "^4.0.0"
-    ember-cli-babel "^7.26.3"
+    ember-cli-babel "^7.26.6"
     ember-cli-test-info "^1.0.0"
     ember-cli-typescript "^4.0.0"
 
@@ -1577,26 +1577,27 @@
   resolved "https://registry.yarnpkg.com/@ember-data/rfc395-data/-/rfc395-data-0.0.4.tgz#ecb86efdf5d7733a76ff14ea651a1b0ed1f8a843"
   integrity sha512-tGRdvgC9/QMQSuSuJV45xoyhI0Pzjm7A9o/MVVA3HakXIImJbbzx/k/6dO9CUEQXIyS2y0fW6C1XaYOG7rY0FQ==
 
-"@ember-data/serializer@3.26.0":
-  version "3.26.0"
-  resolved "https://registry.yarnpkg.com/@ember-data/serializer/-/serializer-3.26.0.tgz#e956e2a77323e4ed3b5542d9a2cc0b119c0f8382"
-  integrity sha512-2+8GG7v8DiW0xBgjUZv8SVMzLA1jGwupBXEeX6idiEC12BMFrmYRBPNz3Ts17I5cVpxuiYArtW7sRcPG8ZnmsA==
+"@ember-data/serializer@3.27.1":
+  version "3.27.1"
+  resolved "https://registry.yarnpkg.com/@ember-data/serializer/-/serializer-3.27.1.tgz#17301698281e9d888f6c38b59c4b460c9ab27fd7"
+  integrity sha512-kJE+kiisk1d9KQYRcRK4BFQhhsZ3n7ADlyK5eCsaNEwJm4YsfvKgjUgaC16MJddX4LG9d7QORHNJT9rWcCL9fg==
   dependencies:
-    "@ember-data/private-build-infra" "3.26.0"
-    "@ember-data/store" "3.26.0"
-    ember-cli-babel "^7.26.3"
+    "@ember-data/private-build-infra" "3.27.1"
+    "@ember-data/store" "3.27.1"
+    ember-cli-babel "^7.26.6"
     ember-cli-test-info "^1.0.0"
     ember-cli-typescript "^4.0.0"
 
-"@ember-data/store@3.26.0":
-  version "3.26.0"
-  resolved "https://registry.yarnpkg.com/@ember-data/store/-/store-3.26.0.tgz#16b52af043aca43e49274c4200054267f65ca3e5"
-  integrity sha512-qG+zgEJStdcyGaJXTS0JV+tPC8HfCSnv/u5IWHBm0AkqtOn4JmWhFmap9h2/hwQE/K1f+clWn7AMSCxQS+uBgw==
+"@ember-data/store@3.27.1":
+  version "3.27.1"
+  resolved "https://registry.yarnpkg.com/@ember-data/store/-/store-3.27.1.tgz#2026adbeee893d3a71417b82095b4921fdd590fb"
+  integrity sha512-RL9OkNBB9DtT5nkYTmGuk46hbVs2avuvSggiPJU3iuQYD3dJ8jC2XGGs3Z4FHEzAVWwlCnFiwVT03GfYbuIbUw==
   dependencies:
-    "@ember-data/canary-features" "3.26.0"
-    "@ember-data/private-build-infra" "3.26.0"
+    "@ember-data/canary-features" "3.27.1"
+    "@ember-data/private-build-infra" "3.27.1"
     "@ember/string" "^1.0.0"
-    ember-cli-babel "^7.26.3"
+    "@glimmer/tracking" "^1.0.4"
+    ember-cli-babel "^7.26.6"
     ember-cli-path-utils "^1.0.0"
     ember-cli-typescript "^4.0.0"
     heimdalljs "^0.3.0"
@@ -2210,7 +2211,7 @@
   resolved "https://registry.yarnpkg.com/@handlebars/parser/-/parser-1.1.0.tgz#d6dbc7574774b238114582410e8fee0dc3532bdf"
   integrity sha512-rR7tJoSwJ2eooOpYGxGGW95sLq6GXUaS1UtWvN7pei6n2/okYvCGld9vsUTvkl2migxbkszsycwtMf/GEc1k1A==
 
-"@malept/cross-spawn-promise@^1.1.0":
+"@malept/cross-spawn-promise@^1.1.0", "@malept/cross-spawn-promise@^1.1.1":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@malept/cross-spawn-promise/-/cross-spawn-promise-1.1.1.tgz#504af200af6b98e198bce768bc1730c6936ae01d"
   integrity sha512-RTBGWL5FWQcg9orDOCcp4LvItNzUPcyEU9bwaeJX0rJ1IQxzucC48Y0/sQLp/g6t99IQgAlGIaesJS+gTn7tVQ==
@@ -4712,7 +4713,7 @@ broccoli-output-wrapper@^3.2.1:
     heimdalljs-logger "^0.1.10"
     symlink-or-copy "^1.2.0"
 
-broccoli-persistent-filter@^1.1.5, broccoli-persistent-filter@^1.1.6, broccoli-persistent-filter@^1.4.3:
+broccoli-persistent-filter@^1.1.6, broccoli-persistent-filter@^1.4.3:
   version "1.4.6"
   resolved "https://registry.yarnpkg.com/broccoli-persistent-filter/-/broccoli-persistent-filter-1.4.6.tgz#80762d19000880a77da33c34373299c0f6a3e615"
   integrity sha512-0RejLwoC95kv4kta8KAa+FmECJCK78Qgm8SRDEK7YyU0N9Cx6KpY3UCDy9WELl3mCXLN8TokNxc7/hp3lL4lfw==
@@ -4920,14 +4921,6 @@ broccoli-stew@^3.0.0:
     rsvp "^4.8.5"
     symlink-or-copy "^1.2.0"
     walk-sync "^1.1.3"
-
-broccoli-string-replace@^0.1.2:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/broccoli-string-replace/-/broccoli-string-replace-0.1.2.tgz#1ed92f85680af8d503023925e754e4e33676b91f"
-  integrity sha1-HtkvhWgK+NUDAjkl51Tk4zZ2uR8=
-  dependencies:
-    broccoli-persistent-filter "^1.1.5"
-    minimatch "^3.0.3"
 
 broccoli-templater@^2.0.1:
   version "2.0.2"
@@ -5324,15 +5317,10 @@ caniuse-api@^3.0.0:
     lodash.memoize "^4.1.2"
     lodash.uniq "^4.5.0"
 
-caniuse-lite@^1.0.0, caniuse-lite@^1.0.30000844, caniuse-lite@^1.0.30001109, caniuse-lite@^1.0.30001173:
-  version "1.0.30001173"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001173.tgz#3c47bbe3cd6d7a9eda7f50ac016d158005569f56"
-  integrity sha512-R3aqmjrICdGCTAnSXtNyvWYMK3YtV5jwudbq0T7nN9k4kmE4CBuwPqyJ+KBzepSTh0huivV2gLbSMEzTTmfeYw==
-
-caniuse-lite@^1.0.30001181:
-  version "1.0.30001204"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001204.tgz#256c85709a348ec4d175e847a3b515c66e79f2aa"
-  integrity sha512-JUdjWpcxfJ9IPamy2f5JaRDCaqJOxDzOSKtbdx4rH9VivMd1vIzoPumsJa9LoMIi4Fx2BV2KZOxWhNkBjaYivQ==
+caniuse-lite@^1.0.0, caniuse-lite@^1.0.30000844, caniuse-lite@^1.0.30001109, caniuse-lite@^1.0.30001173, caniuse-lite@^1.0.30001181:
+  version "1.0.30001230"
+  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001230.tgz"
+  integrity sha512-5yBd5nWCBS+jWKTcHOzXwo5xzcj4ePE/yjtkZyUV1BTUmrBaA9MRGC+e7mxnqXSA90CmCA8L3eKLaSUkt099IQ==
 
 capture-exit@^2.0.0:
   version "2.0.0"
@@ -6427,12 +6415,12 @@ electron-packager@^15.0.0:
     semver "^7.1.3"
     yargs-parser "^20.0.0"
 
-electron-rebuild@^2.0.0:
-  version "2.3.4"
-  resolved "https://registry.yarnpkg.com/electron-rebuild/-/electron-rebuild-2.3.4.tgz#59d49b37d5cc690aa60500aa5e5ecd168cbb5ba2"
-  integrity sha512-EHr1bkqXTN/jQJuh2/IunF9QGa9yOgpE9KdQ9A7VHshd7ycWvoXjWzaXaimfa1nu1l7vKqLLu7N2COe3Jn9NuA==
+electron-rebuild@^2.0.3:
+  version "2.3.5"
+  resolved "https://registry.yarnpkg.com/electron-rebuild/-/electron-rebuild-2.3.5.tgz#10dc38d1ffe1515ba2eef8b8be8e973ad1e1d597"
+  integrity sha512-1sQ1DRtQGpglFhc3urD4olMJzt/wxlbnAAsf+WY2xHf5c50ZovivZvCXSpVgTOP9f4TzOMvelWyspyfhxQKHzQ==
   dependencies:
-    "@malept/cross-spawn-promise" "^1.1.0"
+    "@malept/cross-spawn-promise" "^1.1.1"
     colors "^1.3.3"
     debug "^4.1.1"
     detect-libc "^1.0.3"
@@ -6685,107 +6673,10 @@ ember-cli-babel@^6.0.0-beta.4, ember-cli-babel@^6.16.0, ember-cli-babel@^6.3.0, 
     ember-cli-version-checker "^2.1.2"
     semver "^5.5.0"
 
-ember-cli-babel@^7.0.0, ember-cli-babel@^7.13.0, ember-cli-babel@^7.13.2, ember-cli-babel@^7.19.0, ember-cli-babel@^7.21.0, ember-cli-babel@^7.22.1, ember-cli-babel@^7.23.0, ember-cli-babel@^7.4.0, ember-cli-babel@^7.7.3:
-  version "7.23.0"
-  resolved "https://registry.yarnpkg.com/ember-cli-babel/-/ember-cli-babel-7.23.0.tgz#ec580aa2c115d0810e454dd5c2fffce238284b92"
-  integrity sha512-ix58DlRDAbGITtdJoRUPcAoQwKLYr/x/kIXjU9u1ATyhmuUjqb+0FDXghOWbkNihGiNOqBBR49+LBgK9AeBcNw==
-  dependencies:
-    "@babel/core" "^7.12.0"
-    "@babel/helper-compilation-targets" "^7.12.0"
-    "@babel/plugin-proposal-class-properties" "^7.10.4"
-    "@babel/plugin-proposal-decorators" "^7.10.5"
-    "@babel/plugin-transform-modules-amd" "^7.10.5"
-    "@babel/plugin-transform-runtime" "^7.12.0"
-    "@babel/plugin-transform-typescript" "^7.12.0"
-    "@babel/polyfill" "^7.11.5"
-    "@babel/preset-env" "^7.12.0"
-    "@babel/runtime" "^7.12.0"
-    amd-name-resolver "^1.2.1"
-    babel-plugin-debug-macros "^0.3.3"
-    babel-plugin-ember-data-packages-polyfill "^0.1.2"
-    babel-plugin-ember-modules-api-polyfill "^3.2.0"
-    babel-plugin-module-resolver "^3.1.1"
-    broccoli-babel-transpiler "^7.8.0"
-    broccoli-debug "^0.6.4"
-    broccoli-funnel "^2.0.1"
-    broccoli-source "^1.1.0"
-    clone "^2.1.2"
-    ember-cli-babel-plugin-helpers "^1.1.1"
-    ember-cli-version-checker "^4.1.0"
-    ensure-posix-path "^1.0.2"
-    fixturify-project "^1.10.0"
-    rimraf "^3.0.1"
-    semver "^5.5.0"
-
-ember-cli-babel@^7.1.3, ember-cli-babel@^7.10.0, ember-cli-babel@^7.23.1:
-  version "7.23.1"
-  resolved "https://registry.yarnpkg.com/ember-cli-babel/-/ember-cli-babel-7.23.1.tgz#d1517228ede08a5d4b045c78a7429728e956b30b"
-  integrity sha512-qYggmt3hRs6QJ6cRkww3ahMpyP8IEV2KFrIRO/Z6hu9MkE/8Y28Xd5NjQl6fPV3oLoG0vwuHzhNe3Jr7Wec8zw==
-  dependencies:
-    "@babel/core" "^7.12.0"
-    "@babel/helper-compilation-targets" "^7.12.0"
-    "@babel/plugin-proposal-class-properties" "^7.10.4"
-    "@babel/plugin-proposal-decorators" "^7.10.5"
-    "@babel/plugin-transform-modules-amd" "^7.10.5"
-    "@babel/plugin-transform-runtime" "^7.12.0"
-    "@babel/plugin-transform-typescript" "^7.12.0"
-    "@babel/polyfill" "^7.11.5"
-    "@babel/preset-env" "^7.12.0"
-    "@babel/runtime" "^7.12.0"
-    amd-name-resolver "^1.2.1"
-    babel-plugin-debug-macros "^0.3.3"
-    babel-plugin-ember-data-packages-polyfill "^0.1.2"
-    babel-plugin-ember-modules-api-polyfill "^3.2.1"
-    babel-plugin-module-resolver "^3.1.1"
-    broccoli-babel-transpiler "^7.8.0"
-    broccoli-debug "^0.6.4"
-    broccoli-funnel "^2.0.1"
-    broccoli-source "^1.1.0"
-    clone "^2.1.2"
-    ember-cli-babel-plugin-helpers "^1.1.1"
-    ember-cli-version-checker "^4.1.0"
-    ensure-posix-path "^1.0.2"
-    fixturify-project "^1.10.0"
-    rimraf "^3.0.1"
-    semver "^5.5.0"
-
-ember-cli-babel@^7.11.1, ember-cli-babel@^7.26.3, ember-cli-babel@^7.26.6:
+ember-cli-babel@^7.0.0, ember-cli-babel@^7.1.3, ember-cli-babel@^7.10.0, ember-cli-babel@^7.11.1, ember-cli-babel@^7.13.0, ember-cli-babel@^7.13.2, ember-cli-babel@^7.17.2, ember-cli-babel@^7.19.0, ember-cli-babel@^7.21.0, ember-cli-babel@^7.22.1, ember-cli-babel@^7.23.0, ember-cli-babel@^7.23.1, ember-cli-babel@^7.26.2, ember-cli-babel@^7.26.3, ember-cli-babel@^7.26.6, ember-cli-babel@^7.4.0, ember-cli-babel@^7.7.3:
   version "7.26.6"
   resolved "https://registry.yarnpkg.com/ember-cli-babel/-/ember-cli-babel-7.26.6.tgz#322fbbd3baad9dd99e3276ff05bc6faef5e54b39"
   integrity sha512-040svtfj2RC35j/WMwdWJFusZaXmNoytLAMyBDGLMSlRvznudTxZjGlPV6UupmtTBApy58cEF8Fq4a+COWoEmQ==
-  dependencies:
-    "@babel/core" "^7.12.0"
-    "@babel/helper-compilation-targets" "^7.12.0"
-    "@babel/plugin-proposal-class-properties" "^7.13.0"
-    "@babel/plugin-proposal-decorators" "^7.13.5"
-    "@babel/plugin-transform-modules-amd" "^7.13.0"
-    "@babel/plugin-transform-runtime" "^7.13.9"
-    "@babel/plugin-transform-typescript" "^7.13.0"
-    "@babel/polyfill" "^7.11.5"
-    "@babel/preset-env" "^7.12.0"
-    "@babel/runtime" "7.12.18"
-    amd-name-resolver "^1.3.1"
-    babel-plugin-debug-macros "^0.3.4"
-    babel-plugin-ember-data-packages-polyfill "^0.1.2"
-    babel-plugin-ember-modules-api-polyfill "^3.5.0"
-    babel-plugin-module-resolver "^3.2.0"
-    broccoli-babel-transpiler "^7.8.0"
-    broccoli-debug "^0.6.4"
-    broccoli-funnel "^2.0.2"
-    broccoli-source "^2.1.2"
-    clone "^2.1.2"
-    ember-cli-babel-plugin-helpers "^1.1.1"
-    ember-cli-version-checker "^4.1.0"
-    ensure-posix-path "^1.0.2"
-    fixturify-project "^1.10.0"
-    resolve-package-path "^3.1.0"
-    rimraf "^3.0.1"
-    semver "^5.5.0"
-
-ember-cli-babel@^7.17.2, ember-cli-babel@^7.26.2:
-  version "7.26.2"
-  resolved "https://registry.yarnpkg.com/ember-cli-babel/-/ember-cli-babel-7.26.2.tgz#497985e741ffcc08f89f98c9464509e91cdb2809"
-  integrity sha512-bSSlFbUBfLwaabGpLgoLkOKMIdDRWu3cPBNrN2UQXfzlPei3nZblDatSzPbCZ7O5faJHRi13ra3Q4odnCoBtTg==
   dependencies:
     "@babel/core" "^7.12.0"
     "@babel/helper-compilation-targets" "^7.12.0"
@@ -7320,25 +7211,25 @@ ember-css-transitions@^2.1.1:
     ember-cli-htmlbars "^5.3.1"
     ember-modifier "^2.1.0"
 
-ember-data@~3.26.0:
-  version "3.26.0"
-  resolved "https://registry.yarnpkg.com/ember-data/-/ember-data-3.26.0.tgz#cc6f86e6fd38b2984472faed2146d2d5f2b32252"
-  integrity sha512-rywnYB2vsEMrsvugT+nMlWc/H7QM9LplQxVIKHPKak1wxGKm8EHS7eA/qSWC6CykALItOG2gix05ymPYxqdI1Q==
+ember-data@~3.27.1:
+  version "3.27.1"
+  resolved "https://registry.yarnpkg.com/ember-data/-/ember-data-3.27.1.tgz#02d6b76c1d5de0f50d24274147b8711f6ca4f28d"
+  integrity sha512-36P8+7B6Z5ZjyITFbf2Wcub/fdE2DTsLoPPZK7It488fub5s90o85XC0WlwUQPvff39us2N4pzjwmCZ8Jj/gjg==
   dependencies:
-    "@ember-data/adapter" "3.26.0"
-    "@ember-data/debug" "3.26.0"
-    "@ember-data/model" "3.26.0"
-    "@ember-data/private-build-infra" "3.26.0"
-    "@ember-data/record-data" "3.26.0"
-    "@ember-data/serializer" "3.26.0"
-    "@ember-data/store" "3.26.0"
+    "@ember-data/adapter" "3.27.1"
+    "@ember-data/debug" "3.27.1"
+    "@ember-data/model" "3.27.1"
+    "@ember-data/private-build-infra" "3.27.1"
+    "@ember-data/record-data" "3.27.1"
+    "@ember-data/serializer" "3.27.1"
+    "@ember-data/store" "3.27.1"
     "@ember/edition-utils" "^1.2.0"
     "@ember/ordered-set" "^4.0.0"
     "@ember/string" "^1.0.0"
     "@glimmer/env" "^0.1.7"
     broccoli-merge-trees "^4.2.0"
-    ember-cli-babel "^7.26.3"
-    ember-cli-typescript "^4.0.0"
+    ember-cli-babel "^7.26.6"
+    ember-cli-typescript "^4.1.0"
     ember-inflector "^4.0.1"
 
 ember-destroyable-polyfill@^2.0.2:
@@ -7359,16 +7250,17 @@ ember-destroyable-polyfill@^2.0.3:
     ember-cli-version-checker "^5.1.1"
     ember-compatibility-helpers "^1.2.1"
 
-ember-electron@3.0.0-beta.4:
-  version "3.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/ember-electron/-/ember-electron-3.0.0-beta.4.tgz#3a503f03d43c17e93506eba58a6b0ca3c3537524"
-  integrity sha512-wItNzy0cVBzy7LzKKRzuVEesbDIUBkdgffb2sYri4UfEqdFQoFsPDREgGNbWnbFUoqk+LtdN8QZVHwq+UP0VlA==
+ember-electron@3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/ember-electron/-/ember-electron-3.1.0.tgz#95397f97fe905bf9975fd778e46d50e9dea900c9"
+  integrity sha512-qcviUwsSBGT5SOlCqQSUH/tPEfvNoAvxRivM8oy1YhJiyTWuNJfAJUBrLITEiirWf6b4Qxxi+VZwod+GmZWoqA==
   dependencies:
-    "@electron-forge/core" "6.0.0-beta.53"
-    broccoli-string-replace "^0.1.2"
+    "@electron-forge/core" "6.0.0-beta.54"
     chalk "^4.0.0"
     debug "^4.1.1"
-    ember-cli-babel "^7.19.0"
+    ember-cli-babel "^7.23.0"
+    execa "^5.0.0"
+    find-yarn-workspace-root "^2.0.0"
     ncp "^2.0.0"
     portfinder "^1.0.25"
     rimraf "^3.0.2"
@@ -7665,7 +7557,7 @@ ember-style-modifier@^0.6.0:
     ember-cli-babel "^7.21.0"
     ember-modifier "^2.1.0"
 
-ember-template-lint@^3.2.0:
+ember-template-lint@^3.4.2:
   version "3.4.2"
   resolved "https://registry.yarnpkg.com/ember-template-lint/-/ember-template-lint-3.4.2.tgz#d9480957b576b2b7ed02b4bf6bdb7c4b80243581"
   integrity sha512-YorsJ5cVmrt0hm2gTVwsKsX/NpYp6X7oa+z7a2iAtwBEz4GyEImUpH3YF7ilXHMFB6d5k96LLKzF73cyBJliuQ==
@@ -11243,7 +11135,7 @@ minimalistic-crypto-utils@^1.0.0, minimalistic-crypto-utils@^1.0.1:
   resolved "https://registry.yarnpkg.com/minimalistic-crypto-utils/-/minimalistic-crypto-utils-1.0.1.tgz#f6c00c1c0b082246e5c4d99dfb8c7c083b2b582a"
   integrity sha1-9sAMHAsIIkblxNmd+4x8CDsrWCo=
 
-"minimatch@2 || 3", minimatch@^3.0.0, minimatch@^3.0.2, minimatch@^3.0.3, minimatch@^3.0.4:
+"minimatch@2 || 3", minimatch@^3.0.0, minimatch@^3.0.2, minimatch@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-3.0.4.tgz#5166e286457f03306064be5497e8dbb0c3d32083"
   integrity sha512-yJHVQEhyqPLUTgt9B83PXu6W3rx4MvvHvSUvToogpwoGDOUQ+yDrR0HRot+yOCdCO7u4hX3pWft6kWBBcqh0UA==
@@ -11884,10 +11776,10 @@ onetime@^5.1.0, onetime@^5.1.2:
   dependencies:
     mimic-fn "^2.1.0"
 
-open@^7.2.0:
-  version "7.3.1"
-  resolved "https://registry.yarnpkg.com/open/-/open-7.3.1.tgz#111119cb919ca1acd988f49685c4fdd0f4755356"
-  integrity sha512-f2wt9DCBKKjlFbjzGb8MOAW8LH8F0mrs1zc7KTjAJ9PZNQbfenzWbNP1VZJvw6ICMG9r14Ah6yfwPn7T7i646A==
+open@^7.2.1:
+  version "7.4.2"
+  resolved "https://registry.yarnpkg.com/open/-/open-7.4.2.tgz#b8147e26dcf3e426316c730089fd71edd29c2321"
+  integrity sha512-MVHddDVweXZF3awtlAS+6pgKLlm/JgxZ90+/NBurBoQctVOOB/zDdVjcyPzQ+0laDGbsWgrRkflI65sQeOgT9Q==
   dependencies:
     is-docker "^2.0.0"
     is-wsl "^2.1.1"
@@ -12523,10 +12415,10 @@ prettier-linter-helpers@^1.0.0:
   dependencies:
     fast-diff "^1.1.2"
 
-prettier@^2.2.1:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.2.1.tgz#795a1a78dd52f073da0cd42b21f9c91381923ff5"
-  integrity sha512-PqyhM2yCjg/oKkFPtTGUojv7gnZAoG80ttl45O6x2Ug/rMJw4wcc9k6aaf2hibP7BGVCCM33gZoGjyvt9mm16Q==
+prettier@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.3.0.tgz#b6a5bf1284026ae640f17f7ff5658a7567fc0d18"
+  integrity sha512-kXtO4s0Lz/DW/IJ9QdWhAf7/NmPWQXkFr/r/WkR3vyI+0v8amTDxiaQSLzs8NBlytfLWX/7uQUMIW677yLKl4w==
 
 pretty-bytes@^1.0.2:
   version "1.0.4"
@@ -12763,7 +12655,7 @@ qunit-dom@^1.6.0:
     ember-cli-babel "^7.23.0"
     ember-cli-version-checker "^5.1.1"
 
-qunit@^2.14.1:
+qunit@^2.15.0:
   version "2.15.0"
   resolved "https://registry.yarnpkg.com/qunit/-/qunit-2.15.0.tgz#8ba3a3c5d13369ab1740337680600a98a7f8b591"
   integrity sha512-9ZoOILeyRZzrdvy2m7M4S76bneGD75Bh4B2aot3uKRKZuoEvA9gevvzU339L805Ys0AN2C7cnAV9nIBD5t72IQ==

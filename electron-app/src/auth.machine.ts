@@ -8,6 +8,7 @@ export interface AuthContext {
     email: string;
     password: string;
   };
+  setupError?: any;
 }
 
 export type AuthEvent = { type: 'SETUP'; payload: SetupData };
@@ -76,7 +77,10 @@ export const authMachine = createMachine<AuthContext, AuthEvent, AuthState>({
         ],
         onError: [
           {
-            actions: 'setupMapgeoFailed',
+            actions: [
+              assign((context, event) => ({ setupError: event.data })),
+              'setupMapgeoFailed',
+            ],
           },
         ],
       },

@@ -81,12 +81,16 @@ const authService = interpret(
     })
     .withConfig({
       guards: {
-        needsMapgeoService() {
-          return mapgeoService === undefined && store.get('mapgeo.host');
+        needsMapgeoService(context) {
+          return (
+            (mapgeoService === undefined &&
+              Boolean(store.get<string>('mapgeo.host'))) ||
+            Boolean(context.host)
+          );
         },
         hasLogin() {
           const mapgeo = store.get('mapgeo');
-          return !!mapgeo.login;
+          return Boolean(mapgeo.login);
         },
       },
       actions: {
@@ -105,9 +109,11 @@ const authService = interpret(
             isAuthenticated: false,
           });
         },
-        setupMapgeoFailed() {
+        setupMapgeoFailed(context) {
+          console.log('setupError', context.setupError);
           mainWindow.webContents.send('authenticated', {
             isAuthenticated: false,
+            error: context.setupError?.message,
           });
         },
       },
