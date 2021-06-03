@@ -1,12 +1,14 @@
-<div class='p-4 space-y-2'>
-  <h2 class='font-semibold'>
+<div class='space-y-2'>
+  <h2 class='font-semibold text-gray-700'>
     Datasets
   </h2>
 
   <ul class='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3'>
     {{#each @model.community.datasets as |dataset|}}
-      <li class='bg-white p-4 shadow-lg rounded-2xl'>
-        {{dataset.name}}
+      <li class='bg-white shadow-lg rounded-2xl'>
+        <LinkTo class='p-4 block' @route='dataset' @model={{dataset.id}}>
+          {{dataset.name}}
+        </LinkTo>
       </li>
     {{/each}}
   </ul>

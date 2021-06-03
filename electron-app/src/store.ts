@@ -7,6 +7,10 @@ export type SyncStoreType = {
       email: string;
       password: string;
     };
+    config?: {
+      name: string;
+      datasets: { id: string; name: string }[];
+    };
   };
 };
 

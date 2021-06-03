@@ -105,7 +105,11 @@ const authService = interpret(
             isAuthenticated: false,
           });
         },
-        setupMapgeoFailed() {},
+        setupMapgeoFailed() {
+          mainWindow.webContents.send('authenticated', {
+            isAuthenticated: false,
+          });
+        },
       },
       services: {
         async setupMapgeoService(context) {
@@ -172,7 +176,9 @@ function createBrowserWindow() {
     console.log('did-finish-load');
 
     // Start the service
-    authService.start();
+    setTimeout(() => {
+      authService.start();
+    }, 1000);
 
     let currentConfig = store.get('config') as SyncConfig;
     mainWindow.webContents.send('config-loaded', currentConfig);

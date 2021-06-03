@@ -74,9 +74,11 @@ export const authMachine = createMachine<AuthContext, AuthEvent, AuthState>({
             actions: 'askForLogin',
           },
         ],
-        onError: {
-          actions: 'setupMapgeoFailed',
-        },
+        onError: [
+          {
+            actions: 'setupMapgeoFailed',
+          },
+        ],
       },
     },
     login: {

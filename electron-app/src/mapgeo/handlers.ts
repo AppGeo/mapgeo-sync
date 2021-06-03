@@ -11,8 +11,17 @@ export function register(ipcMain: IpcMain) {
     });
 
   add('fetchConfig', fetchConfig);
+  add('findDataset', findDataset);
 }
 
 export const fetchConfig = (store: SyncStore) => {
   return store.get('mapgeo.config');
+};
+
+export const findDataset = (store: SyncStore, id: string) => {
+  const mapgeo = store.get('mapgeo');
+  if (!mapgeo?.config) {
+    return;
+  }
+  return mapgeo.config.datasets.find((dataset) => dataset.id === id);
 };
