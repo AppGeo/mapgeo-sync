@@ -7,9 +7,15 @@ export default class Router extends EmberRouter {
 }
 
 Router.map(function () {
-  this.route('setup');
+  this.route('setup', function() {
+    this.route('db');
+  });
   this.route('login');
-  this.route('dataset', { path: 'dataset/:datasetId' }, function () {});
+  this.route('dataset', { path: 'dataset/:datasetId' }, function () {
+    this.route('mapping', { path: 'mapping/:mappingId' }, function () {
+      this.route('setup');
+    });
+  });
   this.route('error');
   this.route('loading');
 });

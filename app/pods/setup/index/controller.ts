@@ -4,17 +4,17 @@ import { action } from '@ember/object';
 import RouterService from '@ember/routing/router-service';
 import { NotificationsService } from '@frontile/notifications';
 import { SetupData } from 'mapgeo-sync-config';
-// Node modules
-const { ipcRenderer } = requireNode('electron');
+import Platform from 'mapgeo-sync/services/platform';
 
-export default class Setup extends Controller {
+export default class SetupIndex extends Controller {
   @service('router') declare router: RouterService;
   @service('notifications') declare notifications: NotificationsService;
+  @service('platform') declare platform: Platform;
 
   @action
   async checkMapgeo({ mapgeoUrl }: SetupData) {
     try {
-      const isOk = await ipcRenderer.invoke('checkMapgeo', { mapgeoUrl });
+      const isOk = await this.platform.checkMapGeo(mapgeoUrl);
 
       if (isOk) {
         await this.router.transitionTo('login');
@@ -35,6 +35,6 @@ export default class Setup extends Controller {
 // DO NOT DELETE: this is how TypeScript knows how to look up your controllers.
 declare module '@ember/controller' {
   interface Registry {
-    setup: Setup;
+    'setup/index': SetupIndex;
   }
 }

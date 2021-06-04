@@ -5,6 +5,11 @@ export default class Platform extends Service {
   // once(name: string, cb: (...args: any[]) => void) {
   //   ipcRenderer.once(name, cb);
   // }
+  async checkMapGeo(mapgeoUrl: string) {
+    const isOk = await ipcRenderer.invoke('checkMapgeo', { mapgeoUrl });
+
+    return isOk as boolean;
+  }
 
   async fetchCommunity() {
     const value = await ipcRenderer.invoke('mapgeo/fetchConfig');

@@ -5,8 +5,25 @@
 
   <div class='mt-4 grid grid-cols-3 gap-2'>
     {{#each this.primary as |mapping|}}
-      <div class='shadow rounded-lg p-2 bg-white'>
+      <div
+        class='shadow rounded-lg p-2 bg-white flex justify-between items-center'
+      >
         {{mapping.name}}
+
+        <Button
+          @intent='primary'
+          @appearance='outlined'
+          @size='xs'
+          @isRenderless={{true}} as |btn|
+        >
+          <LinkTo
+            class={{btn.classNames}}
+            @route='dataset.mapping.setup'
+            @models={{array @dataset.id mapping.pk}}
+          >
+            Setup Sync
+          </LinkTo>
+        </Button>
       </div>
     {{/each}}
   </div>

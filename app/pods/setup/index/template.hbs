@@ -1,0 +1,30 @@
+<div class='flex justify-between items-start'>
+  <div class='flex-1'>
+    <h2>
+      Setup Sync
+    </h2>
+
+    <ChangesetForm
+      class='mt-4'
+      @changeset={{changeset (hash mapgeoUrl='')}}
+      @onSubmit={{this.checkMapgeo}} as |Form changeset|
+    >
+      <Form.Input
+        @label='MapGeo URL'
+        @fieldName='mapgeoUrl'
+        required={{true}}
+        placeholder='https://gloucesterma.mapgeo.io'
+      />
+
+      <div class='flex justify-end mt-4'>
+        <Button
+          @type='submit'
+          @intent='primary'
+          disabled={{changeset.isInvalid}}
+        >
+          Continue
+        </Button>
+      </div>
+    </ChangesetForm>
+  </div>
+</div>
