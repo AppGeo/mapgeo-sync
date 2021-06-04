@@ -3,6 +3,7 @@ import { inject as service } from '@ember/service';
 import RouterService from '@ember/routing/router-service';
 import Session from 'mapgeo-sync/services/session';
 import Platform from 'mapgeo-sync/services/platform';
+import { next } from '@ember/runloop';
 
 export default class Application extends Route {
   @service('router') declare router: RouterService;
@@ -12,7 +13,10 @@ export default class Application extends Route {
   beforeModel() {
     return this.session.waitForAuthentication().then((isAuthenticated) => {
       if (!isAuthenticated) {
-        return this.router.transitionTo('setup');
+        next(() => {
+          this.router.transitionTo('setup');
+        });
+        return;
       }
 
       return;

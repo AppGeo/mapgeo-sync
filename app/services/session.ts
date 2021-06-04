@@ -1,12 +1,16 @@
 import { action } from '@ember/object';
 import Service from '@ember/service';
+import { inject as service } from '@ember/service';
 import { tracked } from '@glimmer/tracking';
 import type { IpcRendererEvent } from 'electron/renderer';
-// import { Promise } from 'rsvp';
+import { Promise } from 'rsvp';
+import { NotificationsService } from '@frontile/notifications';
 // Node modules
 const { ipcRenderer } = requireNode('electron');
 
 export default class Session extends Service {
+  @service declare notifications: NotificationsService;
+
   @tracked isAuthenticated = false;
 
   @action
@@ -19,7 +23,9 @@ export default class Session extends Service {
           { isAuthenticated, error }: { isAuthenticated: boolean; error?: any }
         ) => {
           this.isAuthenticated = isAuthenticated;
-          console.log('authenticated', isAuthenticated, error);
+          if (error) {
+            this.notifications.add(error, { appearance: 'error' });
+          }
           resolve(isAuthenticated);
         }
       );
