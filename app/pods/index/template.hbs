@@ -5,7 +5,7 @@
 
   <ul class='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3'>
     {{#each @model.community.datasets as |dataset|}}
-      <li class='bg-white shadow-lg rounded-2xl'>
+      <li class='bg-white shadow-lg rounded-lg'>
         <LinkTo class='p-4 block' @route='dataset' @model={{dataset.id}}>
           {{dataset.name}}
         </LinkTo>
