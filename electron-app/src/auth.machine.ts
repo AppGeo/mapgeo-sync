@@ -11,7 +11,9 @@ export interface AuthContext {
   setupError?: any;
 }
 
-export type AuthEvent = { type: 'SETUP'; payload: SetupData };
+export type AuthEvent =
+  | { type: 'SETUP'; payload: SetupData }
+  | { type: 'LOGOUT' };
 
 export type AuthState =
   | { value: 'idle'; context: AuthContext }
@@ -89,11 +91,18 @@ export const authMachine = createMachine<AuthContext, AuthEvent, AuthState>({
       invoke: {
         id: 'loginMapgeo',
         src: 'loginMapgeo',
-        onDone: {
-          actions: 'authenticated',
-        },
+        onDone: 'authenticated',
         onError: {
           actions: 'authenticationFailed',
+        },
+      },
+    },
+    authenticated: {
+      entry: 'authenticated',
+      on: {
+        LOGOUT: {
+          target: 'idle',
+          actions: 'logout',
         },
       },
     },

@@ -1,3 +1,4 @@
+import { action } from '@ember/object';
 import Service from '@ember/service';
 const { ipcRenderer } = requireNode('electron/renderer');
 
@@ -5,19 +6,28 @@ export default class Platform extends Service {
   // once(name: string, cb: (...args: any[]) => void) {
   //   ipcRenderer.once(name, cb);
   // }
+  @action
   async checkMapGeo(mapgeoUrl: string) {
     const isOk = await ipcRenderer.invoke('checkMapgeo', { mapgeoUrl });
 
     return isOk as boolean;
   }
 
+  @action
   async fetchCommunity() {
     const value = await ipcRenderer.invoke('mapgeo/fetchConfig');
     return value;
   }
 
+  @action
   async findDataset(id: string) {
     const value = await ipcRenderer.invoke('mapgeo/findDataset', id);
+    return value;
+  }
+
+  @action
+  async logout() {
+    const value = await ipcRenderer.invoke('logout');
     return value;
   }
 }

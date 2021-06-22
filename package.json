@@ -28,12 +28,12 @@
   "devDependencies": {
     "@ember/optional-features": "^2.0.0",
     "@ember/test-helpers": "^2.2.5",
-    "@frontile/buttons": "^0.11.0",
-    "@frontile/changeset-form": "^0.11.0",
-    "@frontile/core": "^0.11.0",
-    "@frontile/forms": "^0.11.0",
-    "@frontile/notifications": "^0.11.0",
-    "@frontile/overlays": "^0.11.0",
+    "@frontile/buttons": "^0.12.0",
+    "@frontile/changeset-form": "^0.12.0",
+    "@frontile/core": "^0.12.0",
+    "@frontile/forms": "^0.12.0",
+    "@frontile/notifications": "^0.12.0",
+    "@frontile/overlays": "^0.12.0",
     "@glimmer/component": "^1.0.4",
     "@glimmer/tracking": "^1.0.4",
     "@types/electron": "^1.6.10",
@@ -62,7 +62,7 @@
     "@typescript-eslint/parser": "^4.14.1",
     "broccoli-asset-rev": "^3.0.0",
     "ember-auto-import": "^1.11.2",
-    "ember-basic-dropdown": "^3.0.12",
+    "ember-basic-dropdown": "^3.0.19",
     "ember-breadcrumb-trail": "^0.2.0",
     "ember-cli": "~3.26.1",
     "ember-cli-app-version": "^5.0.0",
@@ -116,9 +116,12 @@
     "yarn": "1.22.5"
   },
   "dependencies": {
-    "@fortawesome/ember-fontawesome": "^0.2.2",
-    "@fortawesome/free-solid-svg-icons": "^5.15.2",
+    "@fortawesome/ember-fontawesome": "^0.2.3",
+    "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "autoprefixer": "^9.8.6",
     "ember-named-blocks-polyfill": "^0.2.4"
+  },
+  "resolutions": {
+    "validated-changeset": "0.14.10"
   }
 }

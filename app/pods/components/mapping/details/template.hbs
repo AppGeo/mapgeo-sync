@@ -1,0 +1,25 @@
+<div class='shadow rounded bg-white p-4'>
+  <h3 class='font-semibold text-gray-600 text-sm'>
+    Details
+  </h3>
+
+  <dl class='mt-4 flex space-x-4'>
+    <div class='flex flex-col'>
+      <dt class='font-semibold text-sm text-gray-700'>
+        Hub Table
+      </dt>
+      <dd class='mt-1 text-gray-700'>
+        {{@mapping.provider.resource}}
+      </dd>
+    </div>
+
+    <div class='flex flex-col'>
+      <dt class='font-semibold text-sm text-gray-700'>
+        Description
+      </dt>
+      <dd class='mt-1 text-gray-700'>
+        {{@mapping.description}}
+      </dd>
+    </div>
+  </dl>
+</div>

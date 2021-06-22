@@ -1,37 +1,44 @@
 {{page-title 'MapGeo Sync'}}
 
-<header class='flex items-center p-2 bg-gray-100'>
+<header class='flex items-center justify-between p-2 bg-gray-100'>
   <div class='flex items-center'>
     <img class='max-h-8 mr-1' src='/assets/logo.png' alt='mapgeo' />
     <div class='text-lg text-gray-500 font-semibold'>
       Sync
     </div>
+    <nav class='ml-4' aria-label='Breadcrumb'>
+      <ol class='flex'>
+        {{#each (breadcrumbs) as |breadcrumb|}}
+          {{#let (is-last breadcrumb (breadcrumbs)) as |isLast|}}
+            <li class='px-1'>
+              <LinkTo
+                @route={{breadcrumb.data.route}}
+                @models={{breadcrumb.data.models}}
+                class={{if isLast 'text-gray-600' 'text-blue-900'}}
+                aria-current={{if isLast 'page'}}
+              >
+                {{breadcrumb.title}}
+              </LinkTo>
+            </li>
+
+            {{#unless isLast}}
+              <li class='text-gray-300'>
+                /
+              </li>
+            {{/unless}}
+          {{/let}}
+        {{/each}}
+      </ol>
+    </nav>
   </div>
 
-  <nav class='ml-4' aria-label='Breadcrumb'>
-    <ol class='flex'>
-      {{#each (breadcrumbs) as |breadcrumb|}}
-        {{#let (is-last breadcrumb (breadcrumbs)) as |isLast|}}
-          <li class='px-1'>
-            <LinkTo
-              @route={{breadcrumb.data.route}}
-              @models={{breadcrumb.data.models}}
-              class={{if isLast 'text-gray-600' 'text-blue-900'}}
-              aria-current={{if isLast 'page'}}
-            >
-              {{breadcrumb.title}}
-            </LinkTo>
-          </li>
-
-          {{#unless isLast}}
-            <li class='text-gray-300'>
-              /
-            </li>
-          {{/unless}}
-        {{/let}}
-      {{/each}}
-    </ol>
-  </nav>
+  <div>
+    {{#if this.session.isAuthenticated}}
+      <Button @size='xs' @appearance='minimal' {{on 'click' this.logout}}>
+        Logout
+      </Button>
+    {{/if}}
+  </div>
 </header>
 
 <main class='flex flex-col flex-1 bg-gray-100 p-4'>

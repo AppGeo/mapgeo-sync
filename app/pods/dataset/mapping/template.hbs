@@ -8,11 +8,9 @@
   <h2 class='text-lg font-semibold text-gray-700'>
     {{@model.mapping.name}}
   </h2>
-
-  <p class='text-gray-500'>
-    {{@model.mapping.description}}
-  </p>
 </div>
+
+<Mapping::Details @mapping={{@model.mapping}} />
 
 <div class='mt-4'>
   {{outlet}}

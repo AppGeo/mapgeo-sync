@@ -4,20 +4,4 @@
   models=(array @model.dataset.id @model.mapping.pk)
 }}
 
-<div class='shadow rounded bg-white p-4'>
-  <h3 class='font-semibold text-gray-600 text-sm'>
-    Details
-  </h3>
-
-  <dl class='mt-4'>
-    <div class='flex flex-col'>
-      <dt class='font-semibold text-sm text-gray-700'>
-        Hub Table
-      </dt>
-      <dd class='mt-1 text-gray-700'>
-        {{@model.mapping.provider.resource}}
-      </dd>
-    </div>
-  </dl>
-</div>
 {{log @model}}

@@ -90,7 +90,7 @@ const authService = interpret(
         },
         hasLogin() {
           const mapgeo = store.get('mapgeo');
-          return Boolean(mapgeo.login);
+          return Boolean(mapgeo?.login);
         },
       },
       actions: {
@@ -116,6 +116,10 @@ const authService = interpret(
             error: context.setupError?.message,
           });
         },
+        logout() {
+          mapgeoService = undefined;
+          store.clear();
+        },
       },
       services: {
         async setupMapgeoService(context) {
@@ -136,6 +140,11 @@ const authService = interpret(
 ipcMain.handle('checkMapgeo', async (event, data: SetupData) => {
   authService.send({ type: 'SETUP', payload: data } as any);
   return waitForState(authService, ['login', 'askForLogin']);
+});
+
+ipcMain.handle('logout', async (event, data: SetupData) => {
+  authService.send({ type: 'LOGOUT' });
+  return waitForState(authService, ['idle']);
 });
 
 function createBrowserWindow() {
