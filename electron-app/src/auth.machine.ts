@@ -13,10 +13,11 @@ export interface AuthContext {
 
 export type AuthEvent =
   | { type: 'SETUP'; payload: SetupData }
+  | { type: 'LOGIN' }
   | { type: 'LOGOUT' };
 
 export type AuthState =
-  | { value: 'idle'; context: AuthContext }
+  | { value: 'unauthenticated.idle'; context: AuthContext }
   | { value: 'finishSetup'; context: AuthContext & { host: string } }
   | {
       value: 'login';
@@ -32,76 +33,78 @@ export const authMachine = createMachine<AuthContext, AuthEvent, AuthState>({
     login: undefined,
   },
   // Initial state
-  initial: 'idle',
+  initial: 'unauthenticated',
   states: {
-    idle: {
-      always: [
-        { target: 'finishSetup', cond: 'needsMapgeoService' },
-        { target: 'login', cond: 'hasLogin' },
-        {
-          actions: 'needsSetup',
-        },
-      ],
-      on: {
-        SETUP: {
-          target: 'finishSetup',
-          cond: 'needsMapgeoService',
-          actions: assign({
-            // increment the current count by the event value
-            host: (context, event) => {
-              debugger;
-              console.log(event);
-              return event.payload.mapgeoUrl;
+    unauthenticated: {
+      initial: 'idle',
+      states: {
+        idle: {
+          on: {
+            LOGIN: {
+              target: 'login',
             },
-          }),
+            SETUP: {
+              target: 'finishSetup',
+              cond: 'needsMapgeoService',
+              actions: assign({
+                // increment the current count by the event value
+                host: (context, event) => {
+                  debugger;
+                  console.log(event);
+                  return event.payload.mapgeoUrl;
+                },
+              }),
+            },
+          },
         },
-      },
-    },
-    finishSetup: {
-      invoke: {
-        id: 'setupMapgeoService',
-        src: 'setupMapgeoService',
-        onDone: [
-          {
-            target: 'login',
-            cond: 'hasLogin',
-            actions: assign({
-              config: (context, event) => {
-                console.log(event);
+        finishSetup: {
+          invoke: {
+            id: 'setupMapgeoService',
+            src: 'setupMapgeoService',
+            onDone: [
+              {
+                target: 'login',
+                cond: 'hasLogin',
+                actions: assign({
+                  config: (context, event) => {
+                    console.log(event);
 
-                return event.data;
+                    return event.data;
+                  },
+                }),
               },
-            }),
-          },
-          {
-            actions: 'askForLogin',
-          },
-        ],
-        onError: [
-          {
-            actions: [
-              assign((context, event) => ({ setupError: event.data })),
-              'setupMapgeoFailed',
+              {
+                actions: 'askForLogin',
+              },
+            ],
+            onError: [
+              {
+                actions: [
+                  assign((context, event) => ({ setupError: event.data })),
+                  'setupMapgeoFailed',
+                ],
+              },
             ],
           },
-        ],
-      },
-    },
-    login: {
-      invoke: {
-        id: 'loginMapgeo',
-        src: 'loginMapgeo',
-        onDone: 'authenticated',
-        onError: {
-          actions: 'authenticationFailed',
+        },
+        login: {
+          invoke: {
+            id: 'loginMapgeo',
+            src: 'loginMapgeo',
+            onDone: '#auth.authenticated',
+            onError: {
+              actions: 'authenticationFailed',
+            },
+          },
         },
       },
     },
+
     authenticated: {
       entry: 'authenticated',
       on: {
         LOGOUT: {
-          target: 'idle',
+          target: 'unauthenticated',
           actions: 'logout',
         },
       },
