@@ -37,6 +37,7 @@ export const authMachine = createMachine<AuthContext, AuthEvent, AuthState>({
   states: {
     unauthenticated: {
       initial: 'idle',
+      entry: 'sendIsUnauthenticated',
       states: {
         idle: {
           on: {

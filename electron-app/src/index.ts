@@ -94,6 +94,11 @@ const authService = interpret(
         },
       },
       actions: {
+        sendIsUnauthenticated() {
+          mainWindow.webContents.send('authenticated', {
+            isAuthenticated: false,
+          });
+        },
         authenticated() {
           mainWindow.webContents.send('authenticated', {
             isAuthenticated: true,
@@ -139,12 +144,15 @@ const authService = interpret(
 
 ipcMain.handle('checkMapgeo', async (event, data: SetupData) => {
   authService.send({ type: 'SETUP', payload: data } as any);
-  return waitForState(authService, ['login', 'askForLogin']);
+  return waitForState(authService, [
+    'unauthenticated.login',
+    'unauthenticated.askForLogin',
+  ]);
 });
 
 ipcMain.handle('logout', async (event, data: SetupData) => {
   authService.send({ type: 'LOGOUT' });
-  return waitForState(authService, ['idle']);
+  return waitForState(authService, ['unauthenticated.idle']);
 });
 
 function createBrowserWindow() {
