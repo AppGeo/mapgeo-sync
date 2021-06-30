@@ -6,7 +6,7 @@
 
     <ChangesetForm
       class='mt-4'
-      @changeset={{changeset (hash mapgeoUrl='')}}
+      @changeset={{changeset (track mapgeoUrl='')}}
       @onSubmit={{this.checkMapgeo}} as |Form changeset|
     >
       <Form.Input

@@ -19,6 +19,7 @@
       "optouts",
       "oracledb",
       "predebug",
+      "runloop",
       "semibold",
       "testem",
       "unathenticated"

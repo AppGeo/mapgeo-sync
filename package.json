@@ -87,6 +87,7 @@
     "ember-render-helpers": "^0.2.0",
     "ember-resolver": "^8.0.2",
     "ember-simple-set-helper": "^0.1.2",
+    "ember-simple-track-helper": "^1.0.0",
     "ember-source": "~3.27.2",
     "ember-template-lint": "^3.4.2",
     "eslint": "^7.23.0",

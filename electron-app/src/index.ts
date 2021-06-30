@@ -81,6 +81,11 @@ const authService = interpret(
     })
     .withConfig({
       guards: {
+        hasCommunityConfig(context) {
+          return (
+            Boolean(store.get<string>('mapgeo.host')) || Boolean(context.host)
+          );
+        },
         needsMapgeoService(context) {
           return (
             (mapgeoService === undefined &&
@@ -94,6 +99,7 @@ const authService = interpret(
         },
       },
       actions: {
+        initMapgeoService() {},
         sendIsUnauthenticated() {
           mainWindow.webContents.send('authenticated', {
             isAuthenticated: false,
@@ -145,8 +151,8 @@ const authService = interpret(
 ipcMain.handle('checkMapgeo', async (event, data: SetupData) => {
   authService.send({ type: 'SETUP', payload: data } as any);
   return waitForState(authService, [
-    'unauthenticated.login',
-    'unauthenticated.askForLogin',
+    'unauthenticated.withConfig.idle',
+    'unauthenticated.withConfig.validated',
   ]);
 });
 

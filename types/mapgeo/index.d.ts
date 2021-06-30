@@ -1,4 +1,6 @@
-import { Role } from '../api';
+// import { Role } from '../api';
+
+type Role = unknown;
 
 export type BasicField = {
   key: string;

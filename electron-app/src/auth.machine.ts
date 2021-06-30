@@ -55,6 +55,27 @@ export const authMachine = createMachine<AuthContext, AuthEvent, AuthState>({
           entry: 'initMapgeoService',
           states: {
             idle: {
+              always: [
+                { cond: 'needsMapgeoService', target: 'init' },
+                {
+                  target: 'validated',
+                },
+              ],
+            },
+            init: {
+              invoke: {
+                id: 'setupMapgeoService',
+                src: 'setupMapgeoService',
+                onDone: 'validated',
+                onError: {
+                  target: '#auth.unauthenticated',
+                  actions: assign({
+                    host: () => null,
+                  }),
+                },
+              },
+            },
+            validated: {
               on: {
                 LOGIN: {
                   target: 'login',
@@ -82,7 +103,9 @@ export const authMachine = createMachine<AuthContext, AuthEvent, AuthState>({
                 SETUP: {
                   target: '#auth.unauthenticated.idle',
                   actions: assign({
-                    config: () => true,
+                    host: (context, event) => {
+                      return event.payload.mapgeoUrl;
+                    },
                   }),
                 },
               },
