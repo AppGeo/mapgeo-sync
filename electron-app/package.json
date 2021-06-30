@@ -9,11 +9,13 @@
     "predebug": "yarn build:ts",
     "debug": "electron-forge start --inspect-electron",
     "build:ts": "tsc",
+    "postbuild:ts": "yarn generate:store-schema",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts .",
-    "test": "node dist/tests/auth.machine.test.js"
+    "test": "node dist/tests/auth.machine.test.js",
+    "generate:store-schema": "yarn ts-json-schema-generator --path 'src/store.ts' --type 'SyncStoreType' --no-type-check -o src/store-schema.json"
   },
   "keywords": [],
   "author": "",
@@ -83,6 +85,7 @@
     "eslint-plugin-import": "^2.22.1",
     "tap": "^15.0.9",
     "tap-spec": "^5.0.0",
+    "ts-json-schema-generator": "^0.93.0",
     "typescript": "^4.3.2"
   },
   "volta": {

@@ -16,7 +16,7 @@ export default class Login extends Controller {
   @action
   async login(data: LoginData) {
     try {
-      const isAuthenticated = await ipcRenderer.invoke('login', data);
+      const isAuthenticated = await ipcRenderer.invoke('login', { ...data });
 
       this.session.isAuthenticated = isAuthenticated;
       this.router.transitionTo('index');

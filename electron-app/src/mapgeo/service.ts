@@ -2,6 +2,9 @@ import axios, { AxiosInstance } from 'axios';
 import * as https from 'https';
 
 let service: MapgeoService;
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: false,
+});
 
 export const getService = () => {
   if (!service) {
@@ -45,9 +48,7 @@ export default class MapgeoService {
       const result = await axios.get<{ community: Record<string, unknown> }>(
         `${host}/api/config/current`,
         {
-          httpsAgent: new https.Agent({
-            rejectUnauthorized: false,
-          }),
+          httpsAgent,
         }
       );
       const config = result.status < 400 && result.data;
@@ -73,6 +74,7 @@ export default class MapgeoService {
       baseURL: host,
       // timeout: 1000,
       headers,
+      httpsAgent,
     });
   }
 
