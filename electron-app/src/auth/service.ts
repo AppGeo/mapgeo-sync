@@ -54,12 +54,15 @@ export const createService = ({
           authenticated() {
             send('authenticated', {
               isAuthenticated: true,
+              route: 'index',
             });
           },
-          authenticationFailed() {
+          authenticationFailed(context, other) {
+            debugger;
             send('authenticated', {
               isAuthenticated: false,
             });
+            store.set('mapgeo.login', undefined);
           },
           needsSetup() {
             send('authenticated', {

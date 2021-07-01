@@ -24,8 +24,8 @@ import type {
 } from 'mapgeo-sync-config';
 import Scheduler from './scheduler';
 import MapgeoService from './mapgeo/service';
-import { EventObject, interpret, Interpreter } from 'xstate';
-import { AuthContext, authMachine } from './auth/machine';
+import { EventObject, Interpreter } from 'xstate';
+import { AuthContext } from './auth/machine';
 import { store } from './store';
 import { register as registerMapgeoHandlers } from './mapgeo/handlers';
 import { waitForState } from './utils/wait-for-state';
@@ -43,6 +43,15 @@ let mainWindow: BrowserWindow;
 let tray: Tray;
 let queryWorker: Worker;
 let mapgeoService: MapgeoService;
+let authService: Interpreter<
+  AuthContext,
+  any,
+  EventObject,
+  {
+    value: any;
+    context: AuthContext;
+  }
+>;
 
 registerMapgeoHandlers(ipcMain);
 
@@ -52,6 +61,13 @@ ipcMain.handle('store/findSyncRules', (event, key: string) => {
 
 ipcMain.handle('getStoreValue', (event, key: string) => {
   return store.get(key);
+});
+
+ipcMain.handle('restoreAuth', async (event) => {
+  if (authService.state.matches('authenticated')) {
+    return true;
+  }
+  return false;
 });
 
 ipcMain.handle('login', async (event, data: LoginData) => {
@@ -65,7 +81,7 @@ ipcMain.handle('login', async (event, data: LoginData) => {
   //   store.set('mapgeo.login', data);
   // }
 
-  authService.send({ type: 'LOGIN', ...data });
+  authService.send({ type: 'LOGIN', payload: data } as any);
   await waitForState(authService, ['authenticated']);
   return true;
 });
@@ -79,16 +95,6 @@ async function initWorkers(config: SyncConfig) {
     workerData: { config },
   });
 }
-
-let authService: Interpreter<
-  AuthContext,
-  any,
-  EventObject,
-  {
-    value: any;
-    context: AuthContext;
-  }
->;
 
 ipcMain.handle('checkMapgeo', async (event, data: SetupData) => {
   authService.send({ type: 'SETUP', payload: data } as any);

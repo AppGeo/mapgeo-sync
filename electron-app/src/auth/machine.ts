@@ -27,7 +27,7 @@ export type AuthState =
   | { value: 'finishSetup'; context: AuthContext & { host: string } }
   | {
       value: 'login';
-      context: AuthContext & { login: { email: string; password: string } };
+      context: AuthContext & { login: LoginData };
     };
 
 export const authMachine = createMachine<AuthContext, AuthEvent, AuthState>({
@@ -87,7 +87,10 @@ export const authMachine = createMachine<AuthContext, AuthEvent, AuthState>({
                 LOGIN: {
                   target: 'login',
                   actions: assign({
-                    login: (context, event) => event.payload,
+                    login: (context, event) => {
+                      store.set('mapgeo.login', event.payload);
+                      return event.payload;
+                    },
                   }),
                 },
               },

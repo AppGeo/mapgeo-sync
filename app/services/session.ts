@@ -17,6 +17,13 @@ export default class Session extends Service {
   @tracked isAuthenticated = false;
 
   @action
+  async restore() {
+    const isAuthenticated = await ipcRenderer.invoke('restoreAuth');
+    this.isAuthenticated = isAuthenticated;
+    return isAuthenticated;
+  }
+
+  @action
   waitForAuthentication(): Promise<{
     isAuthenticated: boolean;
     route: string;

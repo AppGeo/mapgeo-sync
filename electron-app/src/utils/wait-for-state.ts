@@ -18,19 +18,19 @@ export async function waitForState<T extends Interpreter<any, any, any>>(
       const match = states.find((stateKey) => state.matches(stateKey));
       let end = new Date().getTime();
 
-      time = end - time;
-      console.log(`waitForState time ${time}ms`);
+      const elapsedMs = end - time;
+      console.log(`waitForState time ${elapsedMs}ms`);
 
       if (match) {
         subscription.unsubscribe();
         return resolve(match);
       }
 
-      if (time >= timeout) {
+      if (elapsedMs >= timeout) {
         subscription.unsubscribe();
         reject(
           new Error(
-            `waitForState [${states.join(', ')}] timed out after ${time}ms`
+            `waitForState [${states.join(', ')}] timed out after ${elapsedMs}ms`
           )
         );
       }

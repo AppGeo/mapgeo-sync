@@ -10,23 +10,15 @@ export default class Application extends Route {
   @service('session') declare session: Session;
   @service('platform') declare platform: Platform;
 
-  beforeModel() {
-    return this.session
-      .waitForAuthentication()
-      .then(({ isAuthenticated, route }) => {
-        console.log({ isAuthenticated, route });
-        if (!isAuthenticated) {
-          next(() => {
-            this.router.transitionTo(route || 'setup');
-          });
-          return;
-        }
-
-        return;
-      });
+  async beforeModel() {
+    await this.session.restore();
   }
 
   afterModel() {
-    this.session.setupRedirectEvent();
+    if (!this.session.isAuthenticated) {
+      next(() => {
+        this.router.transitionTo('setup');
+      });
+    }
   }
 }

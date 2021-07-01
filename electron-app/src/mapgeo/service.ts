@@ -80,10 +80,16 @@ export default class MapgeoService {
 
   async login(email: string, password: string) {
     try {
-      const result = await this.#axios.post(`/auth/login`, {
-        email,
-        password,
-      });
+      const result = await this.#axios.post(
+        `/auth/login`,
+        {
+          email,
+          password,
+        },
+        {
+          httpsAgent,
+        }
+      );
 
       this.token = result.data.token;
       this.#axios = axios.create({
