@@ -1,5 +1,6 @@
 import { SetupData } from 'mapgeo-sync-config';
-import { createMachine, assign, AssignAction } from 'xstate';
+import { createMachine, assign } from 'xstate';
+import { store } from './store';
 
 export interface AuthContext {
   config: any;
@@ -104,6 +105,7 @@ export const authMachine = createMachine<AuthContext, AuthEvent, AuthState>({
                   target: '#auth.unauthenticated.idle',
                   actions: assign({
                     host: (context, event) => {
+                      store.set('mapgeo.host', event.payload.mapgeoUrl);
                       return event.payload.mapgeoUrl;
                     },
                   }),

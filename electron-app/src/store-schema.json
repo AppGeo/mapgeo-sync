@@ -2,6 +2,37 @@
   "$ref": "#/definitions/SyncStoreType",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
+    "SyncRule": {
+      "additionalProperties": false,
+      "properties": {
+        "datasetId": {
+          "type": "string"
+        },
+        "schedule": {
+          "additionalProperties": false,
+          "properties": {
+            "rule": {
+              "type": "string"
+            },
+            "running": {
+              "type": "boolean"
+            },
+            "started": {
+              "type": "boolean"
+            }
+          },
+          "type": "object"
+        },
+        "sourceId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "datasetId",
+        "sourceId"
+      ],
+      "type": "object"
+    },
     "SyncStoreType": {
       "additionalProperties": false,
       "properties": {
@@ -66,18 +97,16 @@
           },
           "type": "object"
         },
-        "scheduleRule": {
-          "type": "string"
-        },
-        "scheduleRunning": {
-          "type": "boolean"
-        },
-        "scheduleStarted": {
-          "type": "boolean"
+        "syncRules": {
+          "items": {
+            "$ref": "#/definitions/SyncRule"
+          },
+          "type": "array"
         }
       },
       "required": [
-        "mapgeo"
+        "mapgeo",
+        "syncRules"
       ],
       "type": "object"
     }

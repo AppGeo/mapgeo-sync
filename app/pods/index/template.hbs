@@ -1,28 +1,23 @@
 <div class='space-y-2'>
   <h2 class='font-semibold text-gray-700'>
-    Datasets
+    Sync Rules
   </h2>
 
   <ul class='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3'>
-    {{#each @model.community.datasets as |dataset|}}
+    {{#each @model.syncRules as |rule|}}
       <li class='bg-white shadow-lg rounded-lg'>
-        <LinkTo class='p-4 block' @route='dataset' @model={{dataset.id}}>
-          {{dataset.name}}
-        </LinkTo>
+        <div class='p-4 block'>
+          {{rule.name}}
+        </div>
+      </li>
+    {{else}}
+      <li class='bg-white shadow-lg rounded-lg'>
+        <div class='p-4 block'>
+          <LinkTo @route='rules.create'>
+            Add New Sync Rule
+          </LinkTo>
+        </div>
       </li>
     {{/each}}
   </ul>
 </div>
-
-{{!-- <div class='flex flex-col items-center p-4' {{did-insert this.waitForConfig}}>
-  {{#if @model.config}}
-    <ConfigStatus
-      @config={{@model.config}}
-      @configUpdated={{@model.configUpdated}}
-      @scheduleRule={{@model.scheduleRule}}
-      @selectNewConfig={{this.selectNewConfig}}
-    />
-  {{else}}
-    <WithoutConfig @selectNewConfig={{this.selectNewConfig}} />
-  {{/if}}
-</div> --}}

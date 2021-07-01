@@ -24,12 +24,7 @@ export default class Index extends Route {
       community: this.platform.fetchCommunity(),
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       config: this.electronStore.getValue('config') as Promise<SyncConfig>,
-      configUpdated: this.electronStore.getValue(
-        'configUpdated'
-      ) as Promise<Date>,
-      scheduleRule: this.electronStore.getValue(
-        'scheduleRule'
-      ) as Promise<string>,
+      syncRules: this.electronStore.findSyncRules(),
     });
   }
 }

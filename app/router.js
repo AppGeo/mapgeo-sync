@@ -18,4 +18,8 @@ Router.map(function () {
   });
   this.route('error');
   this.route('loading');
+
+  this.route('rules', function() {
+    this.route('create');
+  });
 });

@@ -45,6 +45,10 @@ let mapgeoService: MapgeoService;
 
 registerMapgeoHandlers(ipcMain);
 
+ipcMain.handle('store/findSyncRules', (event, key: string) => {
+  return store.get('syncRules');
+});
+
 ipcMain.handle('getStoreValue', (event, key: string) => {
   return store.get(key);
 });
@@ -205,9 +209,8 @@ function createBrowserWindow() {
     console.log('did-finish-load');
 
     // Start the service
-    setTimeout(() => {
-      authService.start();
-    }, 1000);
+    console.log('starting auth service');
+    authService.start();
 
     let currentConfig = store.get('config') as SyncConfig;
     mainWindow.webContents.send('config-loaded', currentConfig);
@@ -324,6 +327,7 @@ function createBrowserWindow() {
     e.preventDefault();
     mainWindow = null;
     // Stop the service
+    console.log('window closed, stopping auth service');
     authService.stop();
   });
 

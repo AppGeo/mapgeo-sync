@@ -57,3 +57,13 @@ export interface LoginData {
   email: string;
   password: string;
 }
+
+export interface SyncRule {
+  datasetId: string;
+  sourceId: string;
+  schedule?: {
+    rule?: string;
+    started?: boolean;
+    running?: boolean;
+  };
+}

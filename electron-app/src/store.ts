@@ -1,10 +1,7 @@
 import * as Store from 'electron-store';
-import * as schema from './store-schema.json';
+import { SyncRule } from '../../types/mapgeo-sync-config';
 
 export type SyncStoreType = {
-  scheduleRule?: string;
-  scheduleStarted?: boolean;
-  scheduleRunning?: boolean;
   configUpdate?: Date;
   mapgeo: {
     host?: string;
@@ -17,6 +14,7 @@ export type SyncStoreType = {
       datasets: { id: string; name: string }[];
     };
   };
+  syncRules: SyncRule[];
 };
 
 export type SyncStore = Store<SyncStoreType>;
@@ -33,11 +31,9 @@ export const store = new Store<SyncStoreType>({
       additionalProperties: false,
       properties: {
         config: {
-          additionalProperties: false,
           properties: {
             datasets: {
               items: {
-                additionalProperties: false,
                 properties: {
                   id: {
                     type: 'string',
@@ -77,14 +73,34 @@ export const store = new Store<SyncStoreType>({
       },
       type: 'object',
     },
-    scheduleRule: {
-      type: 'string',
-    },
-    scheduleRunning: {
-      type: 'boolean',
-    },
-    scheduleStarted: {
-      type: 'boolean',
+    syncRules: {
+      items: {
+        type: 'object',
+        properties: {
+          datasetId: {
+            type: 'string',
+          },
+          schedule: {
+            additionalProperties: false,
+            properties: {
+              rule: {
+                type: 'string',
+              },
+              running: {
+                type: 'boolean',
+              },
+              started: {
+                type: 'boolean',
+              },
+            },
+            type: 'object',
+          },
+          sourceId: {
+            type: 'string',
+          },
+        },
+      },
+      type: 'array',
     },
   },
 });
