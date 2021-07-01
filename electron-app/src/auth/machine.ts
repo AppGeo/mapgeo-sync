@@ -1,6 +1,6 @@
-import { SetupData } from 'mapgeo-sync-config';
+import { LoginData, SetupData } from 'mapgeo-sync-config';
 import { createMachine, assign } from 'xstate';
-import { store } from './store';
+import { store } from '../store';
 
 export interface AuthContext {
   config: any;
@@ -14,7 +14,7 @@ export interface AuthContext {
 
 export type AuthEvent =
   | { type: 'SETUP'; payload: SetupData }
-  | { type: 'LOGIN' }
+  | { type: 'LOGIN'; payload: LoginData }
   | { type: 'LOGOUT' };
 
 export type AuthState =
@@ -53,7 +53,6 @@ export const authMachine = createMachine<AuthContext, AuthEvent, AuthState>({
         },
         withConfig: {
           initial: 'idle',
-          entry: 'initMapgeoService',
           states: {
             idle: {
               always: [
@@ -77,9 +76,19 @@ export const authMachine = createMachine<AuthContext, AuthEvent, AuthState>({
               },
             },
             validated: {
+              entry: 'sendValidated',
+              always: [
+                {
+                  cond: 'hasLogin',
+                  target: 'login',
+                },
+              ],
               on: {
                 LOGIN: {
                   target: 'login',
+                  actions: assign({
+                    login: (context, event) => event.payload,
+                  }),
                 },
               },
             },

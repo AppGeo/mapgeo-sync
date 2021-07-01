@@ -24,11 +24,12 @@ import type {
 } from 'mapgeo-sync-config';
 import Scheduler from './scheduler';
 import MapgeoService from './mapgeo/service';
-import { interpret } from 'xstate';
-import { authMachine } from './auth.machine';
+import { EventObject, interpret, Interpreter } from 'xstate';
+import { AuthContext, authMachine } from './auth/machine';
 import { store } from './store';
 import { register as registerMapgeoHandlers } from './mapgeo/handlers';
 import { waitForState } from './utils/wait-for-state';
+import { createService as createAuthService } from './auth/service';
 
 const scheduler = new Scheduler({
   store,
@@ -58,12 +59,15 @@ ipcMain.handle('login', async (event, data: LoginData) => {
     throw new Error('MapGeoService has not been setup');
   }
 
-  const isAuthenticated = await mapgeoService.login(data.email, data.password);
+  // const isAuthenticated = await mapgeoService.login(data.email, data.password);
 
-  if (isAuthenticated) {
-    store.set('mapgeo.login', data);
-  }
-  return isAuthenticated;
+  // if (isAuthenticated) {
+  //   store.set('mapgeo.login', data);
+  // }
+
+  authService.send({ type: 'LOGIN', ...data });
+  await waitForState(authService, ['authenticated']);
+  return true;
 });
 
 async function initWorkers(config: SyncConfig) {
@@ -76,81 +80,15 @@ async function initWorkers(config: SyncConfig) {
   });
 }
 
-const authService = interpret(
-  authMachine
-    .withContext({
-      config: store.get('mapgeo.config'),
-      host: store.get('mapgeo.host'),
-      login: store.get('mapgeo.login'),
-    })
-    .withConfig({
-      guards: {
-        hasCommunityConfig(context) {
-          return (
-            Boolean(store.get<string>('mapgeo.host')) || Boolean(context.host)
-          );
-        },
-        needsMapgeoService(context) {
-          return (
-            (mapgeoService === undefined &&
-              Boolean(store.get<string>('mapgeo.host'))) ||
-            Boolean(context.host)
-          );
-        },
-        hasLogin() {
-          const mapgeo = store.get('mapgeo');
-          return Boolean(mapgeo?.login);
-        },
-      },
-      actions: {
-        initMapgeoService() {},
-        sendIsUnauthenticated() {
-          mainWindow.webContents.send('authenticated', {
-            isAuthenticated: false,
-          });
-        },
-        authenticated() {
-          mainWindow.webContents.send('authenticated', {
-            isAuthenticated: true,
-          });
-        },
-        authenticationFailed() {
-          mainWindow.webContents.send('authenticated', {
-            isAuthenticated: false,
-          });
-        },
-        needsSetup() {
-          mainWindow.webContents.send('authenticated', {
-            isAuthenticated: false,
-          });
-        },
-        setupMapgeoFailed(context) {
-          console.log('setupError', context.setupError);
-          mainWindow.webContents.send('authenticated', {
-            isAuthenticated: false,
-            error: context.setupError?.message,
-          });
-        },
-        logout() {
-          mapgeoService = undefined;
-          store.clear();
-        },
-      },
-      services: {
-        async setupMapgeoService(context) {
-          mapgeoService = await MapgeoService.fromUrl(context.host);
-          store.set('mapgeo.config', mapgeoService.config.community);
-          return mapgeoService.config.community;
-        },
-        loginMapgeo(context) {
-          return mapgeoService.login(
-            context.login.email,
-            context.login.password
-          );
-        },
-      },
-    })
-).onTransition((state) => console.log(state.value));
+let authService: Interpreter<
+  AuthContext,
+  any,
+  EventObject,
+  {
+    value: any;
+    context: AuthContext;
+  }
+>;
 
 ipcMain.handle('checkMapgeo', async (event, data: SetupData) => {
   authService.send({ type: 'SETUP', payload: data } as any);
@@ -208,9 +146,15 @@ function createBrowserWindow() {
   mainWindow.webContents.on('did-finish-load', async () => {
     console.log('did-finish-load');
 
-    // Start the service
+    // create/tart the service
+    authService = createAuthService({
+      send: (event: string, payload: unknown) =>
+        mainWindow.webContents.send(event, payload),
+      getMapgeoService: () => mapgeoService,
+      setMapgeoService: (value) => (mapgeoService = value),
+    });
     console.log('starting auth service');
-    authService.start();
+    console.log(authService.start().state.value);
 
     let currentConfig = store.get('config') as SyncConfig;
     mainWindow.webContents.send('config-loaded', currentConfig);

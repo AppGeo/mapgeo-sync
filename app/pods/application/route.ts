@@ -11,15 +11,22 @@ export default class Application extends Route {
   @service('platform') declare platform: Platform;
 
   beforeModel() {
-    return this.session.waitForAuthentication().then((isAuthenticated) => {
-      if (!isAuthenticated) {
-        next(() => {
-          this.router.transitionTo('setup');
-        });
-        return;
-      }
+    return this.session
+      .waitForAuthentication()
+      .then(({ isAuthenticated, route }) => {
+        console.log({ isAuthenticated, route });
+        if (!isAuthenticated) {
+          next(() => {
+            this.router.transitionTo(route || 'setup');
+          });
+          return;
+        }
 
-      return;
-    });
+        return;
+      });
+  }
+
+  afterModel() {
+    this.session.setupRedirectEvent();
   }
 }
