@@ -21,6 +21,7 @@ import type {
   QueryAction,
   SetupData,
   SyncConfig,
+  SyncRule,
 } from 'mapgeo-sync-config';
 import Scheduler from './scheduler';
 import MapgeoService from './mapgeo/service';
@@ -55,8 +56,18 @@ let authService: Interpreter<
 
 registerMapgeoHandlers(ipcMain);
 
-ipcMain.handle('store/findSyncRules', (event, key: string) => {
-  return store.get('syncRules');
+ipcMain.handle('store/findSyncRules', (event) => {
+  return store.get('syncRules') || [];
+});
+
+ipcMain.handle('store/addSyncRule', (event, rule: SyncRule) => {
+  let rules = store.get('syncRules');
+  if (!rules) {
+    rules = [];
+  }
+  rules.push(rule);
+  store.set('syncRules', rules);
+  return rules;
 });
 
 ipcMain.handle('getStoreValue', (event, key: string) => {
@@ -147,20 +158,30 @@ function createBrowserWindow() {
 
   // Load the ember application
   mainWindow.loadURL(emberAppURL);
+  authService = createAuthService({
+    send: (event: string, payload: unknown) =>
+      mainWindow.webContents.send(event, payload),
+    getMapgeoService: () => mapgeoService,
+    setMapgeoService: (value) => (mapgeoService = value),
+  });
+  console.log('starting auth service');
+  console.log(authService.start().state.value);
 
   // Ember app has loaded, send an event
   mainWindow.webContents.on('did-finish-load', async () => {
     console.log('did-finish-load');
 
     // create/tart the service
-    authService = createAuthService({
-      send: (event: string, payload: unknown) =>
-        mainWindow.webContents.send(event, payload),
-      getMapgeoService: () => mapgeoService,
-      setMapgeoService: (value) => (mapgeoService = value),
-    });
-    console.log('starting auth service');
-    console.log(authService.start().state.value);
+    if (!authService) {
+      authService = createAuthService({
+        send: (event: string, payload: unknown) =>
+          mainWindow.webContents.send(event, payload),
+        getMapgeoService: () => mapgeoService,
+        setMapgeoService: (value) => (mapgeoService = value),
+      });
+      console.log('starting auth service');
+      console.log(authService.start().state.value);
+    }
 
     let currentConfig = store.get('config') as SyncConfig;
     mainWindow.webContents.send('config-loaded', currentConfig);
@@ -279,6 +300,7 @@ function createBrowserWindow() {
     // Stop the service
     console.log('window closed, stopping auth service');
     authService.stop();
+    authService = undefined;
   });
 
   return mainWindow;

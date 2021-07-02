@@ -33,6 +33,15 @@ The project uses an addon called `ember-electron` that facilitates the interacti
 
 If you want to update the main table of a single table setup, the action must set `FormatAsGeoJson` to `true`, this way the geometry is inserted.
 
+## Running
+
+When running MapGeo with HTTPS locally, you need to copy the `caPath` when you start MapGeo.
+Then start the electron app (`cd electron-app/`) with something like this, remember to replace the cert path:`
+
+```sh
+NODE_EXTRA_CA_CERTS="/Users/iradchenko/Library/Application Support/devcert/certificate-authority/certificate.cert" yarn debug
+```
+
 ## Changed Config
 
 - `UploadActions` now requires a `DbType` filed, valid values include 'pg'

@@ -1,7 +1,7 @@
 import Route from '@ember/routing/route';
 import { inject as service } from '@ember/service';
 import RouterService from '@ember/routing/router-service';
-import { SyncConfig } from 'mapgeo-sync-config';
+import { SyncConfig, SyncRule } from 'mapgeo-sync-config';
 import ElectronStore from 'mapgeo-sync/services/electron-store';
 import { hash } from 'rsvp';
 import Session from 'mapgeo-sync/services/session';
@@ -9,8 +9,7 @@ import Platform from 'mapgeo-sync/services/platform';
 
 export interface Model {
   config: SyncConfig;
-  configUpdated?: Date;
-  scheduleRule?: string;
+  syncRules: SyncRule[];
 }
 
 export default class Index extends Route {

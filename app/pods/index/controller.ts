@@ -1,31 +1,45 @@
 import Controller from '@ember/controller';
 import { inject as service } from '@ember/service';
 import { action } from '@ember/object';
+import { task } from 'ember-concurrency';
+import Platform from 'mapgeo-sync/services/platform';
+import { tracked, cached } from '@glimmer/tracking';
+import { Dataset, TableMapping } from 'mapgeo';
 import ElectronStore from 'mapgeo-sync/services/electron-store';
-import type { IpcRendererEvent } from 'electron';
-import type { SyncConfig } from 'mapgeo-sync-config';
 import { Model } from './route';
-// Node modules
-const { ipcRenderer } = requireNode('electron');
+import { getAllMappings } from 'mapgeo-sync/utils/dataset-mapping';
+
+interface RuleInput {
+  dataset: Dataset;
+  mapping: TableMapping;
+}
 
 export default class Index extends Controller {
-  @service declare electronStore: ElectronStore;
+  @service('electron-store') declare electronStore: ElectronStore;
+  @service('platform') declare platform: Platform;
 
   declare model: Model;
+  @tracked dataset?: Dataset;
 
-  @action
-  waitForConfig() {
-    ipcRenderer.on(
-      'config-loaded',
-      (_event: IpcRendererEvent, config: SyncConfig) => {
-        this.model.config = config;
-      }
-    );
+  @cached
+  get mappings() {
+    return this.dataset ? getAllMappings(this.dataset) : [];
   }
 
   @action
-  selectNewConfig() {
-    ipcRenderer.send('select-config');
+  async createRule(ruleInput: RuleInput) {
+    const rules = await this.electronStore.addSyncRule({
+      datasetId: ruleInput.dataset.id,
+      mappingId: ruleInput.mapping.pk,
+    });
+    this.model.syncRules = rules;
+  }
+
+  @task
+  async findDataset(datasetId: string) {
+    const dataset = await this.platform.findDataset(datasetId);
+    this.dataset = dataset;
+    return dataset;
   }
 }
 

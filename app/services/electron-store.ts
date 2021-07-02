@@ -16,6 +16,12 @@ export default class ElectronStore extends Service {
     const value = await ipcRenderer.invoke('store/findSyncRules');
     return value;
   }
+
+  @action
+  async addSyncRule(rule: Record<string, unknown>): Promise<SyncRule[]> {
+    const rules = await ipcRenderer.invoke('store/addSyncRule', rule);
+    return rules;
+  }
 }
 
 // DO NOT DELETE: this is how TypeScript knows how to look up your services.

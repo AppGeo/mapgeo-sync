@@ -12,12 +12,78 @@
       </li>
     {{else}}
       <li class='bg-white rounded-lg p-4 flex items-center justify-center'>
-        <Button @intent='primary' @isRenderless={{true}} as |btn|>
-          <LinkTo class={{btn.classNames}} @route='rules.create'>
-            Add New Sync Rule
-          </LinkTo>
+        <Button
+          @intent='primary'
+          {{on 'click' (set this.isCreateRuleOpen true)}}
+        >
+          Add New Sync Rule
         </Button>
       </li>
     {{/each}}
   </ul>
 </div>
+
+<Modal
+  @isOpen={{this.isCreateRuleOpen}}
+  @onClose={{set this.isCreateRuleOpen false}} as |m|
+>
+  <m.Header>
+    New Sync Rule
+  </m.Header>
+
+  <ChangesetForm
+    @changeset={{changeset (hash)}}
+    @onSubmit={{this.createRule}} as |Form changeset|
+  >
+    <m.Body>
+      <Form.Select
+        @label='Dataset'
+        @fieldName='dataset'
+        @options={{@model.community.datasets}}
+        @containerClass='mt-4' as |dataset|
+      >
+        {{dataset.name}}
+      </Form.Select>
+
+      {{#if changeset.dataset}}
+        {{did-insert (perform this.findDataset changeset.dataset.id)}}
+        {{#if this.findDataset.isRunning}}
+          Loading dataset config..
+        {{else if this.dataset}}
+          <Form.Select
+            @label='Mapping'
+            @fieldName='mapping'
+            @options={{this.mappings}}
+            @containerClass='mt-4' as |mapping|
+          >
+            {{mapping.name}}
+          </Form.Select>
+        {{/if}}
+      {{/if}}
+
+      {{#if changeset.mapping}}
+        <Form.RadioGroup
+          @fieldName='syncType'
+          @label='Sync Type'
+          @containerClass='mt-4' as |Radio|
+        >
+          <Radio @label='Database' @value='database' />
+          <Radio @label='File' @value='file' />
+        </Form.RadioGroup>
+      {{/if}}
+    </m.Body>
+
+    <m.Footer class='flex justify-between'>
+      <Button
+        @appearance='minimal'
+        class='mr-4'
+        {{on 'click' (set this.isCreateRuleOpen false)}}
+      >
+        Cancel
+      </Button>
+      <Button @type='submit' @intent='primary'>
+        Create Rule
+      </Button>
+    </m.Footer>
+  </ChangesetForm>
+</Modal>

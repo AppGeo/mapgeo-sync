@@ -110,7 +110,9 @@ export default class MapgeoService {
   }
 
   async findDataset(id: string) {
-    const result = await this.#axios.get(`/api/config/datasets/${id}`);
+    const result = await this.#axios.get(`/api/config/datasets/${id}`, {
+      httpsAgent,
+    });
     debugger;
     return result.data.dataset;
   }
