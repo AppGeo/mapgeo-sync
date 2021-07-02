@@ -135,7 +135,11 @@
         placeholder='Test Database'
       />
 
-      <Form.RadioGroup @fieldName='sourceType' @label='Source Type' as |Radio|>
+      <Form.RadioGroup
+        @fieldName='sourceType'
+        @label='Source Type'
+        @containerClass='mt-4' as |Radio|
+      >
         <Radio @label='Database' @value='database' />
         <Radio @label='File' @value='file' />
       </Form.RadioGroup>

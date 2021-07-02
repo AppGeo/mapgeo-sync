@@ -25,7 +25,9 @@ export default class Index extends Controller {
 
   databaseTypes = databaseTypes;
   declare model: Model;
+
   @tracked isCreateRuleOpen = false;
+  @tracked isSyncSourceOpen = false;
   @tracked dataset?: Dataset;
 
   @cached
@@ -52,6 +54,7 @@ export default class Index extends Controller {
       id: v4(),
     });
     this.model.sources = sources;
+    this.isSyncSourceOpen = false;
   }
 
   @task
