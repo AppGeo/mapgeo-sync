@@ -20,6 +20,7 @@ import type {
   LoginData,
   QueryAction,
   SetupData,
+  Source,
   SyncConfig,
   SyncRule,
 } from 'mapgeo-sync-config';
@@ -68,6 +69,36 @@ ipcMain.handle('store/addSyncRule', (event, rule: SyncRule) => {
   rules.push(rule);
   store.set('syncRules', rules);
   return rules;
+});
+
+ipcMain.handle('store/findSources', (event) => {
+  return store.get('sources') || [];
+});
+
+ipcMain.handle('store/addSource', (event, source: Source) => {
+  let sources = store.get('sources');
+  if (!sources) {
+    sources = [];
+  }
+  sources.push(source);
+  store.set('sources', sources);
+  return sources;
+});
+
+ipcMain.handle('selectSourceFile', async (event, sourceId: string) => {
+  const sources = store.get('sources');
+  const source = sources.find((source) => source.id === sourceId);
+
+  if (source.sourceType === 'file') {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      defaultPath: source.folder,
+      properties: ['openFile', 'openDirectory'],
+    });
+
+    return result.filePaths[0];
+  }
+
+  return [];
 });
 
 ipcMain.handle('getStoreValue', (event, key: string) => {

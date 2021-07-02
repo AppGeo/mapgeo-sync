@@ -59,11 +59,32 @@ export interface LoginData {
 }
 
 export interface SyncRule {
+  id: string;
   datasetId: string;
   sourceId: string;
+  mappingId: string;
   schedule?: {
     rule?: string;
     started?: boolean;
     running?: boolean;
   };
 }
+
+export type DbType = 'pg' | 'oracle' | 'mysql' | 'mssql';
+
+export interface SourceDbType {
+  id: string;
+  name: string;
+  sourceType: 'database';
+  databaseType: DbType;
+  connectionString: string;
+}
+
+export interface SourceFileType {
+  id: string;
+  name: string;
+  sourceType: 'file';
+  folder: string;
+}
+
+export type Source = SourceDbType | SourceFileType;

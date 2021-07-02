@@ -4,21 +4,28 @@ import { action } from '@ember/object';
 import { task } from 'ember-concurrency';
 import Platform from 'mapgeo-sync/services/platform';
 import { tracked, cached } from '@glimmer/tracking';
+import { v4 } from 'uuid';
 import { Dataset, TableMapping } from 'mapgeo';
 import ElectronStore from 'mapgeo-sync/services/electron-store';
 import { Model } from './route';
 import { getAllMappings } from 'mapgeo-sync/utils/dataset-mapping';
+import { DbType, Source } from 'mapgeo-sync-config';
+
+const databaseTypes: DbType[] = ['pg', 'oracle', 'mysql', 'mssql'];
 
 interface RuleInput {
   dataset: Dataset;
   mapping: TableMapping;
+  source: Source;
 }
 
 export default class Index extends Controller {
   @service('electron-store') declare electronStore: ElectronStore;
   @service('platform') declare platform: Platform;
 
+  databaseTypes = databaseTypes;
   declare model: Model;
+  @tracked isCreateRuleOpen = false;
   @tracked dataset?: Dataset;
 
   @cached
@@ -31,8 +38,20 @@ export default class Index extends Controller {
     const rules = await this.electronStore.addSyncRule({
       datasetId: ruleInput.dataset.id,
       mappingId: ruleInput.mapping.pk,
+      sourceId: ruleInput.source.id,
+      id: v4(),
     });
     this.model.syncRules = rules;
+    this.isCreateRuleOpen = false;
+  }
+
+  @action
+  async createSource(sourceInput: Source) {
+    const sources = await this.electronStore.addSource({
+      ...sourceInput,
+      id: v4(),
+    });
+    this.model.sources = sources;
   }
 
   @task

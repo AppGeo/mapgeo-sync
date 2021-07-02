@@ -1,6 +1,6 @@
 import { action } from '@ember/object';
 import Service from '@ember/service';
-import { SyncRule } from 'mapgeo-sync-config';
+import { Source, SyncRule } from 'mapgeo-sync-config';
 const { ipcRenderer } = requireNode('electron/renderer');
 
 export default class ElectronStore extends Service {
@@ -18,9 +18,21 @@ export default class ElectronStore extends Service {
   }
 
   @action
-  async addSyncRule(rule: Record<string, unknown>): Promise<SyncRule[]> {
+  async addSyncRule(rule: SyncRule): Promise<SyncRule[]> {
     const rules = await ipcRenderer.invoke('store/addSyncRule', rule);
     return rules;
+  }
+
+  @action
+  async findSources(): Promise<Source[]> {
+    const sources = await ipcRenderer.invoke('store/findSources');
+    return sources;
+  }
+
+  @action
+  async addSource(source: Source): Promise<Source[]> {
+    const sources = await ipcRenderer.invoke('store/addSource', source);
+    return sources;
   }
 }
 

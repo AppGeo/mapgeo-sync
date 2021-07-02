@@ -7,19 +7,28 @@
     {{#each @model.syncRules as |rule|}}
       <li class='bg-white shadow-lg rounded-lg'>
         <div class='p-4 block'>
-          {{rule.name}}
+          {{rule.datasetId}}: {{rule.mappingId}}
         </div>
       </li>
-    {{else}}
-      <li class='bg-white rounded-lg p-4 flex items-center justify-center'>
+    {{/each}}
+
+    <li class='bg-white rounded-lg p-4 flex items-center justify-center'>
+      <div class='grid grid-cols-2 gap-2'>
         <Button
           @intent='primary'
           {{on 'click' (set this.isCreateRuleOpen true)}}
         >
           Add New Sync Rule
         </Button>
-      </li>
-    {{/each}}
+
+        <Button
+          @intent='primary'
+          {{on 'click' (set this.isSyncSourceOpen true)}}
+        >
+          Add New Source
+        </Button>
+      </div>
+    </li>
   </ul>
 </div>
 
@@ -62,14 +71,32 @@
       {{/if}}
 
       {{#if changeset.mapping}}
-        <Form.RadioGroup
-          @fieldName='syncType'
-          @label='Sync Type'
-          @containerClass='mt-4' as |Radio|
+        <Form.Select
+          @label='Source'
+          @fieldName='source'
+          @options={{@model.sources}}
+          @containerClass='mt-4' as |source|
         >
-          <Radio @label='Database' @value='database' />
-          <Radio @label='File' @value='file' />
-        </Form.RadioGroup>
+          {{source.name}} ({{source.sourceType}})
+        </Form.Select>
+      {{/if}}
+
+      {{#if changeset.source}}
+        {{#if (eq changeset.source.sourceType 'database')}}
+          <Form.Textarea
+            @label='Select Statement'
+            @fieldName='selectStatement'
+            @containerClass='mt-4'
+            rows='5'
+          />
+        {{else if (eq changeset.source.sourceType 'file')}}
+          <Form.Input
+            @label='File'
+            @fieldName='file'
+            type='file'
+            @containerClass='mt-4'
+          />
+        {{/if}}
       {{/if}}
     </m.Body>
 
@@ -86,4 +113,79 @@
       </Button>
     </m.Footer>
   </ChangesetForm>
+</Modal>
+
+<Modal
+  @isOpen={{this.isSyncSourceOpen}}
+  @onClose={{set this.isSyncSourceOpen false}} as |m|
+>
+  <m.Header>
+    Sync Sources
+  </m.Header>
+
+  <m.Body>
+    <ChangesetForm
+      @changeset={{changeset (hash)}}
+      @onSubmit={{this.createSource}} as |Form changeset|
+    >
+      <Form.Input
+        @label='Name'
+        @fieldName='name'
+        @containerClass='mt-4'
+        placeholder='Test Database'
+      />
+
+      <Form.RadioGroup @fieldName='sourceType' @label='Source Type' as |Radio|>
+        <Radio @label='Database' @value='database' />
+        <Radio @label='File' @value='file' />
+      </Form.RadioGroup>
+
+      {{#if (eq changeset.sourceType 'database')}}
+        <Form.Select
+          @label='Database Type'
+          @fieldName='databaseType'
+          @options={{this.databaseTypes}}
+          @containerClass='mt-4' as |db|
+        >
+          {{db}}
+        </Form.Select>
+
+        {{#if changeset.databaseType}}
+          <Form.Input
+            @label='Connection String'
+            @fieldName='connectionString'
+            @containerClass='mt-4'
+            placeholder='host=HOST port=5432 dbname=YOUR_DB connect_timeout=10'
+          />
+        {{/if}}
+      {{else if (eq changeset.sourceType 'file')}}
+        <Form.Input
+          @label='Folder'
+          @fieldName='folder'
+          @containerClass='mt-4'
+          type='file'
+          webkitdirectory
+        />
+      {{/if}}
+
+      <Button
+        @type='submit'
+        @intent='primary'
+        class='mt-4'
+        disabled={{not (or changeset.folder changeset.connectionString)}}
+      >
+        Add Source
+      </Button>
+    </ChangesetForm>
+  </m.Body>
+
+  <m.Footer>
+    <Button
+      @appearance='minimal'
+      class='mr-4'
+      {{on 'click' (set this.isSyncSourceOpen false)}}
+    >
+      Close
+    </Button>
+  </m.Footer>
 </Modal>
