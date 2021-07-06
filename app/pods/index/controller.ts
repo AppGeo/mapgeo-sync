@@ -9,7 +9,7 @@ import { Dataset, TableMapping } from 'mapgeo';
 import ElectronStore from 'mapgeo-sync/services/electron-store';
 import { Model } from './route';
 import { getAllMappings } from 'mapgeo-sync/utils/dataset-mapping';
-import { DbType, Source } from 'mapgeo-sync-config';
+import { DbType, Source, SyncRule } from 'mapgeo-sync-config';
 
 const databaseTypes: DbType[] = ['pg', 'oracle', 'mysql', 'mssql'];
 
@@ -17,6 +17,7 @@ interface RuleInput {
   dataset: Dataset;
   mapping: TableMapping;
   source: Source;
+  selectStatement?: string;
 }
 
 export default class Index extends Controller {
@@ -26,10 +27,12 @@ export default class Index extends Controller {
   databaseTypes = databaseTypes;
   declare model: Model;
 
+  @tracked syncRules?: SyncRule[];
   @tracked isAddSourceVisible = false;
   @tracked isCreateRuleOpen = false;
   @tracked isSyncSourceOpen = false;
   @tracked dataset?: Dataset;
+  @tracked ruleInput: Partial<RuleInput> = {};
 
   @cached
   get mappings() {
@@ -42,9 +45,12 @@ export default class Index extends Controller {
       datasetId: ruleInput.dataset.id,
       mappingId: ruleInput.mapping.pk,
       sourceId: ruleInput.source.id,
+      sourceConfig: {
+        selectStatement: ruleInput.selectStatement as string,
+      },
       id: v4(),
     });
-    this.model.syncRules = rules;
+    this.syncRules = rules;
     this.isCreateRuleOpen = false;
   }
 

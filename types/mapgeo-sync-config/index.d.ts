@@ -58,11 +58,20 @@ export interface LoginData {
   password: string;
 }
 
+export interface SyncDbConfig {
+  selectStatement: string;
+}
+
+export interface SyncFileConfig {
+  filePath: string;
+}
+
 export interface SyncRule {
   id: string;
   datasetId: string;
   sourceId: string;
   mappingId: string;
+  sourceConfig: SyncDbConfig | SyncFileConfig;
   schedule?: {
     rule?: string;
     started?: boolean;

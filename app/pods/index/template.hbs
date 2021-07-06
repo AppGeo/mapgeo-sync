@@ -4,7 +4,7 @@
   </h2>
 
   <ul class='grid grid-cols-1 gap-4'>
-    {{#each @model.syncRules as |rule|}}
+    {{#each (or this.syncRules @model.syncRules) as |rule|}}
       <li class='bg-white shadow-lg rounded-lg'>
         <div class='p-4 block'>
           {{rule.datasetId}}: {{rule.mappingId}}
@@ -41,7 +41,7 @@
   </m.Header>
 
   <ChangesetForm
-    @changeset={{changeset (hash)}}
+    @changeset={{changeset this.ruleInput}}
     @onSubmit={{this.createRule}} as |Form changeset|
   >
     <m.Body>
@@ -77,7 +77,12 @@
           @options={{@model.sources}}
           @containerClass='mt-4' as |source|
         >
-          {{source.name}} ({{source.sourceType}})
+          {{source.name}}
+          {{#if (eq source.sourceType 'database')}}
+            ({{source.sourceType}}: {{source.databaseType}})
+          {{else}}
+            ({{source.sourceType}})
+          {{/if}}
         </Form.Select>
       {{/if}}
 
@@ -87,6 +92,7 @@
             @label='Select Statement'
             @fieldName='selectStatement'
             @containerClass='mt-4'
+            placeholder='select *, ST_AsGeoJSON(geom) as the_geom from "sync-test"'
             rows='5'
           />
         {{else if (eq changeset.source.sourceType 'file')}}
