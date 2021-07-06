@@ -110,7 +110,7 @@ export default class MapgeoService {
   async findDataset(id: string) {
     const result = await this.#fetch(`/api/config/datasets/${id}`);
     debugger;
-    return result.data.dataset;
+    return result.dataset;
   }
 
   async notifyUploader({
@@ -137,8 +137,8 @@ export default class MapgeoService {
           }),
         }
       );
-      console.log('notifyUploader: ', result.data);
-      return result.data as CartoDirectResult;
+      console.log('notifyUploader: ', result);
+      return result as CartoDirectResult;
     } catch (e) {
       console.log('notifyUploader error: ', e.data);
       throw e;
@@ -151,7 +151,7 @@ export default class MapgeoService {
 
     switch (result.status) {
       case 200: {
-        response = result.data;
+        response = result;
         break;
       }
 
@@ -184,7 +184,7 @@ export default class MapgeoService {
 
     switch (result.status) {
       case 200: {
-        response = result.data;
+        response = result;
         response.deleted = 1;
         break;
       }
