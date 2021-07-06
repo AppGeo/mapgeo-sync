@@ -6,8 +6,18 @@
   <ul class='grid grid-cols-1 gap-4'>
     {{#each (or this.syncRules @model.syncRules) as |rule|}}
       <li class='bg-white shadow-lg rounded-lg'>
-        <div class='p-4 block'>
-          {{rule.datasetId}}: {{rule.mappingId}}
+        <div class='p-4 flex justify-between items-center'>
+          <div>
+            {{rule.datasetId}}: {{rule.mappingId}}
+          </div>
+
+          <Button
+            @size='sm'
+            @appearance='outlined'
+            {{on 'click' (fn this.runRule rule)}}
+          >
+            Run
+          </Button>
         </div>
       </li>
     {{/each}}

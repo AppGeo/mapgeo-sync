@@ -65,6 +65,11 @@ export default class Index extends Controller {
     this.isAddSourceVisible = false;
   }
 
+  @action
+  runRule(rule: SyncRule) {
+    this.platform.runSyncRule(rule);
+  }
+
   @task
   async findDataset(datasetId: string) {
     const dataset = await this.platform.findDataset(datasetId);

@@ -1,5 +1,6 @@
 import { action } from '@ember/object';
 import Service from '@ember/service';
+import { SyncRule } from 'mapgeo-sync-config';
 const { ipcRenderer } = requireNode('electron/renderer');
 
 export default class Platform extends Service {
@@ -23,6 +24,11 @@ export default class Platform extends Service {
   async findDataset(id: string) {
     const value = await ipcRenderer.invoke('mapgeo/findDataset', id);
     return value;
+  }
+
+  @action
+  runSyncRule(rule: SyncRule) {
+    ipcRenderer.send('run-action', rule);
   }
 
   @action

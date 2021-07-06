@@ -75,6 +75,30 @@
       ],
       "type": "object"
     },
+    "SyncDbConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "selectStatement": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "selectStatement"
+      ],
+      "type": "object"
+    },
+    "SyncFileConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "filePath": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "filePath"
+      ],
+      "type": "object"
+    },
     "SyncRule": {
       "additionalProperties": false,
       "properties": {
@@ -102,6 +126,16 @@
           },
           "type": "object"
         },
+        "sourceConfig": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/SyncDbConfig"
+            },
+            {
+              "$ref": "#/definitions/SyncFileConfig"
+            }
+          ]
+        },
         "sourceId": {
           "type": "string"
         }
@@ -110,7 +144,8 @@
         "id",
         "datasetId",
         "sourceId",
-        "mappingId"
+        "mappingId",
+        "sourceConfig"
       ],
       "type": "object"
     },
