@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+import fetch, { RequestInit } from 'node-fetch';
 import * as https from 'https';
 
 let service: MapgeoService;
@@ -73,7 +73,7 @@ export default class MapgeoService {
     this.#headers = headers;
   }
 
-  async #fetch(url: string, options: Record<string, unknown> = {}) {
+  async #fetch(url: string, options: RequestInit = {}) {
     const baseUrl = this.#host;
     const response = await fetch(`${baseUrl}${url}`, {
       ...options,
@@ -93,7 +93,7 @@ export default class MapgeoService {
         }),
       });
 
-      this.token = result.data.token;
+      this.token = result.token;
       this.#headers = { Authorization: `Bearer ${this.token}` };
       return true;
     } catch (e) {
