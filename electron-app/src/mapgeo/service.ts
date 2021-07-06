@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from 'axios';
+import fetch from 'node-fetch';
 import * as https from 'https';
 
 let service: MapgeoService;
@@ -36,7 +36,8 @@ export default class MapgeoService {
   host: string;
   token: string;
   config: Record<string, unknown>;
-  #axios: AxiosInstance;
+  #headers: Record<string, string> = {};
+  #host: string = '';
 
   static async fromUrl(host: string) {
     // cached instance
@@ -45,13 +46,11 @@ export default class MapgeoService {
     }
 
     try {
-      const result = await axios.get<{ community: Record<string, unknown> }>(
-        `${host}/api/config/current`,
-        {
-          httpsAgent,
-        }
-      );
-      const config = result.status < 400 && result.data;
+      const result = await fetch(`${host}/api/config/current`, {
+        agent: httpsAgent,
+      });
+      const data = await result.json();
+      const config = result.status < 400 && data;
 
       if (config) {
         const instance = new MapgeoService(host, config);
@@ -70,33 +69,32 @@ export default class MapgeoService {
 
     this.host = host;
     this.config = config;
-    this.#axios = axios.create({
-      baseURL: host,
-      // timeout: 1000,
-      headers,
-      httpsAgent,
+    this.#host = host;
+    this.#headers = headers;
+  }
+
+  async #fetch(url: string, options: Record<string, unknown> = {}) {
+    const baseUrl = this.#host;
+    const response = await fetch(`${baseUrl}${url}`, {
+      ...options,
+      agent: httpsAgent,
+      headers: Object.assign({}, this.#headers, options.headers || {}),
     });
+    return response.json();
   }
 
   async login(email: string, password: string) {
     try {
-      const result = await this.#axios.post(
-        `/auth/login`,
-        {
+      const result = await this.#fetch(`/auth/login`, {
+        method: 'post',
+        body: JSON.stringify({
           email,
           password,
-        },
-        {
-          httpsAgent,
-        }
-      );
+        }),
+      });
 
       this.token = result.data.token;
-      this.#axios = axios.create({
-        baseURL: this.host,
-        // timeout: 1000,
-        headers: { Authorization: `Bearer ${this.token}` },
-      });
+      this.#headers = { Authorization: `Bearer ${this.token}` };
       return true;
     } catch (e) {
       console.log('login error: ', e);
@@ -105,14 +103,12 @@ export default class MapgeoService {
   }
 
   async getUploaderTokens() {
-    const result = await this.#axios.get(`/api/uploader/token`);
+    const result = await this.#fetch(`/api/uploader/token`);
     return result.data as UploaderTokenResult;
   }
 
   async findDataset(id: string) {
-    const result = await this.#axios.get(`/api/config/datasets/${id}`, {
-      httpsAgent,
-    });
+    const result = await this.#fetch(`/api/config/datasets/${id}`);
     debugger;
     return result.data.dataset;
   }
@@ -129,13 +125,16 @@ export default class MapgeoService {
     updateDate: boolean;
   }) {
     try {
-      const result = await this.#axios.post(
+      const result = await this.#fetch(
         `/api/uploader/${datasetId}/cartodb/direct`,
         {
-          earlyFinish: true,
-          updateDate,
-          email: notificationEmail,
-          uploads,
+          method: 'post',
+          body: JSON.stringify({
+            earlyFinish: true,
+            updateDate,
+            email: notificationEmail,
+            uploads,
+          }),
         }
       );
       console.log('notifyUploader: ', result.data);
@@ -147,7 +146,7 @@ export default class MapgeoService {
   }
 
   async getOptouts(datasetId: string) {
-    const result = await this.#axios.get(`/api/optouts/${datasetId}`);
+    const result = await this.#fetch(`/api/optouts/${datasetId}`);
     let response;
 
     switch (result.status) {
@@ -177,7 +176,10 @@ export default class MapgeoService {
   }
 
   async deleteOptouts(datasetId: string, ids: string[]) {
-    const result = await this.#axios.put(`/api/optouts/${datasetId}`, ids);
+    const result = await this.#fetch(`/api/optouts/${datasetId}`, {
+      method: 'put',
+      body: JSON.stringify(ids),
+    });
     let response;
 
     switch (result.status) {
