@@ -1,6 +1,7 @@
 import { action } from '@ember/object';
 import Service from '@ember/service';
 import { SyncRule } from 'mapgeo-sync-config';
+import type { IpcRendererEvent } from 'electron';
 const { ipcRenderer } = requireNode('electron/renderer');
 
 export default class Platform extends Service {
@@ -28,7 +29,22 @@ export default class Platform extends Service {
 
   @action
   runSyncRule(rule: SyncRule) {
-    ipcRenderer.send('runRule', rule);
+    return new Promise((resolve) => {
+      ipcRenderer.send('runRule', rule);
+      ipcRenderer.on(
+        'action-result',
+        (
+          _event: IpcRendererEvent,
+          result: {
+            status: { ok: boolean };
+            rows: Record<string, unknown>[];
+            errors?: { message: string }[];
+          }
+        ) => {
+          resolve(result);
+        }
+      );
+    });
   }
 
   @action

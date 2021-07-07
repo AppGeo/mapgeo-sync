@@ -13,13 +13,6 @@ import { DbType, Source, SyncRule } from 'mapgeo-sync-config';
 
 const databaseTypes: DbType[] = ['pg', 'oracle', 'mysql', 'mssql'];
 
-interface RuleInput {
-  dataset: Dataset;
-  mapping: TableMapping;
-  source: Source;
-  selectStatement?: string;
-}
-
 export default class Index extends Controller {
   @service('electron-store') declare electronStore: ElectronStore;
   @service('platform') declare platform: Platform;
@@ -31,28 +24,6 @@ export default class Index extends Controller {
   @tracked isAddSourceVisible = false;
   @tracked isCreateRuleOpen = false;
   @tracked isSyncSourceOpen = false;
-  @tracked dataset?: Dataset;
-  @tracked ruleInput: Partial<RuleInput> = {};
-
-  @cached
-  get mappings() {
-    return this.dataset ? getAllMappings(this.dataset) : [];
-  }
-
-  @action
-  async createRule(ruleInput: RuleInput) {
-    const rules = await this.electronStore.addSyncRule({
-      datasetId: ruleInput.dataset.id,
-      mappingId: ruleInput.mapping.pk,
-      sourceId: ruleInput.source.id,
-      sourceConfig: {
-        selectStatement: ruleInput.selectStatement as string,
-      },
-      id: v4(),
-    });
-    this.syncRules = rules;
-    this.isCreateRuleOpen = false;
-  }
 
   @action
   async createSource(sourceInput: Source) {
@@ -63,18 +34,6 @@ export default class Index extends Controller {
     this.model.sources = sources;
     this.isSyncSourceOpen = false;
     this.isAddSourceVisible = false;
-  }
-
-  @action
-  runRule(rule: SyncRule) {
-    this.platform.runSyncRule(rule);
-  }
-
-  @task
-  async findDataset(datasetId: string) {
-    const dataset = await this.platform.findDataset(datasetId);
-    this.dataset = dataset;
-    return dataset;
   }
 }
 

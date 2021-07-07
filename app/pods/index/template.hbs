@@ -5,21 +5,7 @@
 
   <ul class='grid grid-cols-1 gap-4'>
     {{#each (or this.syncRules @model.syncRules) as |rule|}}
-      <li class='bg-white shadow-lg rounded-lg'>
-        <div class='p-4 flex justify-between items-center'>
-          <div>
-            {{rule.datasetId}}: {{rule.mappingId}}
-          </div>
-
-          <Button
-            @size='sm'
-            @appearance='outlined'
-            {{on 'click' (fn this.runRule rule)}}
-          >
-            Run
-          </Button>
-        </div>
-      </li>
+      <Rule::Card @rule={{rule}} />
     {{/each}}
 
     <li class='bg-white rounded-lg p-4 flex items-center justify-center'>
@@ -42,94 +28,13 @@
   </ul>
 </div>
 
-<Modal
+<Rule::CreateModal
   @isOpen={{this.isCreateRuleOpen}}
-  @onClose={{set this.isCreateRuleOpen false}} as |m|
->
-  <m.Header>
-    New Sync Rule
-  </m.Header>
-
-  <ChangesetForm
-    @changeset={{changeset this.ruleInput}}
-    @onSubmit={{this.createRule}} as |Form changeset|
-  >
-    <m.Body>
-      <Form.Select
-        @label='Dataset'
-        @fieldName='dataset'
-        @options={{@model.community.datasets}}
-        @containerClass='mt-4' as |dataset|
-      >
-        {{dataset.name}}
-      </Form.Select>
-
-      {{#if changeset.dataset}}
-        {{did-insert (perform this.findDataset changeset.dataset.id)}}
-        {{#if this.findDataset.isRunning}}
-          Loading dataset config..
-        {{else if this.dataset}}
-          <Form.Select
-            @label='Mapping'
-            @fieldName='mapping'
-            @options={{this.mappings}}
-            @containerClass='mt-4' as |mapping|
-          >
-            {{mapping.name}}
-          </Form.Select>
-        {{/if}}
-      {{/if}}
-
-      {{#if changeset.mapping}}
-        <Form.Select
-          @label='Source'
-          @fieldName='source'
-          @options={{@model.sources}}
-          @containerClass='mt-4' as |source|
-        >
-          {{source.name}}
-          {{#if (eq source.sourceType 'database')}}
-            ({{source.sourceType}}: {{source.databaseType}})
-          {{else}}
-            ({{source.sourceType}})
-          {{/if}}
-        </Form.Select>
-      {{/if}}
-
-      {{#if changeset.source}}
-        {{#if (eq changeset.source.sourceType 'database')}}
-          <Form.Textarea
-            @label='Select Statement'
-            @fieldName='selectStatement'
-            @containerClass='mt-4'
-            placeholder='select *, ST_AsGeoJSON(geom) as the_geom from "sync-test"'
-            rows='5'
-          />
-        {{else if (eq changeset.source.sourceType 'file')}}
-          <Form.Input
-            @label='File'
-            @fieldName='file'
-            type='file'
-            @containerClass='mt-4'
-          />
-        {{/if}}
-      {{/if}}
-    </m.Body>
-
-    <m.Footer class='flex justify-between'>
-      <Button
-        @appearance='minimal'
-        class='mr-4'
-        {{on 'click' (set this.isCreateRuleOpen false)}}
-      >
-        Cancel
-      </Button>
-      <Button @type='submit' @intent='primary'>
-        Create Rule
-      </Button>
-    </m.Footer>
-  </ChangesetForm>
-</Modal>
+  @onClose={{set this.isCreateRuleOpen false}}
+  @onSubmit={{set this.syncRules}}
+  @datasets={{@model.community.datasets}}
+  @sources={{@model.sources}}
+/>
 
 <Modal
   @isOpen={{this.isSyncSourceOpen}}
@@ -142,16 +47,7 @@
   <m.Body>
     <ul class='grid grid-cols-1 gap-2'>
       {{#each @model.sources as |source|}}
-        <li class='bg-white shadow-lg rounded-lg'>
-          <div class='p-4 flex justify-between'>
-            <div>
-              {{source.name}} ({{source.sourceType}})
-            </div>
-            <Button @intent='warning' @appearance='minimal' @size='xs'>
-              Delete
-            </Button>
-          </div>
-        </li>
+        <Source::Card @source={{source}} />
       {{/each}}
     </ul>
 
