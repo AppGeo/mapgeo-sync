@@ -31,105 +31,14 @@
 <Rule::CreateModal
   @isOpen={{this.isCreateRuleOpen}}
   @onClose={{set this.isCreateRuleOpen false}}
-  @onSubmit={{set this.syncRules}}
+  @onSubmit={{pipe (set this.syncRules) (set this.isCreateRuleOpen false)}}
   @datasets={{@model.community.datasets}}
-  @sources={{@model.sources}}
+  @sources={{or this.sources @model.sources}}
 />
 
-<Modal
+<Source::CreateModal
   @isOpen={{this.isSyncSourceOpen}}
-  @onClose={{set this.isSyncSourceOpen false}} as |m|
->
-  <m.Header>
-    Sync Sources
-  </m.Header>
-
-  <m.Body>
-    <ul class='grid grid-cols-1 gap-2'>
-      {{#each @model.sources as |source|}}
-        <Source::Card @source={{source}} />
-      {{/each}}
-    </ul>
-
-    <hr />
-
-    {{#if this.isAddSourceVisible}}
-      <ChangesetForm
-        class='mt-4'
-        @changeset={{changeset (hash)}}
-        @onSubmit={{this.createSource}} as |Form changeset|
-      >
-        <Form.Input
-          @label='Name'
-          @fieldName='name'
-          @containerClass='mt-4'
-          placeholder='Test Database'
-        />
-
-        <Form.RadioGroup
-          @fieldName='sourceType'
-          @label='Source Type'
-          @containerClass='mt-4' as |Radio|
-        >
-          <Radio @label='Database' @value='database' />
-          <Radio @label='File' @value='file' />
-        </Form.RadioGroup>
-
-        {{#if (eq changeset.sourceType 'database')}}
-          <Form.Select
-            @label='Database Type'
-            @fieldName='databaseType'
-            @options={{this.databaseTypes}}
-            @containerClass='mt-4' as |db|
-          >
-            {{db}}
-          </Form.Select>
-
-          {{#if changeset.databaseType}}
-            <Form.Input
-              @label='Connection String'
-              @fieldName='connectionString'
-              @containerClass='mt-4'
-              placeholder='host=HOST port=5432 dbname=YOUR_DB connect_timeout=10'
-            />
-          {{/if}}
-        {{else if (eq changeset.sourceType 'file')}}
-          <Form.Input
-            @label='Folder'
-            @fieldName='folder'
-            @containerClass='mt-4'
-            type='file'
-            webkitdirectory
-          />
-        {{/if}}
-
-        <Button
-          @type='submit'
-          @intent='primary'
-          class='mt-4'
-          disabled={{not (or changeset.folder changeset.connectionString)}}
-        >
-          Add Source
-        </Button>
-      </ChangesetForm>
-    {{else}}
-      <Button
-        @intent='primary'
-        class='mt-4'
-        {{on 'click' (set this.isAddSourceVisible true)}}
-      >
-        Add Source
-      </Button>
-    {{/if}}
-  </m.Body>
-
-  <m.Footer>
-    <Button
-      @appearance='minimal'
-      class='mr-4'
-      {{on 'click' (set this.isSyncSourceOpen false)}}
-    >
-      Close
-    </Button>
-  </m.Footer>
-</Modal>
+  @onClose={{set this.isSyncSourceOpen false}}
+  @onSubmit={{pipe (set this.sources) (set this.isSyncSourceOpen false)}}
+  @sources={{or this.sources @model.sources}}
+/>

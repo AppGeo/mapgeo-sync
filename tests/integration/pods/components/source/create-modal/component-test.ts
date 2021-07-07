@@ -3,15 +3,15 @@ import { setupRenderingTest } from 'ember-qunit';
 import { render } from '@ember/test-helpers';
 import hbs from 'htmlbars-inline-precompile';
 
-module('Integration | Component | source/card', function (hooks) {
+module('Integration | Component | source/create-modal', function (hooks) {
   setupRenderingTest(hooks);
 
   test('it renders', async function (assert) {
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
 
-    await render(hbs`<Source::Card/>`);
+    await render(hbs`<Source::CreateModal @isOpen={{true}} />`);
 
-    assert.dom(this.element).containsText('');
+    assert.dom(this.element).containsText('Source');
   });
 });

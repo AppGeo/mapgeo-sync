@@ -1,0 +1,90 @@
+<Modal @isOpen={{@isOpen}} @onClose={{@onClose}} as |m|>
+  <m.Header>
+    Sync Sources
+  </m.Header>
+
+  <m.Body>
+    <ul class='grid grid-cols-1 gap-2'>
+      {{#each @sources as |source|}}
+        <Source::Card @source={{source}} />
+      {{/each}}
+    </ul>
+
+    <hr />
+
+    {{#if this.isAddSourceVisible}}
+      <ChangesetForm
+        class='mt-4'
+        @changeset={{changeset (hash)}}
+        @onSubmit={{this.createSource}} as |Form changeset|
+      >
+        <Form.Input
+          @label='Name'
+          @fieldName='name'
+          @containerClass='mt-4'
+          placeholder='Test Database'
+        />
+
+        <Form.RadioGroup
+          @fieldName='sourceType'
+          @label='Source Type'
+          @containerClass='mt-4' as |Radio|
+        >
+          <Radio @label='Database' @value='database' />
+          <Radio @label='File' @value='file' />
+        </Form.RadioGroup>
+
+        {{#if (eq changeset.sourceType 'database')}}
+          <Form.Select
+            @label='Database Type'
+            @fieldName='databaseType'
+            @options={{this.databaseTypes}}
+            @containerClass='mt-4' as |db|
+          >
+            {{db}}
+          </Form.Select>
+
+          {{#if changeset.databaseType}}
+            <Form.Input
+              @label='Connection String'
+              @fieldName='connectionString'
+              @containerClass='mt-4'
+              placeholder='host=HOST port=5432 dbname=YOUR_DB connect_timeout=10'
+            />
+          {{/if}}
+        {{else if (eq changeset.sourceType 'file')}}
+          <Form.Input
+            @label='Folder'
+            @fieldName='folder'
+            @containerClass='mt-4'
+            type='file'
+            webkitdirectory
+          />
+        {{/if}}
+
+        <Button
+          @type='submit'
+          @intent='primary'
+          class='mt-4'
+          disabled={{not (or changeset.folder changeset.connectionString)}}
+        >
+          Add Source
+        </Button>
+      </ChangesetForm>
+    {{else}}
+      <Button
+        @intent='primary'
+        class='mt-4'
+        {{on 'click' (set this.isAddSourceVisible true)}}
+      >
+        Add Source
+      </Button>
+    {{/if}}
+  </m.Body>
+
+  <m.Footer>
+    <Button @appearance='minimal' class='mr-4' {{on 'click' @onClose}}>
+      Close
+    </Button>
+  </m.Footer>
+</Modal>
