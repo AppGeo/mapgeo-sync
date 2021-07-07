@@ -134,7 +134,7 @@ async function initWorkers(config: SyncConfig) {
   }
 
   queryWorker = new Worker(path.join(__dirname, 'workers', 'query-action.js'), {
-    workerData: { config },
+    workerData: { config, mapgeo: store.get('mapgeo') },
   });
 }
 
@@ -217,7 +217,7 @@ function createBrowserWindow() {
     let currentConfig = store.get('config') as SyncConfig;
     mainWindow.webContents.send('config-loaded', currentConfig);
 
-    if (currentConfig && !queryWorker) {
+    if (!queryWorker) {
       initWorkers(currentConfig);
     }
 
@@ -242,8 +242,17 @@ function createBrowserWindow() {
       currentConfig = config;
     });
 
-    ipcMain.on('run-action', async (event, action: QueryAction) => {
-      queryWorker.postMessage({ event: 'handle-action', data: action });
+    ipcMain.on('runRule', async (event, rule: SyncRule) => {
+      const sources = store.get('sources');
+      const source = sources.find((source) => source.id === rule.sourceId);
+
+      queryWorker.postMessage({
+        event: 'handle-rule',
+        data: {
+          rule,
+          source,
+        },
+      });
 
       queryWorker.once('message', (message) => {
         // console.log(message);

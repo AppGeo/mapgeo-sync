@@ -3,18 +3,20 @@ import { workerData, parentPort } from 'worker_threads';
 import MapgeoService from '../mapgeo/service';
 import handleQueryAction from '../action-handlers/query';
 import S3Service from '../s3-service';
-import { SyncConfig, QueryAction } from 'mapgeo-sync-config';
+import { RuleBundle, SyncConfig, SyncRule } from 'mapgeo-sync-config';
+import { SyncStoreType } from 'src/store';
 
 interface WorkerData {
+  mapgeo: SyncStoreType['mapgeo'];
   config: SyncConfig;
 }
 
-type HandleActionMessage = {
-  event: 'handle-action';
-  data: QueryAction;
+type HandleRuleMessage = {
+  event: 'handle-rule';
+  data: RuleBundle;
 };
 type CloseMessage = { event: 'close' };
-type Message = HandleActionMessage | CloseMessage;
+type Message = HandleRuleMessage | CloseMessage;
 type FinishedResponse = {
   status: string;
   rows: any[];
@@ -27,25 +29,23 @@ type ErrorResponse = {
 };
 type Response = FinishedResponse | ErrorResponse;
 
-const { config } = workerData as WorkerData;
+const { config, mapgeo } = workerData as WorkerData;
 
 function respond(response: Response) {
   parentPort.postMessage(response);
 }
 
-async function handleAction(action: QueryAction) {
-  action = action || config.UploadActions[0];
-
-  if (!config?.MapGeoOptions?.Host) {
-    throw new Error('MapGeoOptions.Host is a required config property');
+async function handleRule(ruleBundle: RuleBundle) {
+  if (!mapgeo.host) {
+    throw new Error('mapgeo.host is a required config property');
   }
-  const url = new URL(config.MapGeoOptions.Host);
+  const url = new URL(mapgeo.host);
   const subdomain = url.hostname.split('.')[0];
-  const mapgeo = await MapgeoService.fromUrl(config.MapGeoOptions.Host);
-  await mapgeo.login(config.MapGeoOptions.Email, config.MapGeoOptions.Password);
+  const mapgeoService = await MapgeoService.fromUrl(mapgeo.host);
+  await mapgeoService.login(mapgeo.login.email, mapgeo.login.password);
 
-  const result = await handleQueryAction(subdomain, action);
-  const tokens = await mapgeo.getUploaderTokens();
+  const result = await handleQueryAction(subdomain, ruleBundle);
+  const tokens = await mapgeoService.getUploaderTokens();
   const transformed = result.rows.map((row) => {
     try {
       return { ...row, the_geom: JSON.parse(row.the_geom) };
@@ -53,7 +53,8 @@ async function handleAction(action: QueryAction) {
       return row;
     }
   });
-  const geojson = action.FormatAsGeoJson
+  const formatAsGeoJson = false;
+  const geojson = formatAsGeoJson
     ? transformed.reduce(
         (all, row) => {
           const { the_geom, ...properties } = row;
@@ -70,9 +71,10 @@ async function handleAction(action: QueryAction) {
   // console.log('action result: ', result);
   const s3 = new S3Service(tokens);
   const folder = `ilya-test-${subdomain}`;
-  const file = action.FormatAsGeoJson
-    ? action.FileName.replace('.json', '.geojson')
-    : action.FileName;
+  const ruleFileName = `rule_${ruleBundle.rule.id}.json`;
+  const file = formatAsGeoJson
+    ? ruleFileName.replace('.json', '.geojson')
+    : ruleFileName;
   const { key, fileName } = await s3.upload({
     folder,
     fileName: file,
@@ -80,8 +82,8 @@ async function handleAction(action: QueryAction) {
   });
   // Lets MapGeo know, which validates and uploads to carto
   // An upload-status.json is uploaded to s3 with results of process, failure or success
-  const res = await mapgeo.notifyUploader({
-    datasetId: action.DatasetId,
+  const res = await mapgeoService.notifyUploader({
+    datasetId: ruleBundle.rule.datasetId,
     updateDate: config.MapGeoOptions.UpdateDate,
     notificationEmail: config.MapGeoOptions.NotificationEmail,
     uploads: [
@@ -111,9 +113,9 @@ if (parentPort) {
     console.log(`Handling '${msg.event}'...`);
 
     switch (msg.event) {
-      case 'handle-action': {
+      case 'handle-rule': {
         try {
-          await handleAction(msg.data);
+          await handleRule(msg.data);
         } catch (error) {
           respond({
             errors: [

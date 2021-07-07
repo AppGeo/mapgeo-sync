@@ -1,5 +1,11 @@
 import knex from 'knex';
-import { QueryAction, QueryOutput } from 'mapgeo-sync-config';
+import {
+  QueryOutput,
+  RuleBundle,
+  SyncDbConfig,
+  SyncRule,
+} from 'mapgeo-sync-config';
+import { store } from '../store';
 
 // TODO: update config instead?
 const typeConversion = new Map([
@@ -8,31 +14,44 @@ const typeConversion = new Map([
   ['property', 'data'],
 ]);
 
-export default async function handle(community: string, action: QueryAction) {
-  if (!action.FileName) {
-    throw new Error('FileName cannot be empty');
-  }
+export default async function handle(
+  community: string,
+  ruleBundle: RuleBundle
+) {
+  const fileName = `${community}_rule_${ruleBundle.rule.id}.json`;
+  console.log(`Uploading query file ${fileName} to cloud`);
 
-  const FileName = `${community}_${action.FileName}`;
-  console.log(`Uploading query file ${FileName} to cloud`);
-
-  const rows = await query({ ...action, FileName });
+  const rows = await query(ruleBundle);
   const res: QueryOutput = {
     rows,
-    fieldname: typeConversion.get(action.UploadType),
-    table: FileName.slice(0, FileName.lastIndexOf('.')),
-    typeId: action.FileName.slice(0, action.FileName.lastIndexOf('.')),
+    fieldname: typeConversion.get(ruleBundle.rule.mappingId),
+    table: fileName.slice(0, fileName.lastIndexOf('.')),
+    typeId: fileName.slice(0, fileName.lastIndexOf('.')),
   };
 
   return res;
 }
 
-async function query(action: QueryAction): Promise<any[]> {
+async function query(ruleBundle: RuleBundle): Promise<any[]> {
+  const source = ruleBundle.source;
+
+  if (!source) {
+    throw new Error(`Source with id '${ruleBundle.rule.sourceId}' not found`);
+  }
+
+  if (source.sourceType !== 'database') {
+    throw new Error(
+      `query handler only handles sources with 'database' type, but got '${source.sourceType}' instead.`
+    );
+  }
+
   const db = knex({
-    client: action.DbType,
-    connection: action.ConnectionString,
+    client: source.databaseType,
+    connection: source.connectionString,
   });
-  let result = await db.raw(action.Query);
+  let result = await db.raw(
+    (ruleBundle.rule.sourceConfig as SyncDbConfig).selectStatement
+  );
   console.log(`found ${result?.rows?.length} items`);
   return result?.rows;
 }

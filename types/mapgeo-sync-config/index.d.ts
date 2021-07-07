@@ -66,6 +66,11 @@ export interface SyncFileConfig {
   filePath: string;
 }
 
+export interface RuleBundle {
+  rule: SyncRule;
+  source: Source;
+}
+
 export interface SyncRule {
   id: string;
   datasetId: string;

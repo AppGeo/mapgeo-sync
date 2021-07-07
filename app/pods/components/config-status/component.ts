@@ -145,6 +145,6 @@ export default class ConfigStatus extends Component<ConfigStatusArgs> {
   runAction(uploadAction: QueryAction) {
     this.status = undefined;
     this.running = true;
-    ipcRenderer.send('run-action', uploadAction);
+    ipcRenderer.send('runRule', uploadAction);
   }
 }

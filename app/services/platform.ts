@@ -28,7 +28,7 @@ export default class Platform extends Service {
 
   @action
   runSyncRule(rule: SyncRule) {
-    ipcRenderer.send('run-action', rule);
+    ipcRenderer.send('runRule', rule);
   }
 
   @action
