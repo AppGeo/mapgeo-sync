@@ -71,6 +71,16 @@ ipcMain.handle('store/addSyncRule', (event, rule: SyncRule) => {
   return rules;
 });
 
+ipcMain.handle('store/removeSyncRule', (event, rule: SyncRule) => {
+  let rules = store.get('syncRules');
+  if (!rules) {
+    return [];
+  }
+  rules = rules.filter((item) => item.id !== rule.id);
+  store.set('syncRules', rules);
+  return rules;
+});
+
 ipcMain.handle('store/findSources', (event) => {
   return store.get('sources') || [];
 });

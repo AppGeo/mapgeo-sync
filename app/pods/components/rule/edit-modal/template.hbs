@@ -69,6 +69,13 @@
           />
         {{/if}}
       {{/if}} --}}
+    <Button
+      @intent='warning'
+      disabled={{this.deleteRule.isRunning}}
+      {{on 'click' (perform this.deleteRule)}}
+    >
+      Delete
+    </Button>
   </m.Body>
 
   <m.Footer class='flex justify-between'>

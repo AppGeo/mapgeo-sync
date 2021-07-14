@@ -24,6 +24,12 @@ export default class ElectronStore extends Service {
   }
 
   @action
+  async removeSyncRule(rule: SyncRule): Promise<SyncRule[]> {
+    const rules = await ipcRenderer.invoke('store/removeSyncRule', rule);
+    return rules;
+  }
+
+  @action
   async findSources(): Promise<Source[]> {
     const sources = await ipcRenderer.invoke('store/findSources');
     return sources;
