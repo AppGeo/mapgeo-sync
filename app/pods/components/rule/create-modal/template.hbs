@@ -8,6 +8,8 @@
     @onSubmit={{this.createRule}} as |Form changeset|
   >
     <m.Body>
+      <Form.Input @label='Name' @fieldName='name' @containerClass='mt-4' />
+
       <Form.Select
         @label='Dataset'
         @fieldName='dataset'

@@ -12,13 +12,14 @@ import { Source, SyncRule } from 'mapgeo-sync-config';
 
 interface RuleCreateModalArgs {
   isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (rules: SyncRule[]) => void;
   datasets: Dataset[];
   sources: Source[];
+  onClose: () => void;
+  onSubmit: (rules: SyncRule[]) => void;
 }
 
 interface RuleInput {
+  name?: string;
   dataset: Dataset;
   mapping: TableMapping;
   source: Source;
@@ -40,6 +41,9 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
   @action
   async createRule(ruleInput: RuleInput) {
     const rules = await this.electronStore.addSyncRule({
+      name:
+        ruleInput.name ||
+        `${ruleInput.dataset.name} - ${ruleInput.mapping.name}`,
       datasetId: ruleInput.dataset.id,
       mappingId: ruleInput.mapping.pk,
       sourceId: ruleInput.source.id,

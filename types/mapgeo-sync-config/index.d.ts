@@ -73,6 +73,7 @@ export interface RuleBundle {
 
 export interface SyncRule {
   id: string;
+  name: string;
   datasetId: string;
   sourceId: string;
   mappingId: string;
