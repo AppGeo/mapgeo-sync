@@ -17,17 +17,27 @@
       </div>
     </div>
 
-    <Button
-      @size='sm'
-      @appearance='outlined'
-      disabled={{this.runRule.isRunning}}
-      {{on 'click' (perform this.runRule @rule)}}
-    >
-      {{#if this.runRule.isRunning}}
-        Running..
-      {{else}}
-        Run
-      {{/if}}
-    </Button>
+    <div class='space-x-2'>
+      <Button
+        @size='sm'
+        @appearance='outlined'
+        disabled={{this.runRule.isRunning}}
+        {{on 'click' (perform this.runRule @rule)}}
+      >
+        {{#if this.runRule.isRunning}}
+          Running..
+        {{else}}
+          Run
+        {{/if}}
+      </Button>
+
+      <Button
+        @size='sm'
+        @appearance='outlined'
+        {{on 'click' (fn @onEdit @rule)}}
+      >
+        <FaIcon @icon='pen' />
+      </Button>
+    </div>
   </div>
 </li>

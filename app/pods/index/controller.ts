@@ -17,6 +17,7 @@ export default class Index extends Controller {
   @tracked syncRules?: SyncRule[];
   @tracked sources?: Source[];
   @tracked isCreateRuleOpen = false;
+  @tracked isEditRuleOpen = false;
   @tracked isSyncSourceOpen = false;
 }
 

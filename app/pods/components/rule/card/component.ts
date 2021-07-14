@@ -9,6 +9,7 @@ import { Source, SyncRule } from 'mapgeo-sync-config';
 interface RuleCardArgs {
   rule: SyncRule;
   sources: Source[];
+  onEdit: (rule: SyncRule) => void;
 }
 
 export default class RuleCard extends Component<RuleCardArgs> {

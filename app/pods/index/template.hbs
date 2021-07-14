@@ -5,7 +5,11 @@
 
   <ul class='grid grid-cols-1 gap-4'>
     {{#each (or this.syncRules @model.syncRules) as |rule|}}
-      <Rule::Card @rule={{rule}} @sources={{@model.sources}} />
+      <Rule::Card
+        @rule={{rule}}
+        @sources={{@model.sources}}
+        @onEdit={{queue (set this.isEditRuleOpen true) (set this.ruleEditing)}}
+      />
     {{/each}}
 
     <li class='bg-white rounded-lg p-4 flex items-center justify-center'>
@@ -34,6 +38,16 @@
   @onSubmit={{pipe (set this.syncRules) (set this.isCreateRuleOpen false)}}
   @datasets={{@model.community.datasets}}
   @sources={{or this.sources @model.sources}}
+/>
+
+<Rule::EditModal
+  @isOpen={{this.isEditRuleOpen}}
+  @onClose={{pipe
+    (set this.isEditRuleOpen false)
+    (set this.ruleEditing undefined)
+  }}
+  @onSubmit={{set this.test}}
+  @rule={{this.ruleEditing}}
 />
 
 <Source::CreateModal
