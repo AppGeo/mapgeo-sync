@@ -77,12 +77,8 @@ export interface SyncRule {
   datasetId: string;
   sourceId: string;
   mappingId: string;
+  scheduleRule?: string;
   sourceConfig: SyncDbConfig | SyncFileConfig;
-  schedule?: {
-    rule?: string;
-    started?: boolean;
-    running?: boolean;
-  };
 }
 
 export type DbType = 'pg' | 'oracle' | 'mysql' | 'mssql';

@@ -48,6 +48,19 @@ export default class Platform extends Service {
   }
 
   @action
+  startSyncRuleSchedule(rule: SyncRule) {
+    return new Promise((resolve) => {
+      ipcRenderer.send('startRuleSchedule', rule);
+      ipcRenderer.on(
+        'startRuleSchedule:result',
+        (_event: IpcRendererEvent, result: any) => {
+          resolve(result);
+        }
+      );
+    });
+  }
+
+  @action
   async logout() {
     const value = await ipcRenderer.invoke('logout');
     return value;

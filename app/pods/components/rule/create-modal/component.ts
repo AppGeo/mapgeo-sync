@@ -24,6 +24,7 @@ interface RuleInput {
   mapping: TableMapping;
   source: Source;
   selectStatement?: string;
+  scheduleRule?: string;
 }
 
 export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
@@ -47,6 +48,7 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
       datasetId: ruleInput.dataset.id,
       mappingId: ruleInput.mapping.pk,
       sourceId: ruleInput.source.id,
+      scheduleRule: ruleInput.scheduleRule,
       sourceConfig: {
         selectStatement: ruleInput.selectStatement as string,
       },

@@ -65,7 +65,7 @@
     "node-schedule": "^2.0.0",
     "oracledb": "^5.1.0",
     "pg": "^8.6.0",
-    "xstate": "^4.19.2"
+    "xstate": "^4.22.0"
   },
   "devDependencies": {
     "@electron-forge/cli": "6.0.0-beta.57",

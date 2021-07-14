@@ -69,13 +69,33 @@
           />
         {{/if}}
       {{/if}} --}}
-    <Button
-      @intent='warning'
-      disabled={{this.deleteRule.isRunning}}
-      {{on 'click' (perform this.deleteRule)}}
-    >
-      Delete
-    </Button>
+    <div class='flex space-x-2'>
+      {{#if @rule.scheduleRule}}
+        <Button
+          @intent='success'
+          class='flex space-x-1'
+          disabled={{this.startSchedule.isRunning}}
+          {{on 'click' (perform this.startSchedule)}}
+        >
+          <FaIcon @icon='play' />
+          <span>
+            Start Schedule
+          </span>
+        </Button>
+      {{/if}}
+
+      <Button
+        @intent='warning'
+        class='flex space-x-1'
+        disabled={{this.deleteRule.isRunning}}
+        {{on 'click' (perform this.deleteRule)}}
+      >
+        <FaIcon @icon='trash' />
+        <span>
+          Delete
+        </span>
+      </Button>
+    </div>
   </m.Body>
 
   <m.Footer class='flex justify-between'>

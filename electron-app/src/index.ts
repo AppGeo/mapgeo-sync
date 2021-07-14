@@ -111,6 +111,32 @@ ipcMain.handle('selectSourceFile', async (event, sourceId: string) => {
   return [];
 });
 
+ipcMain.handle('startSyncRuleSchedule', async (event, rule: SyncRule) => {
+  scheduler.schedule(rule.scheduleRule, (done) => {
+    const sources = store.get('sources');
+    const source = sources.find((source) => source.id === rule.sourceId);
+
+    queryWorker.postMessage({
+      event: 'handle-rule',
+      data: {
+        rule,
+        source,
+      },
+    });
+
+    return new Promise((resolve, reject) => {
+      queryWorker.once('message', (message) => {
+        // console.log(message);
+        if (message.errors) {
+          return reject(message);
+        }
+        const { nextRunDate } = done();
+        resolve({ ...message, nextRunDate });
+      });
+    });
+  });
+});
+
 ipcMain.handle('getStoreValue', (event, key: string) => {
   return store.get(key);
 });
