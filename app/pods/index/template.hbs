@@ -7,7 +7,7 @@
     {{#each this.syncRules as |rule|}}
       <Rule::Card
         @rule={{rule}}
-        @sources={{@model.sources}}
+        @sources={{this.sources}}
         @onEdit={{queue (set this.isEditRuleOpen true) (set this.ruleEditing)}}
       />
     {{/each}}
@@ -37,7 +37,7 @@
   @onClose={{set this.isCreateRuleOpen false}}
   @onSubmit={{pipe (set this.syncRules) (set this.isCreateRuleOpen false)}}
   @datasets={{@model.community.datasets}}
-  @sources={{or this.sources @model.sources}}
+  @sources={{this.sources}}
 />
 
 <Rule::EditModal
@@ -55,5 +55,5 @@
   @isOpen={{this.isSyncSourceOpen}}
   @onClose={{set this.isSyncSourceOpen false}}
   @onSubmit={{pipe (set this.sources) (set this.isSyncSourceOpen false)}}
-  @sources={{or this.sources @model.sources}}
+  @sources={{this.sources}}
 />

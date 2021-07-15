@@ -17,8 +17,9 @@ export default class Index extends Controller {
 
   @localCopy('model.syncRules')
   declare syncRules: SyncRule[];
+  @localCopy('model.sources')
+  declare sources: Source[];
 
-  @tracked sources?: Source[];
   @tracked isCreateRuleOpen = false;
   @tracked isEditRuleOpen = false;
   @tracked isSyncSourceOpen = false;

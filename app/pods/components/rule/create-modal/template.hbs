@@ -90,6 +90,7 @@
           <Form.Select
             @label='Schedule Hour'
             @fieldName='schedule.hour'
+            @hint='The job will run at a random point within the selected hour'
             @options={{this.hours}}
             @containerClass='mt-4' as |hour|
           >
