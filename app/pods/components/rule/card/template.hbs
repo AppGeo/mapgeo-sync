@@ -3,18 +3,7 @@
     <div>
       {{@rule.name}}
 
-      <div class='flex items-center space-x-2 text-gray-600 text-sm'>
-        {{#if (eq this.source.sourceType 'database')}}
-          <FaIcon @icon='database' />
-        {{else if (eq this.source.sourceType 'file')}}
-          <FaIcon @icon='file' />
-        {{/if}}
-
-        <div>
-          {{this.source.name}}
-          ({{this.source.databaseType}})
-        </div>
-      </div>
+      <Source::Card class='text-sm' @source={{this.source}} />
     </div>
 
     <div class='space-x-2'>

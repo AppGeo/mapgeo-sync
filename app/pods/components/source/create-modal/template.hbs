@@ -6,7 +6,7 @@
   <m.Body>
     <ul class='grid grid-cols-1 gap-2'>
       {{#each @sources as |source|}}
-        <li class='bg-white shadow-lg rounded-lg'>
+        <li class='bg-white shadow-lg rounded-lg p-4'>
           <Source::Card @source={{source}} @onDelete={{set this.test}} />
         </li>
       {{/each}}
