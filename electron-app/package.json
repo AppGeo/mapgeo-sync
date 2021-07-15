@@ -8,6 +8,8 @@
     "start": "electron-forge start",
     "predebug": "yarn build:ts",
     "debug": "electron-forge start --inspect-electron",
+    "watch": "tsc-watch --onCompilationComplete 'yarn start'",
+    "watch:debug": "tsc-watch --onCompilationComplete 'yarn debug'",
     "build:ts": "tsc",
     "postbuild:ts": "yarn generate:store-schema",
     "package": "electron-forge package",
@@ -87,7 +89,8 @@
     "tap": "^15.0.9",
     "tap-spec": "^5.0.0",
     "ts-json-schema-generator": "^0.93.0",
-    "typescript": "^4.3.2"
+    "typescript": "^4.3.2",
+    "tsc-watch": "^4.4.0"
   },
   "volta": {
     "node": "12.22.1",
