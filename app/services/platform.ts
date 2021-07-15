@@ -48,16 +48,10 @@ export default class Platform extends Service {
   }
 
   @action
-  startSyncRuleSchedule(rule: SyncRule) {
-    return new Promise((resolve) => {
-      ipcRenderer.send('startRuleSchedule', rule);
-      ipcRenderer.on(
-        'startRuleSchedule:result',
-        (_event: IpcRendererEvent, result: any) => {
-          resolve(result);
-        }
-      );
-    });
+  async startSyncRuleSchedule(rule: SyncRule) {
+    const res = await ipcRenderer.invoke('startSyncRuleSchedule', rule);
+
+    return res as { nextRunDate: Date };
   }
 
   @action

@@ -134,18 +134,9 @@ ipcMain.handle('startSyncRuleSchedule', async (event, rule: SyncRule) => {
         source,
       },
     });
-
-    return new Promise((resolve, reject) => {
-      queryWorker.once('message', (message) => {
-        // console.log(message);
-        if (message.errors) {
-          return reject(message);
-        }
-        const { nextRunDate } = done();
-        resolve({ ...message, nextRunDate });
-      });
-    });
   });
+
+  return { nextRunDate: scheduler.nextRunDate };
 });
 
 ipcMain.handle('getStoreValue', (event, key: string) => {

@@ -70,7 +70,7 @@
         {{/if}}
       {{/if}} --}}
     <div class='flex space-x-2'>
-      {{#if @rule.scheduleRule}}
+      {{#if @rule.schedule}}
         <Button
           @intent='success'
           class='flex space-x-1'
@@ -95,6 +95,14 @@
           Delete
         </span>
       </Button>
+    </div>
+
+    <div class='mt-4'>
+      {{#if this.startSchedule.isRunning}}
+        Starting..
+      {{else if this.startSchedule.last.value}}
+        Will run at {{this.startSchedule.last.value.nextRunDate}}
+      {{/if}}
     </div>
   </m.Body>
 

@@ -28,7 +28,7 @@ export default class RuleEditModal extends Component<RuleEditModalArgs> {
   @task
   async startSchedule() {
     const result = await this.platform.startSyncRuleSchedule(this.args.rule);
-    debugger;
+
     return result;
   }
 }
