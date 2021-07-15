@@ -68,9 +68,10 @@ export const authMachine = createMachine<AuthContext, AuthEvent, AuthState>({
                 src: 'setupMapgeoService',
                 onDone: 'validated',
                 onError: {
-                  target: '#auth.unauthenticated',
+                  target: '#auth.unauthenticated.withoutConfig',
                   actions: assign({
                     host: () => null,
+                    config: () => null,
                   }),
                 },
               },
