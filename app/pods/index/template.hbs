@@ -4,7 +4,7 @@
   </h2>
 
   <ul class='grid grid-cols-1 gap-4'>
-    {{#each (or this.syncRules @model.syncRules) as |rule|}}
+    {{#each this.syncRules as |rule|}}
       <Rule::Card
         @rule={{rule}}
         @sources={{@model.sources}}

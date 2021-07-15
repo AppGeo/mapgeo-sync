@@ -4,6 +4,7 @@ import { action } from '@ember/object';
 import { task } from 'ember-concurrency';
 import Platform from 'mapgeo-sync/services/platform';
 import { tracked } from '@glimmer/tracking';
+import { localCopy } from 'tracked-toolbox';
 import ElectronStore from 'mapgeo-sync/services/electron-store';
 import { Model } from './route';
 import { Source, SyncRule } from 'mapgeo-sync-config';
@@ -14,7 +15,9 @@ export default class Index extends Controller {
 
   declare model: Model;
 
-  @tracked syncRules?: SyncRule[];
+  @localCopy('model.syncRules')
+  declare syncRules: SyncRule[];
+
   @tracked sources?: Source[];
   @tracked isCreateRuleOpen = false;
   @tracked isEditRuleOpen = false;
