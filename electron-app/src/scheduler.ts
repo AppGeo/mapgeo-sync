@@ -1,5 +1,6 @@
 import * as schedule from 'node-schedule';
 import * as Store from 'electron-store';
+import { RecurrenceRule } from 'node-schedule';
 
 export default class Scheduler {
   private store: Store;
@@ -9,7 +10,10 @@ export default class Scheduler {
     this.store = store;
   }
 
-  schedule(rule: string, run: (done: () => { nextRunDate: Date }) => void) {
+  schedule(
+    rule: string | RecurrenceRule,
+    run: (done: () => { nextRunDate: Date }) => void
+  ) {
     if (this.job) {
       console.log('rescheduling...');
       this.store.set('scheduleRule', rule);

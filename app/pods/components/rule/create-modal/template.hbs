@@ -66,24 +66,36 @@
           />
         {{/if}}
 
-        <Form.Input
-          @label='Schedule Rule'
-          @fieldName='scheduleRule'
-          @containerClass='mt-4'
-          placeholder='wip'
-        />
+        {{#unless this.isAddScheduleVisible}}
+          <Button
+            @intent='primary'
+            @appearance='outlined'
+            class='mt-4'
+            {{on 'click' (set this.isAddScheduleVisible true)}}
+          >
+            Add Schedule
+          </Button>
+        {{/unless}}
 
-        {{! <pre class='text-xs'>
-          *    *    *    *    *    *
-        ┬    ┬    ┬    ┬    ┬    ┬
-        │    │    │    │    │    │
-        │    │    │    │    │    └ day of week (0 - 7) (0 or 7 is Sun)
-        │    │    │    │    └───── month (1 - 12)
-        │    │    │    └────────── day of month (1 - 31)
-        │    │    └─────────────── hour (0 - 23)
-        │    └──────────────────── minute (0 - 59)
-        └───────────────────────── second (0 - 59, OPTIONAL)
-        </pre> }}
+        {{#if this.isAddScheduleVisible}}
+          <Form.Select
+            @label='Schedule Frequency'
+            @fieldName='schedule.frequency'
+            @options={{this.frequencies}}
+            @containerClass='mt-4' as |frequency|
+          >
+            {{frequency}}
+          </Form.Select>
+
+          <Form.Select
+            @label='Schedule Hour'
+            @fieldName='schedule.hour'
+            @options={{this.hours}}
+            @containerClass='mt-4' as |hour|
+          >
+            {{hour}}
+          </Form.Select>
+        {{/if}}
       {{/if}}
     </m.Body>
 

@@ -11,6 +11,10 @@
       ],
       "type": "string"
     },
+    "ScheduleFrequency": {
+      "const": "daily",
+      "type": "string"
+    },
     "Source": {
       "anyOf": [
         {
@@ -114,8 +118,21 @@
         "name": {
           "type": "string"
         },
-        "scheduleRule": {
-          "type": "string"
+        "schedule": {
+          "additionalProperties": false,
+          "properties": {
+            "frequency": {
+              "$ref": "#/definitions/ScheduleFrequency"
+            },
+            "hour": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "frequency",
+            "hour"
+          ],
+          "type": "object"
         },
         "sourceConfig": {
           "anyOf": [

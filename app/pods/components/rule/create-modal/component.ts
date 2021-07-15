@@ -8,7 +8,7 @@ import { v4 } from 'uuid';
 import { Dataset, TableMapping } from 'mapgeo';
 import ElectronStore from 'mapgeo-sync/services/electron-store';
 import { getAllMappings } from 'mapgeo-sync/utils/dataset-mapping';
-import { Source, SyncRule } from 'mapgeo-sync-config';
+import { ScheduleFrequency, Source, SyncRule } from 'mapgeo-sync-config';
 
 interface RuleCreateModalArgs {
   isOpen: boolean;
@@ -25,14 +25,31 @@ interface RuleInput {
   source: Source;
   selectStatement?: string;
   scheduleRule?: string;
+  schedule?: {
+    frequency: ScheduleFrequency;
+    hour: number;
+  };
 }
+
+const defaultFrequency: ScheduleFrequency = 'daily';
+const hours = [
+  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+  22, 23,
+];
 
 export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
   @service('electron-store') declare electronStore: ElectronStore;
   @service('platform') declare platform: Platform;
 
   @tracked dataset?: Dataset;
-  @tracked ruleInput: Partial<RuleInput> = {};
+  @tracked ruleInput: Partial<RuleInput> = {
+    schedule: {
+      hour: 1,
+      frequency: defaultFrequency,
+    },
+  };
+  frequencies: ScheduleFrequency[] = [defaultFrequency];
+  hours = hours;
 
   @cached
   get mappings() {
@@ -48,7 +65,7 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
       datasetId: ruleInput.dataset.id,
       mappingId: ruleInput.mapping.pk,
       sourceId: ruleInput.source.id,
-      scheduleRule: ruleInput.scheduleRule,
+      schedule: ruleInput.schedule,
       sourceConfig: {
         selectStatement: ruleInput.selectStatement as string,
       },

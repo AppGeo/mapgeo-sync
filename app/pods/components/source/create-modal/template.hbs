@@ -7,7 +7,7 @@
     <ul class='grid grid-cols-1 gap-2'>
       {{#each @sources as |source|}}
         <li class='bg-white shadow-lg rounded-lg'>
-          <Source::Card @source={{source}} />
+          <Source::Card @source={{source}} @onDelete={{set this.test}} />
         </li>
       {{/each}}
     </ul>

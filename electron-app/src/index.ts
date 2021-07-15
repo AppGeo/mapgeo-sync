@@ -32,6 +32,7 @@ import { store } from './store';
 import { register as registerMapgeoHandlers } from './mapgeo/handlers';
 import { waitForState } from './utils/wait-for-state';
 import { createService as createAuthService } from './auth/service';
+import { RecurrenceRule, Range } from 'node-schedule';
 
 const scheduler = new Scheduler({
   store,
@@ -112,7 +113,17 @@ ipcMain.handle('selectSourceFile', async (event, sourceId: string) => {
 });
 
 ipcMain.handle('startSyncRuleSchedule', async (event, rule: SyncRule) => {
-  scheduler.schedule(rule.scheduleRule, (done) => {
+  const scheduleRule = new RecurrenceRule();
+  const randomQuarter = Math.floor(Math.random() * 4) + 1;
+  const minutes = randomQuarter * 15;
+
+  if (rule.schedule?.frequency === 'daily') {
+    scheduleRule.dayOfWeek = [new Range(0, 6)];
+    scheduleRule.hour = rule.schedule?.hour;
+    scheduleRule.minute = randomQuarter === 4 ? minutes - 5 : minutes;
+  }
+
+  scheduler.schedule(scheduleRule, (done) => {
     const sources = store.get('sources');
     const source = sources.find((source) => source.id === rule.sourceId);
 

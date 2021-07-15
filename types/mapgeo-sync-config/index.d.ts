@@ -71,13 +71,18 @@ export interface RuleBundle {
   source: Source;
 }
 
+export type ScheduleFrequency = 'daily';
+
 export interface SyncRule {
   id: string;
   name: string;
   datasetId: string;
   sourceId: string;
   mappingId: string;
-  scheduleRule?: string;
+  schedule?: {
+    frequency: ScheduleFrequency;
+    hour: number;
+  };
   sourceConfig: SyncDbConfig | SyncFileConfig;
 }
 
