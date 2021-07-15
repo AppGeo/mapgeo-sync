@@ -1,10 +1,19 @@
-<li class='bg-white shadow-lg rounded-lg'>
-  <div class='p-4 flex justify-between'>
-    <div>
+<div class='p-4 flex justify-between hover:bg-white' ...attributes>
+  <div class='flex items-center space-x-2 text-gray-600 text-sm'>
+    {{#if (eq @source.sourceType 'database')}}
+      <FaIcon @icon='database' />
+    {{else if (eq @source.sourceType 'file')}}
+      <FaIcon @icon='file' />
+    {{/if}}
+
+    <span>
       {{@source.name}} ({{@source.sourceType}})
-    </div>
+    </span>
+  </div>
+
+  {{#if @onDelete}}
     <Button @intent='warning' @appearance='minimal' @size='xs'>
       Delete
     </Button>
-  </div>
-</li>
+  {{/if}}
+</div>

@@ -43,12 +43,7 @@
           @options={{@sources}}
           @containerClass='mt-4' as |source|
         >
-          {{source.name}}
-          {{#if (eq source.sourceType 'database')}}
-            ({{source.sourceType}}: {{source.databaseType}})
-          {{else}}
-            ({{source.sourceType}})
-          {{/if}}
+          <Source::Card @source={{source}} />
         </Form.Select>
       {{/if}}
 
@@ -75,9 +70,10 @@
           @label='Schedule Rule'
           @fieldName='scheduleRule'
           @containerClass='mt-4'
+          placeholder='wip'
         />
 
-        <pre class='text-xs'>
+        {{! <pre class='text-xs'>
           *    *    *    *    *    *
         ┬    ┬    ┬    ┬    ┬    ┬
         │    │    │    │    │    │
@@ -87,7 +83,7 @@
         │    │    └─────────────── hour (0 - 23)
         │    └──────────────────── minute (0 - 59)
         └───────────────────────── second (0 - 59, OPTIONAL)
-        </pre>
+        </pre> }}
       {{/if}}
     </m.Body>
 

@@ -1,7 +1,7 @@
 {
   "name": "mapgeo-sync",
-  "productName": "mapgeo-sync",
   "version": "0.0.0",
+  "productName": "MapGeo Sync",
   "description": "Small description for mapgeo-sync goes here",
   "main": "dist/index.js",
   "scripts": {

@@ -111,20 +111,11 @@
         "mappingId": {
           "type": "string"
         },
-        "schedule": {
-          "additionalProperties": false,
-          "properties": {
-            "rule": {
-              "type": "string"
-            },
-            "running": {
-              "type": "boolean"
-            },
-            "started": {
-              "type": "boolean"
-            }
-          },
-          "type": "object"
+        "name": {
+          "type": "string"
+        },
+        "scheduleRule": {
+          "type": "string"
         },
         "sourceConfig": {
           "anyOf": [
@@ -142,6 +133,7 @@
       },
       "required": [
         "id",
+        "name",
         "datasetId",
         "sourceId",
         "mappingId",
