@@ -21,7 +21,7 @@
       </div>
 
       <div class='flex space-x-2'>
-        {{#if this.state}}
+        {{#if (and this.state.scheduled this.state.nextScheduledRun)}}
           <div
             class='flex items-center space-x-1 text-sm text-gray-600'
             title='Scheduled to run at'
@@ -40,13 +40,22 @@
     </div>
 
     <div class='flex space-x-2'>
-      {{#if this.state.nextScheduledRun}}
+      {{#if (and this.state.scheduled this.state.nextScheduledRun)}}
         <Button
           @size='sm'
           @appearance='outlined'
-          {{on 'click' (perform this.runRule @rule)}}
+          {{on 'click' (perform this.cancelRuleSchedule @rule)}}
         >
           <FaIcon @icon='stop-circle' />
+        </Button>
+      {{else if @rule.schedule}}
+        <Button
+          @size='sm'
+          @intent='success'
+          @appearance='outlined'
+          {{on 'click' (perform this.startRuleSchedule @rule)}}
+        >
+          <FaIcon @icon='play-circle' />
         </Button>
       {{/if}}
 

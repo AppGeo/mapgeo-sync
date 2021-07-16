@@ -7,7 +7,7 @@ import { SyncRule, SyncState } from 'mapgeo-sync-config';
 type UpdateSyncStateFn = (
   rule: SyncRule,
   data: Omit<Partial<SyncState>, 'id'>
-) => void;
+) => SyncState;
 
 interface ScheduledRule {
   ruleId: string;
@@ -19,7 +19,7 @@ export default class Scheduler {
   private job: schedule.Job;
   private updateSyncState: UpdateSyncStateFn;
   private run: (rule: SyncRule) => Promise<void>;
-  private scheduled: ScheduledRule[];
+  private scheduled: ScheduledRule[] = [];
 
   constructor({
     store,
@@ -50,38 +50,55 @@ export default class Scheduler {
       .get('syncRules')
       .filter((rule) => rule.schedule && scheduledRuleIds.includes(rule.id));
     console.log('rules', rules);
-    const scheduled = rules.map((rule) => {
-      console.log(`Scheduling ${rule.name}`);
 
-      const recurrence = this.createSyncRuleRecurrence(rule);
-      const job = schedule.scheduleJob(recurrence, async () => {
-        console.log(`Running ${rule.name} rule..`);
-        this.updateSyncState(rule, {
-          running: true,
-        });
-        await this.run(rule);
-        this.updateSyncState(rule, {
-          running: false,
-          nextScheduledRun: this.getNextInvocation(job),
-        });
-        console.log(`Finished running ${rule.name} rule.`);
-      });
-
-      this.updateSyncState(rule, {
-        running: false,
-        nextScheduledRun: this.getNextInvocation(job),
-      });
-
-      return {
-        ruleId: rule.id,
-        job,
-      };
+    rules.forEach((rule) => {
+      this.scheduleRule(rule);
     });
-
-    this.scheduled = scheduled;
   }
 
-  scheduleRule(rule: SyncRule) {}
+  scheduleRule(rule: SyncRule) {
+    console.log(`Scheduling ${rule.name}`);
+
+    const recurrence = this.createSyncRuleRecurrence(rule);
+    const job = schedule.scheduleJob(recurrence, async () => {
+      console.log(`Running ${rule.name} rule..`);
+      this.updateSyncState(rule, {
+        running: true,
+      });
+      await this.run(rule);
+      this.updateSyncState(rule, {
+        running: false,
+        nextScheduledRun: this.#getNextInvocation(job),
+      });
+      console.log(`Finished running ${rule.name} rule.`);
+    });
+
+    this.scheduled.push({
+      ruleId: rule.id,
+      job,
+    });
+
+    return this.updateSyncState(rule, {
+      scheduled: true,
+      running: false,
+      nextScheduledRun: this.#getNextInvocation(job),
+    });
+  }
+
+  cancelScheduledRule(rule: SyncRule) {
+    const scheduled = this.scheduled.find((item) => item.ruleId === rule.id);
+
+    if (scheduled) {
+      scheduled.job.cancel();
+      this.updateSyncState(rule, {
+        scheduled: false,
+        running: false,
+        nextScheduledRun: undefined,
+      });
+      this.scheduled = this.scheduled.filter((item) => item.ruleId !== rule.id);
+      console.log(`Job cancelled for rule ${rule.name}.`);
+    }
+  }
 
   createSyncRuleRecurrence(rule: SyncRule) {
     const scheduleRule = new RecurrenceRule();
@@ -162,7 +179,7 @@ export default class Scheduler {
     return result && (result as any).toDate();
   }
 
-  private getNextInvocation(job: schedule.Job) {
+  #getNextInvocation(job: schedule.Job) {
     if (!job) {
       return;
     }

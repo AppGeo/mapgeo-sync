@@ -72,7 +72,14 @@ export default class Platform extends Service {
   async startSyncRuleSchedule(rule: SyncRule) {
     const res = await ipcRenderer.invoke('startSyncRuleSchedule', rule);
 
-    return res as { nextRunDate: Date };
+    return res as SyncState;
+  }
+
+  @action
+  async cancelSyncRuleSchedule(rule: SyncRule) {
+    const res = await ipcRenderer.invoke('cancelSyncRuleSchedule', rule);
+
+    return res as SyncState;
   }
 
   @action

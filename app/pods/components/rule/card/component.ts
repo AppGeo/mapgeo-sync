@@ -54,6 +54,18 @@ export default class RuleCard extends Component<RuleCardArgs> {
   }
 
   @task
+  async startRuleSchedule(rule: SyncRule) {
+    const result = await this.platform.startSyncRuleSchedule(rule);
+    return result;
+  }
+
+  @task
+  async cancelRuleSchedule(rule: SyncRule) {
+    const result = await this.platform.cancelSyncRuleSchedule(rule);
+    return result;
+  }
+
+  @task
   async findDataset() {
     const dataset = await this.platform.findDataset(this.args.rule.datasetId);
     this.dataset = dataset;

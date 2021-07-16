@@ -74,6 +74,7 @@ function updateSyncState(rule: SyncRule, data: Omit<Partial<SyncState>, 'id'>) {
 
   store.set('syncState', all);
   mainWindow?.webContents.send('syncStateUpdated', all);
+  return state;
 }
 
 ipcMain.handle('store/findSyncRules', (event) => {
@@ -135,35 +136,24 @@ ipcMain.handle('selectSourceFile', async (event, sourceId: string) => {
 });
 
 ipcMain.handle('startSyncRuleSchedule', async (event, rule: SyncRule) => {
-  const scheduleRule = new RecurrenceRule();
-  const randomQuarter = Math.floor(Math.random() * 4) + 1;
-  const minutes = randomQuarter * 15;
+  // , (done) => {
+  //   const sources = store.get('sources');
+  //   const source = sources.find((source) => source.id === rule.sourceId);
 
-  if (rule.schedule?.frequency === 'daily') {
-    scheduleRule.dayOfWeek = [new Range(0, 6)];
-    scheduleRule.hour = rule.schedule?.hour;
-    scheduleRule.minute = randomQuarter === 4 ? minutes - 5 : minutes;
-  }
+  //   queryWorker.postMessage({
+  //     event: 'handle-rule',
+  //     data: {
+  //       rule,
+  //       source,
+  //     },
+  //   });
+  // });
 
-  scheduler.schedule(scheduleRule, (done) => {
-    const sources = store.get('sources');
-    const source = sources.find((source) => source.id === rule.sourceId);
+  return scheduler.scheduleRule(rule);
+});
 
-    queryWorker.postMessage({
-      event: 'handle-rule',
-      data: {
-        rule,
-        source,
-      },
-    });
-  });
-
-  updateSyncState(rule, {
-    scheduled: true,
-    nextScheduledRun: scheduler.nextRunDate,
-  });
-
-  return { nextRunDate: scheduler.nextRunDate };
+ipcMain.handle('cancelSyncRuleSchedule', async (event, rule: SyncRule) => {
+  scheduler.cancelScheduledRule(rule);
 });
 
 ipcMain.handle('getStoreValue', (event, key: string) => {
