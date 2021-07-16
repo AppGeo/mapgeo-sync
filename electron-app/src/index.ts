@@ -23,6 +23,7 @@ import type {
   Source,
   SyncConfig,
   SyncRule,
+  SyncState,
 } from 'mapgeo-sync-config';
 import Scheduler from './scheduler';
 import MapgeoService from './mapgeo/service';
@@ -58,6 +59,25 @@ let authService: Interpreter<
 
 registerMapgeoHandlers(ipcMain);
 
+function updateSyncState(rule: SyncRule, data: Omit<Partial<SyncState>, 'id'>) {
+  const all = store.get('syncState') || [];
+  let state = all.find((item) => item.ruleId === rule.id);
+
+  if (!state) {
+    state = {
+      ruleId: rule.id,
+      ...data,
+    };
+
+    all.push(state);
+  } else {
+    Object.assign(state, { ...data });
+  }
+
+  store.set('syncState', all);
+  mainWindow.webContents.send('syncStateUpdated', all);
+}
+
 ipcMain.handle('store/findSyncRules', (event) => {
   return store.get('syncRules') || [];
 });
@@ -80,6 +100,10 @@ ipcMain.handle('store/removeSyncRule', (event, rule: SyncRule) => {
   rules = rules.filter((item) => item.id !== rule.id);
   store.set('syncRules', rules);
   return rules;
+});
+
+ipcMain.handle('store/findSyncState', (event) => {
+  return store.get('syncState') || [];
 });
 
 ipcMain.handle('store/findSources', (event) => {
@@ -134,6 +158,10 @@ ipcMain.handle('startSyncRuleSchedule', async (event, rule: SyncRule) => {
         source,
       },
     });
+  });
+
+  updateSyncState(rule, {
+    nextScheduledRun: scheduler.nextRunDate,
   });
 
   return { nextRunDate: scheduler.nextRunDate };

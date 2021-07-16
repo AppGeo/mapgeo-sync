@@ -1,5 +1,5 @@
 import * as Store from 'electron-store';
-import { Source, SyncRule } from '../../types/mapgeo-sync-config';
+import { Source, SyncRule, SyncState } from '../../types/mapgeo-sync-config';
 
 export type SyncStoreType = {
   configUpdate?: Date;
@@ -15,6 +15,7 @@ export type SyncStoreType = {
     };
   };
   syncRules: SyncRule[];
+  syncState: SyncState[];
   sources: Source[];
 };
 

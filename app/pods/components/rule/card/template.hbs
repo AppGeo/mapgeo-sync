@@ -1,9 +1,21 @@
 <li class='bg-white shadow-lg rounded-lg' ...attributes>
   <div class='p-4 flex justify-between items-center'>
-    <div>
-      {{@rule.name}}
+    <div class='space-y-4'>
+      <div>
+        {{@rule.name}}
+      </div>
 
-      <Source::Card class='text-sm' @source={{this.source}} />
+      <div class='flex space-x-2'>
+        <Source::Card class='text-sm' @source={{this.source}} />
+        {{#if this.state}}
+          <div class='flex items-center space-x-1 text-sm text-gray-600'>
+            <FaIcon @icon='clock' />
+            <span>
+              {{this.state.nextScheduledRun}}
+            </span>
+          </div>
+        {{/if}}
+      </div>
     </div>
 
     <div class='space-x-2'>

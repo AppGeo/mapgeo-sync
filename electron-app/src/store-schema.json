@@ -158,6 +158,22 @@
       ],
       "type": "object"
     },
+    "SyncState": {
+      "additionalProperties": false,
+      "properties": {
+        "nextScheduledRun": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "ruleId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ruleId"
+      ],
+      "type": "object"
+    },
     "SyncStoreType": {
       "additionalProperties": false,
       "properties": {
@@ -233,11 +249,18 @@
             "$ref": "#/definitions/SyncRule"
           },
           "type": "array"
+        },
+        "syncState": {
+          "items": {
+            "$ref": "#/definitions/SyncState"
+          },
+          "type": "array"
         }
       },
       "required": [
         "mapgeo",
         "syncRules",
+        "syncState",
         "sources"
       ],
       "type": "object"

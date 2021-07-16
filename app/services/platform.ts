@@ -1,13 +1,28 @@
 import { action } from '@ember/object';
 import Service from '@ember/service';
-import { SyncRule } from 'mapgeo-sync-config';
+import { SyncRule, SyncState } from 'mapgeo-sync-config';
 import type { IpcRendererEvent } from 'electron';
+import { tracked } from '@glimmer/tracking';
 const { ipcRenderer } = requireNode('electron/renderer');
 
 export default class Platform extends Service {
   // once(name: string, cb: (...args: any[]) => void) {
   //   ipcRenderer.once(name, cb);
   // }
+  @tracked syncState: SyncState[] = [];
+
+  constructor() {
+    super();
+    ipcRenderer.on(
+      'syncStateUpdated',
+      (_event: IpcRendererEvent, results: SyncState[]) => {
+        this.syncState = results;
+      }
+    );
+
+    this.findSyncState().then((results) => (this.syncState = results));
+  }
+
   @action
   async checkMapGeo(mapgeoUrl: string) {
     const isOk = await ipcRenderer.invoke('checkMapgeo', { mapgeoUrl });
@@ -24,6 +39,12 @@ export default class Platform extends Service {
   @action
   async findDataset(id: string) {
     const value = await ipcRenderer.invoke('mapgeo/findDataset', id);
+    return value;
+  }
+
+  @action
+  async findSyncState() {
+    const value = await ipcRenderer.invoke('store/findSyncState');
     return value;
   }
 

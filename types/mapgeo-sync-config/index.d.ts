@@ -86,6 +86,11 @@ export interface SyncRule {
   sourceConfig: SyncDbConfig | SyncFileConfig;
 }
 
+export interface SyncState {
+  ruleId: string;
+  nextScheduledRun?: Date;
+}
+
 export type DbType = 'pg' | 'oracle' | 'mysql' | 'mssql';
 
 export interface SourceDbType {
