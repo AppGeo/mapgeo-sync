@@ -35,27 +35,42 @@
       </div>
     </div>
 
-    <div class='space-x-2'>
-      <Button
-        @size='sm'
-        @appearance='outlined'
-        disabled={{this.runRule.isRunning}}
-        {{on 'click' (perform this.runRule @rule)}}
-      >
-        {{#if this.runRule.isRunning}}
-          Running..
-        {{else}}
-          Run
-        {{/if}}
-      </Button>
+    <div class='flex space-x-2'>
+      {{#if this.state.nextScheduledRun}}
+        <Button
+          @size='sm'
+          @appearance='outlined'
+          {{on 'click' (perform this.runRule @rule)}}
+        >
+          <FaIcon @icon='stop-circle' />
+        </Button>
+      {{/if}}
 
-      <Button
-        @size='sm'
-        @appearance='outlined'
-        {{on 'click' (fn @onEdit @rule)}}
-      >
-        <FaIcon @icon='pen' />
-      </Button>
+      <ButtonWithMore @onClick={{fn @onEdit @rule}}>
+        <:primary>
+          <FaIcon @icon='pen' />
+        </:primary>
+
+        <:secondary as |s|>
+          <ul>
+            <li>
+              <Button
+                @size='sm'
+                @appearance='minimal'
+                class={{s.classNames}}
+                disabled={{this.runRule.isRunning}}
+                {{on 'click' (perform this.runRule @rule)}}
+              >
+                {{#if this.runRule.isRunning}}
+                  Running..
+                {{else}}
+                  Run Manually
+                {{/if}}
+              </Button>
+            </li>
+          </ul>
+        </:secondary>
+      </ButtonWithMore>
     </div>
   </div>
 </li>

@@ -2,7 +2,7 @@
   <Button
     local-class='primary'
     @appearance='outlined'
-    @intent='primary'
+    @intent={{or @intent 'primary'}}
     @size='sm'
     @disabled={{@disabled}}
     {{on 'click' @onClick}}
@@ -15,7 +15,7 @@
       <Button
         local-class='more'
         @appearance='outlined'
-        @intent='primary'
+        @intent={{or @intent 'primary'}}
         @size='sm'
       >
         <FaIcon @icon='ellipsis-v' />
