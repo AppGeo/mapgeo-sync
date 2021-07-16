@@ -1,17 +1,34 @@
 <li class='bg-white shadow-lg rounded-lg' ...attributes>
   <div class='p-4 flex justify-between items-center'>
-    <div class='space-y-4'>
-      <div>
+    <div class='space-y-2'>
+      <div class='text-gray-800'>
         {{@rule.name}}
       </div>
 
       <div class='flex space-x-2'>
+        <div class='flex items-center space-x-1 text-sm text-gray-600'>
+          <FaIcon @icon='map-marked-alt' />
+          <span title='Dataset'>
+            {{this.dataset.name}}
+          </span>
+          <FaIcon class='text-gray-500 font-bold' @icon='caret-right' />
+          <span title='Table Mapping'>
+            {{this.mapping.name}}
+          </span>
+        </div>
+
         <Source::Card class='text-sm' @source={{this.source}} />
+      </div>
+
+      <div class='flex space-x-2'>
         {{#if this.state}}
-          <div class='flex items-center space-x-1 text-sm text-gray-600'>
-            <FaIcon @icon='clock' />
+          <div
+            class='flex items-center space-x-1 text-sm text-gray-600'
+            title='Scheduled to run at'
+          >
+            <FaIcon class='text-green-600' @icon='clock' />
             <span>
-              {{this.state.nextScheduledRun}}
+              {{format-date this.state.nextScheduledRun dateFormat='long'}}
             </span>
           </div>
         {{/if}}

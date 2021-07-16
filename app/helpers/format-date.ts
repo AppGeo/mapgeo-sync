@@ -1,12 +1,29 @@
 import { helper } from '@ember/component/helper';
-const intl = new Intl.DateTimeFormat('en-US', {
+let intl = new Intl.DateTimeFormat('en-US', {
   dateStyle: 'full',
   timeStyle: 'long',
 });
 
-export function formatDate([date]: [Date | string] /*, hash*/) {
+type DateStyle = 'full' | 'long' | 'medium' | 'short' | undefined;
+
+export function formatDate(
+  [date]: [Date | string],
+  {
+    dateFormat,
+    timeFormat,
+  }: {
+    dateFormat?: DateStyle;
+    timeFormat?: DateStyle;
+  } = {}
+) {
   if (!date) {
     return '';
+  }
+  if (dateFormat || timeFormat) {
+    intl = new Intl.DateTimeFormat('en-US', {
+      dateStyle: dateFormat || 'full',
+      timeStyle: timeFormat || 'long',
+    });
   }
   return intl.format(new Date(date));
 }

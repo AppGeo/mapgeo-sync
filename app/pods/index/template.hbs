@@ -7,6 +7,7 @@
     {{#each this.syncRules as |rule|}}
       <Rule::Card
         @rule={{rule}}
+        @datasets={{@model.community.datasets}}
         @sources={{this.sources}}
         @onEdit={{queue (set this.isEditRuleOpen true) (set this.ruleEditing)}}
       />
