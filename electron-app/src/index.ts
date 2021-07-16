@@ -326,26 +326,6 @@ function createBrowserWindow() {
       });
     });
 
-    ipcMain.on('schedule-action', function (event, rule: string) {
-      store.set('scheduleRule', rule);
-
-      scheduler.schedule(rule, (done) => {
-        queryWorker.postMessage({
-          event: 'handle-action',
-          data: currentConfig.UploadActions[0],
-        });
-
-        queryWorker.once('message', (message) => {
-          // console.log(message);
-          if (message.errors) {
-            return event.reply('action-error', message);
-          }
-          const { nextRunDate } = done();
-          event.reply('action-result', { ...message, nextRunDate });
-        });
-      });
-    });
-
     ipcMain.on('get-schedule-details', (event) => {
       event.reply('schedule-details', {
         isScheduled: scheduler.isScheduled,
