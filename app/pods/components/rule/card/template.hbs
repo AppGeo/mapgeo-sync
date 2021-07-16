@@ -46,7 +46,7 @@
           @appearance='outlined'
           {{on 'click' (perform this.cancelRuleSchedule @rule)}}
         >
-          <FaIcon @icon='stop-circle' />
+          <FaIcon @icon='stop' />
         </Button>
       {{else if @rule.schedule}}
         <Button
@@ -55,7 +55,7 @@
           @appearance='outlined'
           {{on 'click' (perform this.startRuleSchedule @rule)}}
         >
-          <FaIcon @icon='play-circle' />
+          <FaIcon @icon='play' />
         </Button>
       {{/if}}
 
