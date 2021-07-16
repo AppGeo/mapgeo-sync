@@ -167,6 +167,12 @@
         },
         "ruleId": {
           "type": "string"
+        },
+        "running": {
+          "type": "boolean"
+        },
+        "scheduled": {
+          "type": "boolean"
         }
       },
       "required": [

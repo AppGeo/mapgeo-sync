@@ -88,6 +88,8 @@ export interface SyncRule {
 
 export interface SyncState {
   ruleId: string;
+  scheduled?: boolean;
+  running?: boolean;
   nextScheduledRun?: Date;
 }
 

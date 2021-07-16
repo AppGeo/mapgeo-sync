@@ -35,14 +35,12 @@ import { waitForState } from './utils/wait-for-state';
 import { createService as createAuthService } from './auth/service';
 import { RecurrenceRule, Range } from 'node-schedule';
 
-const scheduler = new Scheduler({
-  store,
-});
 const emberAppDir = path.resolve(__dirname, '..', 'ember-dist');
 const emberAppURL = pathToFileURL(
   path.join(emberAppDir, 'index.html')
 ).toString();
 
+let scheduler: Scheduler;
 let mainWindow: BrowserWindow;
 let tray: Tray;
 let queryWorker: Worker;
@@ -75,7 +73,7 @@ function updateSyncState(rule: SyncRule, data: Omit<Partial<SyncState>, 'id'>) {
   }
 
   store.set('syncState', all);
-  mainWindow.webContents.send('syncStateUpdated', all);
+  mainWindow?.webContents.send('syncStateUpdated', all);
 }
 
 ipcMain.handle('store/findSyncRules', (event) => {
@@ -161,6 +159,7 @@ ipcMain.handle('startSyncRuleSchedule', async (event, rule: SyncRule) => {
   });
 
   updateSyncState(rule, {
+    scheduled: true,
     nextScheduledRun: scheduler.nextRunDate,
   });
 
@@ -267,6 +266,15 @@ function createBrowserWindow() {
   // Ember app has loaded, send an event
   mainWindow.webContents.on('did-finish-load', async () => {
     console.log('did-finish-load');
+    if (!scheduler) {
+      scheduler = new Scheduler({
+        store,
+        updateSyncState,
+        run: async (rule) => {
+          console.log(`handle run of ${rule.name}`);
+        },
+      });
+    }
 
     // create/tart the service
     if (!authService) {
@@ -286,27 +294,6 @@ function createBrowserWindow() {
     if (!queryWorker) {
       initWorkers(currentConfig);
     }
-
-    ipcMain.on('select-config', async (event) => {
-      const result = await dialog.showOpenDialog({
-        message: 'Select config.json file',
-        properties: ['openFile'],
-      });
-      // Prompt cancelled
-      if (!result.filePaths[0]) {
-        return;
-      }
-      const configBuffer = await fs.promises.readFile(result.filePaths[0]);
-      const config = JSON.parse(configBuffer.toString()) as SyncConfig;
-
-      store.set('config', config);
-      store.set('configUpdated', new Date());
-
-      await initWorkers(config);
-
-      event.reply('config-loaded', config);
-      currentConfig = config;
-    });
 
     ipcMain.on('runRule', async (event, rule: SyncRule) => {
       const sources = store.get('sources');

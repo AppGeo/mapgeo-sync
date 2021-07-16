@@ -28,7 +28,11 @@
           >
             <FaIcon class='text-green-600' @icon='clock' />
             <span>
-              {{format-date this.state.nextScheduledRun dateFormat='long'}}
+              {{#if this.state.running}}
+                Running..
+              {{else if this.state.nextScheduledRun}}
+                {{format-date this.state.nextScheduledRun dateFormat='long'}}
+              {{/if}}
             </span>
           </div>
         {{/if}}
