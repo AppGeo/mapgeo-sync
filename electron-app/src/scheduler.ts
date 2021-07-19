@@ -3,6 +3,7 @@ import * as Store from 'electron-store';
 import { RecurrenceRule, Range } from 'node-schedule';
 import { SyncStoreType } from './store/store';
 import { SyncRule, SyncState } from 'mapgeo-sync-config';
+import { QueryActionResponse } from './workers/query-action';
 
 type UpdateSyncStateFn = (
   rule: SyncRule,
@@ -18,7 +19,7 @@ export default class Scheduler {
   private store: Store<SyncStoreType>;
   private job: schedule.Job;
   private updateSyncState: UpdateSyncStateFn;
-  private run: (rule: SyncRule) => Promise<void>;
+  private run: (rule: SyncRule) => Promise<QueryActionResponse>;
   private scheduled: ScheduledRule[] = [];
 
   constructor({
@@ -28,7 +29,7 @@ export default class Scheduler {
   }: {
     store: Store<SyncStoreType>;
     updateSyncState: UpdateSyncStateFn;
-    run: (rule: SyncRule) => Promise<void>;
+    run: (rule: SyncRule) => Promise<QueryActionResponse>;
   }) {
     this.store = store;
     this.updateSyncState = updateSyncState;
@@ -57,18 +58,53 @@ export default class Scheduler {
   }
 
   scheduleRule(rule: SyncRule) {
-    console.log(`Scheduling ${rule.name}`);
-
     const recurrence = this.createSyncRuleRecurrence(rule);
+    const found = this.scheduled.find(
+      (scheduled) => scheduled.ruleId === rule.id
+    );
+
+    // Reschedule if found
+    if (found) {
+      console.log(
+        `Rescheduling ${rule.name} for ${recurrence.nextInvocationDate(
+          new Date()
+        )}`
+      );
+
+      found.job.reschedule(recurrence);
+
+      return this.updateSyncState(rule, {
+        scheduled: true,
+        running: false,
+        nextScheduledRun: this.#getNextInvocation(found.job),
+      });
+    }
+
+    console.log(
+      `Scheduling ${rule.name} for ${recurrence.nextInvocationDate(new Date())}`
+    );
+
     const job = schedule.scheduleJob(recurrence, async () => {
       console.log(`Running ${rule.name} rule..`);
-      this.updateSyncState(rule, {
+      const state = this.updateSyncState(rule, {
         running: true,
       });
-      await this.run(rule);
+      const response = await this.run(rule);
+      const logs = state.logs || [];
+
+      if ('status' in response) {
+        logs.unshift({ message: response.status, loggedAt: new Date() });
+      } else {
+        logs.unshift({
+          message: response.errors.map((err) => err.message).join(', '),
+          loggedAt: new Date(),
+        });
+      }
+
       this.updateSyncState(rule, {
         running: false,
         nextScheduledRun: this.#getNextInvocation(job),
+        logs: logs.slice(0, 5),
       });
       console.log(`Finished running ${rule.name} rule at ${new Date()}.`);
     });
@@ -110,8 +146,8 @@ export default class Scheduler {
       // scheduleRule.hour = rule.schedule?.hour;
       // scheduleRule.minute = randomQuarter === 4 ? minutes - 5 : minutes;
       // DEBUG
-      scheduleRule.hour = 15;
-      scheduleRule.minute = 56;
+      scheduleRule.hour = 17;
+      scheduleRule.minute = 13;
     }
 
     return scheduleRule;

@@ -91,6 +91,10 @@ export interface SyncState {
   scheduled?: boolean;
   running?: boolean;
   nextScheduledRun?: Date;
+  logs?: {
+    message: string;
+    loggedAt: Date;
+  }[];
 }
 
 export type DbType = 'pg' | 'oracle' | 'mysql' | 'mssql';

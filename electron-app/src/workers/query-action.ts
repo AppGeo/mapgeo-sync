@@ -3,7 +3,7 @@ import { workerData, parentPort } from 'worker_threads';
 import MapgeoService from '../mapgeo/service';
 import handleQueryAction from '../action-handlers/query';
 import S3Service from '../s3-service';
-import { RuleBundle, SyncConfig, SyncRule } from 'mapgeo-sync-config';
+import { RuleBundle, Source, SyncConfig, SyncRule } from 'mapgeo-sync-config';
 import { SyncStoreType } from 'src/store/store';
 
 interface WorkerData {
@@ -16,22 +16,26 @@ type HandleRuleMessage = {
   data: RuleBundle;
 };
 type CloseMessage = { event: 'close' };
-type Message = HandleRuleMessage | CloseMessage;
-type FinishedResponse = {
+export type QueryActionMessage = HandleRuleMessage | CloseMessage;
+export type FinishedResponse = {
+  rule: SyncRule;
+  source: Source;
   status: string;
   rows: any[];
 };
-type ErrorResponse = {
+export type ErrorResponse = {
+  rule: SyncRule;
+  source: Source;
   errors: {
     message: string;
-    event: Message['event'];
+    event: QueryActionMessage['event'];
   }[];
 };
-type Response = FinishedResponse | ErrorResponse;
+export type QueryActionResponse = FinishedResponse | ErrorResponse;
 
 const { config, mapgeo } = workerData as WorkerData;
 
-function respond(response: Response) {
+function respond(response: QueryActionResponse) {
   parentPort.postMessage(response);
 }
 
@@ -100,11 +104,15 @@ async function handleRule(ruleBundle: RuleBundle) {
   const status = await s3.waitForFile(res.key);
   console.log('status res: ', status);
 
-  respond({ status: status.content as string, rows: result.rows });
+  respond({
+    status: status.content as string,
+    rows: result.rows,
+    ...ruleBundle,
+  });
 }
 
 if (parentPort) {
-  parentPort.on('message', async (msg: string | Message) => {
+  parentPort.on('message', async (msg: string | QueryActionMessage) => {
     if (typeof msg !== 'object') {
       console.log('Low-level event: ', msg);
       return;
@@ -118,6 +126,7 @@ if (parentPort) {
           await handleRule(msg.data);
         } catch (error) {
           respond({
+            ...msg.data,
             errors: [
               {
                 message: error.toString(),

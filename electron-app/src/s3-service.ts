@@ -18,6 +18,7 @@ export default class S3Service {
   #aws?: AWS.S3;
 
   constructor(tokens: UploaderTokenResult) {
+    console.log('s3 tokens: ', JSON.stringify(tokens));
     const aws = new AWS.S3({
       accessKeyId: tokens.AccessKeyId,
       secretAccessKey: tokens.SecretAccessKey,

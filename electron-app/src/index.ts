@@ -34,6 +34,10 @@ import { register as registerMapgeoHandlers } from './mapgeo/handlers';
 import { register as registerStoreHandlers } from './store/handlers';
 import { waitForState } from './utils/wait-for-state';
 import { createService as createAuthService } from './auth/service';
+import {
+  QueryActionMessage,
+  QueryActionResponse,
+} from './workers/query-action';
 
 const emberAppDir = path.resolve(__dirname, '..', 'ember-dist');
 const emberAppURL = pathToFileURL(
@@ -221,6 +225,27 @@ function createBrowserWindow() {
         updateSyncState,
         run: async (rule) => {
           console.log(`handle run of ${rule.name}`);
+          const sources = store.get('sources');
+          const source = sources.find((source) => source.id === rule.sourceId);
+
+          queryWorker.postMessage({
+            event: 'handle-rule',
+            data: {
+              rule,
+              source,
+            },
+          });
+
+          const result = await new Promise(
+            (resolve: (msg: QueryActionResponse) => void, reject) => {
+              queryWorker.once('message', (message: QueryActionResponse) => {
+                console.log('handle-rule result: ' + message);
+                resolve(message);
+              });
+            }
+          );
+
+          return result;
         },
       });
     }

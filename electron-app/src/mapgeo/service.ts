@@ -33,11 +33,10 @@ export type CartoDirectResult = {
 };
 
 export default class MapgeoService {
-  host: string;
   token: string;
   config: Record<string, unknown>;
-  #headers: Record<string, string> = {};
-  #host: string = '';
+  headers: Record<string, string> = {};
+  host: string = '';
 
   static async fromUrl(host: string) {
     // cached instance
@@ -65,20 +64,21 @@ export default class MapgeoService {
   }
 
   constructor(host: string, config: Record<string, unknown>) {
-    const headers: Record<string, string> = {};
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
 
-    this.host = host;
     this.config = config;
-    this.#host = host;
-    this.#headers = headers;
+    this.host = host;
+    this.headers = headers;
   }
 
   async #fetch(url: string, options: RequestInit = {}) {
-    const baseUrl = this.#host;
+    const baseUrl = this.host;
     const response = await fetch(`${baseUrl}${url}`, {
       ...options,
       agent: httpsAgent,
-      headers: Object.assign({}, this.#headers, options.headers || {}),
+      headers: Object.assign({}, this.headers, options.headers || {}),
     });
     return response.json();
   }
@@ -93,8 +93,12 @@ export default class MapgeoService {
         }),
       });
 
+      if (!result.token) {
+        throw new Error(result);
+      }
+
       this.token = result.token;
-      this.#headers = { Authorization: `Bearer ${this.token}` };
+      this.headers = { Authorization: `Bearer ${this.token}` };
       return true;
     } catch (e) {
       console.log('login error: ', e);
@@ -104,7 +108,7 @@ export default class MapgeoService {
 
   async getUploaderTokens() {
     const result = await this.#fetch(`/api/uploader/token`);
-    return result.data as UploaderTokenResult;
+    return result as UploaderTokenResult;
   }
 
   async findDataset(id: string) {
