@@ -70,7 +70,7 @@ export default class Scheduler {
         running: false,
         nextScheduledRun: this.#getNextInvocation(job),
       });
-      console.log(`Finished running ${rule.name} rule.`);
+      console.log(`Finished running ${rule.name} rule at ${new Date()}.`);
     });
 
     this.scheduled.push({

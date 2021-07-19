@@ -109,7 +109,6 @@ export default class MapgeoService {
 
   async findDataset(id: string) {
     const result = await this.#fetch(`/api/config/datasets/${id}`);
-    debugger;
     return result.dataset;
   }
 
