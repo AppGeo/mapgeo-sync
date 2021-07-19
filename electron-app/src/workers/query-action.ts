@@ -4,7 +4,7 @@ import MapgeoService from '../mapgeo/service';
 import handleQueryAction from '../action-handlers/query';
 import S3Service from '../s3-service';
 import { RuleBundle, SyncConfig, SyncRule } from 'mapgeo-sync-config';
-import { SyncStoreType } from 'src/store';
+import { SyncStoreType } from 'src/store/store';
 
 interface WorkerData {
   mapgeo: SyncStoreType['mapgeo'];

@@ -5,7 +5,7 @@ import {
   SyncDbConfig,
   SyncRule,
 } from 'mapgeo-sync-config';
-import { store } from '../store';
+import { store } from '../store/store';
 
 // TODO: update config instead?
 const typeConversion = new Map([

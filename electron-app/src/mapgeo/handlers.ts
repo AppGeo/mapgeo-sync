@@ -1,5 +1,5 @@
 import { IpcMain } from 'electron';
-import { store, SyncStore } from '../store';
+import { store, SyncStore } from '../store/store';
 import { getService } from './service';
 
 export function register(ipcMain: IpcMain) {

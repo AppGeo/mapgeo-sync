@@ -1,7 +1,7 @@
 import * as schedule from 'node-schedule';
 import * as Store from 'electron-store';
 import { RecurrenceRule, Range } from 'node-schedule';
-import { SyncStoreType } from './store';
+import { SyncStoreType } from './store/store';
 import { SyncRule, SyncState } from 'mapgeo-sync-config';
 
 type UpdateSyncStateFn = (

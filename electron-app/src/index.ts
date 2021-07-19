@@ -29,11 +29,11 @@ import Scheduler from './scheduler';
 import MapgeoService from './mapgeo/service';
 import { EventObject, Interpreter } from 'xstate';
 import { AuthContext } from './auth/machine';
-import { store } from './store';
+import { store } from './store/store';
 import { register as registerMapgeoHandlers } from './mapgeo/handlers';
+import { register as registerStoreHandlers } from './store/handlers';
 import { waitForState } from './utils/wait-for-state';
 import { createService as createAuthService } from './auth/service';
-import { RecurrenceRule, Range } from 'node-schedule';
 
 const emberAppDir = path.resolve(__dirname, '..', 'ember-dist');
 const emberAppURL = pathToFileURL(
@@ -56,6 +56,7 @@ let authService: Interpreter<
 >;
 
 registerMapgeoHandlers(ipcMain);
+registerStoreHandlers(ipcMain);
 
 function updateSyncState(rule: SyncRule, data: Omit<Partial<SyncState>, 'id'>) {
   const all = store.get('syncState') || [];
@@ -76,48 +77,6 @@ function updateSyncState(rule: SyncRule, data: Omit<Partial<SyncState>, 'id'>) {
   mainWindow?.webContents.send('syncStateUpdated', all);
   return state;
 }
-
-ipcMain.handle('store/findSyncRules', (event) => {
-  return store.get('syncRules') || [];
-});
-
-ipcMain.handle('store/addSyncRule', (event, rule: SyncRule) => {
-  let rules = store.get('syncRules');
-  if (!rules) {
-    rules = [];
-  }
-  rules.push(rule);
-  store.set('syncRules', rules);
-  return rules;
-});
-
-ipcMain.handle('store/removeSyncRule', (event, rule: SyncRule) => {
-  let rules = store.get('syncRules');
-  if (!rules) {
-    return [];
-  }
-  rules = rules.filter((item) => item.id !== rule.id);
-  store.set('syncRules', rules);
-  return rules;
-});
-
-ipcMain.handle('store/findSyncState', (event) => {
-  return store.get('syncState') || [];
-});
-
-ipcMain.handle('store/findSources', (event) => {
-  return store.get('sources') || [];
-});
-
-ipcMain.handle('store/addSource', (event, source: Source) => {
-  let sources = store.get('sources');
-  if (!sources) {
-    sources = [];
-  }
-  sources.push(source);
-  store.set('sources', sources);
-  return sources;
-});
 
 ipcMain.handle('selectSourceFile', async (event, sourceId: string) => {
   const sources = store.get('sources');

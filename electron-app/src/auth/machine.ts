@@ -1,6 +1,6 @@
 import { LoginData, SetupData } from 'mapgeo-sync-config';
 import { createMachine, assign } from 'xstate';
-import { store } from '../store';
+import { store } from '../store/store';
 
 export interface AuthContext {
   config: any;

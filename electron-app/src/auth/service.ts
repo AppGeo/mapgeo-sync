@@ -1,6 +1,6 @@
 import { interpret } from 'xstate';
 import MapgeoService from '../mapgeo/service';
-import { store } from '../store';
+import { store } from '../store/store';
 import { authMachine } from './machine';
 
 interface ServiceOptions {
