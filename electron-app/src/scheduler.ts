@@ -146,8 +146,8 @@ export default class Scheduler {
       // scheduleRule.hour = rule.schedule?.hour;
       // scheduleRule.minute = randomQuarter === 4 ? minutes - 5 : minutes;
       // DEBUG
-      scheduleRule.hour = 17;
-      scheduleRule.minute = 13;
+      scheduleRule.hour = 16;
+      scheduleRule.minute = 58;
     }
 
     return scheduleRule;

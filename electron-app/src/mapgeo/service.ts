@@ -64,21 +64,24 @@ export default class MapgeoService {
   }
 
   constructor(host: string, config: Record<string, unknown>) {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-
     this.config = config;
     this.host = host;
-    this.headers = headers;
+    this.headers = {};
   }
 
   async #fetch(url: string, options: RequestInit = {}) {
     const baseUrl = this.host;
+    const headers = Object.assign(
+      { 'Content-Type': 'application/json' },
+      this.headers,
+      options.headers || {}
+    );
+    console.log('Headers: ', JSON.stringify(headers));
+
     const response = await fetch(`${baseUrl}${url}`, {
       ...options,
       agent: httpsAgent,
-      headers: Object.assign({}, this.headers, options.headers || {}),
+      headers,
     });
     return response.json();
   }
@@ -124,8 +127,8 @@ export default class MapgeoService {
   }: {
     datasetId: string;
     uploads: UploadedMetadata[];
-    notificationEmail: string;
-    updateDate: boolean;
+    notificationEmail?: string;
+    updateDate?: boolean;
   }) {
     try {
       const result = await this.#fetch(

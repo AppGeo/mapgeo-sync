@@ -88,8 +88,8 @@ async function handleRule(ruleBundle: RuleBundle) {
   // An upload-status.json is uploaded to s3 with results of process, failure or success
   const res = await mapgeoService.notifyUploader({
     datasetId: ruleBundle.rule.datasetId,
-    updateDate: config.MapGeoOptions.UpdateDate,
-    notificationEmail: config.MapGeoOptions.NotificationEmail,
+    updateDate: true,
+    // notificationEmail: 'ivradchenko@appgeo.com',
     uploads: [
       {
         key,
@@ -142,10 +142,10 @@ if (parentPort) {
         parentPort.postMessage('done');
         break;
       }
+
       default:
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        // eslint-disable-next-line no-case-declarations
-        const _exhaustiveCheck: never = msg;
+        const exhaustiveCheck: never = msg;
+        throw new Error(`Unhandled case: ${exhaustiveCheck}`);
     }
   });
 }
