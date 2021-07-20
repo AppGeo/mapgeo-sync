@@ -14,4 +14,8 @@ Router.map(function () {
 
   this.route('error');
   this.route('loading');
+
+  this.route('rule', { path: 'rules/:ruleId' }, function () {
+    this.route('runs');
+  });
 });

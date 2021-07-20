@@ -59,31 +59,49 @@
         </Button>
       {{/if}}
 
-      <ButtonWithMore @onClick={{fn @onEdit @rule}}>
-        <:primary>
-          <FaIcon @icon='pen' />
-        </:primary>
+      {{#if @onEdit}}
+        <ButtonWithMore @onClick={{fn @onEdit @rule}}>
+          <:primary>
+            <FaIcon @icon='pen' />
+          </:primary>
 
-        <:secondary as |s|>
-          <ul>
-            <li>
-              <Button
-                @size='sm'
-                @appearance='minimal'
-                class={{s.classNames}}
-                disabled={{this.runRule.isRunning}}
-                {{on 'click' (perform this.runRule @rule)}}
-              >
-                {{#if this.runRule.isRunning}}
-                  Running..
-                {{else}}
-                  Run Manually
-                {{/if}}
-              </Button>
-            </li>
-          </ul>
-        </:secondary>
-      </ButtonWithMore>
+          <:secondary as |s|>
+            <ul>
+              <li>
+                <Button
+                  @size='sm'
+                  @appearance='minimal'
+                  class={{s.classNames}}
+                  disabled={{this.runRule.isRunning}}
+                  {{on 'click' (perform this.runRule @rule)}}
+                >
+                  {{#if this.runRule.isRunning}}
+                    Running..
+                  {{else}}
+                    Run Manually
+                  {{/if}}
+                </Button>
+              </li>
+
+              <li>
+                <Button
+                  @size='sm'
+                  @appearance='minimal'
+                  @isRenderless={{true}} as |btn|
+                >
+                  <LinkTo
+                    class="{{btn.classNames}} {{s.classNames}}"
+                    @route='rule.runs'
+                    @model={{@rule.id}}
+                  >
+                    Previous Runs
+                  </LinkTo>
+                </Button>
+              </li>
+            </ul>
+          </:secondary>
+        </ButtonWithMore>
+      {{/if}}
     </div>
   </div>
 </li>
