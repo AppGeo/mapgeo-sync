@@ -23,7 +23,8 @@ export default class RuleRuns extends Route {
   @service('router') declare router: RouterService;
   @service('session') declare session: Session;
 
-  async model({ ruleId }: Params): Promise<Model> {
+  async model(): Promise<Model> {
+    const { ruleId } = this.paramsFor('rule') as Params;
     const result = await hash({
       community: this.platform.fetchCommunity(),
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
