@@ -59,6 +59,15 @@ let authService: Interpreter<
   }
 >;
 
+app.setAboutPanelOptions({
+  applicationName: 'MapGeo Sync',
+  applicationVersion: '0.0.0',
+});
+// Login https://www.electronjs.org/docs/api/app#appsetloginitemsettingssettings-macos-windows
+app.setLoginItemSettings({
+  openAtLogin: true,
+});
+
 registerMapgeoHandlers(ipcMain);
 registerStoreHandlers(ipcMain);
 
@@ -366,6 +375,7 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     console.log('closing because windows closed');
     app.quit();
+    tray?.destroy();
   }
 });
 
@@ -400,6 +410,7 @@ app.on('ready', async () => {
         }
       },
     },
+    { label: 'About', type: 'normal', click: () => app.showAboutPanel() },
     {
       type: 'separator',
     },
