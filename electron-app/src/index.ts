@@ -1,26 +1,15 @@
 /* eslint-disable no-console */
 // import installExtension, { EMBER_INSPECTOR } from 'electron-devtools-installer';
 import { pathToFileURL } from 'url';
-import {
-  app,
-  BrowserWindow,
-  Tray,
-  Menu,
-  ipcMain,
-  dialog,
-  Notification,
-} from 'electron';
+import { app, BrowserWindow, Tray, Menu, ipcMain, dialog } from 'electron';
 import { Worker } from 'worker_threads';
-import * as fs from 'fs';
 import * as path from 'path';
 import * as isDev from 'electron-is-dev';
 import * as windowStateKeeper from 'electron-window-state';
 import handleFileUrls from './handle-file-urls';
 import type {
   LoginData,
-  QueryAction,
   SetupData,
-  Source,
   SyncConfig,
   SyncRule,
   SyncState,
@@ -34,10 +23,7 @@ import { register as registerMapgeoHandlers } from './mapgeo/handlers';
 import { register as registerStoreHandlers } from './store/handlers';
 import { waitForState } from './utils/wait-for-state';
 import { createService as createAuthService } from './auth/service';
-import {
-  QueryActionMessage,
-  QueryActionResponse,
-} from './workers/query-action';
+import { QueryActionResponse } from './workers/query-action';
 
 const emberAppDir = path.resolve(__dirname, '..', 'ember-dist');
 const emberAppURL = pathToFileURL(
@@ -60,12 +46,34 @@ let authService: Interpreter<
 >;
 
 app.setAboutPanelOptions({
-  applicationName: 'MapGeo Sync',
+  applicationName: app.name,
   applicationVersion: '0.0.0',
 });
+
+const isWindows = process.platform === 'win32';
+
 // Login https://www.electronjs.org/docs/api/app#appsetloginitemsettingssettings-macos-windows
+let loginItemSettings = {};
+
+if (isWindows) {
+  const appFolder = path.dirname(process.execPath);
+  const updateExe = path.resolve(appFolder, '..', 'Update.exe');
+  const exeName = path.basename(process.execPath);
+
+  loginItemSettings = {
+    path: updateExe,
+    args: [
+      '--processStart',
+      `"${exeName}"`,
+      '--process-start-args',
+      `"--hidden"`,
+    ],
+  };
+}
+
 app.setLoginItemSettings({
   openAtLogin: true,
+  ...loginItemSettings,
 });
 
 registerMapgeoHandlers(ipcMain);
