@@ -48,6 +48,17 @@ NODE_EXTRA_CA_CERTS="/Users/iradchenko/Library/Application Support/devcert/certi
 - `UploadActions` can now specify a `DatasetId` (defaults to 'properties' if not specified)
 - `UploadActions` requires a `GeometryColumn` if `FormatAsGeoJson` is set to true.
 
+## Electron
+
+On mac you need to install Wine, `brew install wine-stable` to build for Windows.
+
+Building the app: `cd electron-app/` first.
+
+```sh
+npm run package
+npm run package:win
+```
+
 ## Prerequisites
 
 You will need the following things properly installed on your computer.
