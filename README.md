@@ -50,14 +50,35 @@ NODE_EXTRA_CA_CERTS="/Users/iradchenko/Library/Application Support/devcert/certi
 
 ## Electron
 
-On mac you need to install Wine, `brew install wine-stable` to build for Windows.
+On mac you need to install Wine and mono, `brew install wine-stable && brew install mono` to build for Windows.
 
 Building the app: `cd electron-app/` first.
 
 ```sh
-npm run package
-npm run package:win
+yarn package
+yarn package:win
 ```
+
+### Logs
+
+Are located here:
+
+- on Linux: `~/.config/MapGeo Sync/logs/main.log`
+- on macOS: `~/Library/Logs/MapGeo Sync/main.log`
+- on Windows: `%USERPROFILE%\AppData\Roaming\MapGeo Sync\logs\main.log`
+
+### Publish
+
+To publish to Github releases, you must first get a Github Token.
+
+```sh
+# MacOS
+GITHUB_TOKEN=<token> yarn pub
+# Windows, running this on macos will take a while 30+ min, it's faster in a Windows VM
+GITHUB_TOKEN=<token> yarn pub --platform win32
+```
+
+Releases can be seen here: https://github.com/AppGeo/mapgeo-sync/releases
 
 ## Prerequisites
 
