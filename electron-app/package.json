@@ -18,7 +18,8 @@
     "package": "electron-forge package",
     "package:win": "yarn package -p win32",
     "make": "electron-forge make",
-    "pub": "electron-forge publish",
+    "publish:macos": "electron-forge publish",
+    "publish:windows": "electron-forge publish --platform win32",
     "lint": "eslint --ext .ts .",
     "test": "node dist/tests/auth.machine.test.js",
     "generate:store-schema": "yarn ts-json-schema-generator --path 'src/store.ts' --type 'SyncStoreType' --no-type-check -o src/store-schema.json"
