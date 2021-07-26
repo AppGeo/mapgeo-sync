@@ -117,19 +117,6 @@ ipcMain.handle('selectSourceFile', async (event, sourceId: string) => {
 });
 
 ipcMain.handle('startSyncRuleSchedule', async (event, rule: SyncRule) => {
-  // , (done) => {
-  //   const sources = store.get('sources');
-  //   const source = sources.find((source) => source.id === rule.sourceId);
-
-  //   queryWorker.postMessage({
-  //     event: 'handle-rule',
-  //     data: {
-  //       rule,
-  //       source,
-  //     },
-  //   });
-  // });
-
   return scheduler.scheduleRule(rule);
 });
 
@@ -152,12 +139,6 @@ ipcMain.handle('login', async (event, data: LoginData) => {
   if (!mapgeoService) {
     throw new Error('MapGeoService has not been setup');
   }
-
-  // const isAuthenticated = await mapgeoService.login(data.email, data.password);
-
-  // if (isAuthenticated) {
-  //   store.set('mapgeo.login', data);
-  // }
 
   authService.send({ type: 'LOGIN', payload: data } as any);
   await waitForState(authService, ['authenticated']);
@@ -304,32 +285,6 @@ function createBrowserWindow() {
         event.reply('action-result', message);
       });
     });
-
-    ipcMain.on('get-schedule-details', (event) => {
-      event.reply('schedule-details', {
-        isScheduled: scheduler.isScheduled,
-        nextRunDate: scheduler.nextRunDate,
-      });
-    });
-
-    // Start on run if schedule rule set
-    const scheduleRule = store.get('scheduleRule');
-    if (typeof scheduleRule === 'string') {
-      scheduler.schedule(scheduleRule, (done) => {
-        queryWorker.postMessage({
-          event: 'handle-action',
-          data: currentConfig.UploadActions[0],
-        });
-
-        queryWorker.once('message', (message) => {
-          const { nextRunDate } = done();
-          mainWindow.webContents.send('action-result', {
-            ...message,
-            nextRunDate,
-          });
-        });
-      });
-    }
   });
 
   // If a loading operation goes wrong, we'll send Electron back to
