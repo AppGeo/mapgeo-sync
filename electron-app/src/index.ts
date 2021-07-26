@@ -25,6 +25,7 @@ import { register as registerStoreHandlers } from './store/handlers';
 import { waitForState } from './utils/wait-for-state';
 import { createService as createAuthService } from './auth/service';
 import { QueryActionResponse } from './workers/query-action';
+import logger from './logger';
 
 const emberAppDir = path.resolve(__dirname, '..', 'ember-dist');
 const emberAppURL = pathToFileURL(
@@ -212,18 +213,18 @@ function createBrowserWindow() {
     getMapgeoService: () => mapgeoService,
     setMapgeoService: (value) => (mapgeoService = value),
   });
-  console.log('starting auth service');
-  console.log(authService.start().state.value);
+  logger.log('starting auth service');
+  logger.log(authService.start().state.value);
 
   // Ember app has loaded, send an event
   mainWindow.webContents.on('did-finish-load', async () => {
-    console.log('did-finish-load');
+    logger.log('did-finish-load');
     if (!scheduler) {
       scheduler = new Scheduler({
         store,
         updateSyncState,
         run: async (rule) => {
-          console.log(`handle run of ${rule.name}`);
+          logger.log(`handle run of ${rule.name}`);
           const sources = store.get('sources');
           const source = sources.find((source) => source.id === rule.sourceId);
 
@@ -238,7 +239,7 @@ function createBrowserWindow() {
           const result = await new Promise(
             (resolve: (msg: QueryActionResponse) => void, reject) => {
               queryWorker.once('message', (message: QueryActionResponse) => {
-                console.log('handle-rule result: ' + message);
+                logger.log('handle-rule result: ' + message);
                 resolve(message);
               });
             }
@@ -257,8 +258,8 @@ function createBrowserWindow() {
         getMapgeoService: () => mapgeoService,
         setMapgeoService: (value) => (mapgeoService = value),
       });
-      console.log('starting auth service');
-      console.log(authService.start().state.value);
+      logger.log('starting auth service');
+      logger.log(authService.start().state.value);
     }
 
     let currentConfig = store.get('config') as SyncConfig;
@@ -281,7 +282,7 @@ function createBrowserWindow() {
       });
 
       queryWorker.once('message', (message) => {
-        // console.log(message);
+        // logger.log(message);
         event.reply('action-result', message);
       });
     });
@@ -295,30 +296,30 @@ function createBrowserWindow() {
 
   mainWindow.webContents.on('render-process-gone', (_event, details) => {
     if (details.reason !== 'killed') {
-      console.log(
+      logger.log(
         'Your Ember app (or other code) in the main window has crashed.'
       );
-      console.log(
+      logger.log(
         'This is a serious issue that needs to be handled and/or debugged.'
       );
     }
   });
 
   mainWindow.on('unresponsive', () => {
-    console.log(
+    logger.log(
       'Your Ember app (or other code) has made the window unresponsive.'
     );
   });
 
   mainWindow.on('responsive', () => {
-    console.log('The main window has become responsive again.');
+    logger.log('The main window has become responsive again.');
   });
 
   mainWindow.on('closed', (e: Electron.IpcRendererEvent) => {
     e.preventDefault();
     mainWindow = null;
     // Stop the service
-    console.log('window closed, stopping auth service');
+    logger.log('window closed, stopping auth service');
     authService.stop();
     authService = undefined;
   });
@@ -337,7 +338,7 @@ function createBrowserWindow() {
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
-    console.log('closing because windows closed');
+    logger.log('closing because windows closed');
     app.quit();
     tray?.destroy();
   }
@@ -352,12 +353,12 @@ app.on('ready', async () => {
   //   try {
   //     require('devtron').install();
   //   } catch (err) {
-  //     console.log('Failed to install Devtron: ', err);
+  //     logger.log('Failed to install Devtron: ', err);
   //   }
   //   try {
   //     await installExtension(EMBER_INSPECTOR);
   //   } catch (err) {
-  //     console.log('Failed to install Ember Inspector: ', err);
+  //     logger.log('Failed to install Ember Inspector: ', err);
   //   }
   // }
 
@@ -410,10 +411,10 @@ app.on('ready', async () => {
 // resources (e.g. file descriptors, handles, etc) before shutting down the process. It is
 // not safe to resume normal operation after 'uncaughtException'.
 process.on('uncaughtException', (err) => {
-  console.log('An exception in the main thread was not handled.');
-  console.log(
+  logger.log('An exception in the main thread was not handled.');
+  logger.log(
     'This is a serious issue that needs to be handled and/or debugged.'
   );
-  console.log(`Exception: ${err}`);
-  console.log(err.stack);
+  logger.log(`Exception: ${err}`);
+  logger.log(err.stack);
 });
