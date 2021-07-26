@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+require('update-electron-app')();
 // import installExtension, { EMBER_INSPECTOR } from 'electron-devtools-installer';
 import { pathToFileURL } from 'url';
 import { app, BrowserWindow, Tray, Menu, ipcMain, dialog } from 'electron';

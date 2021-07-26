@@ -4,6 +4,9 @@
   "productName": "MapGeo Sync",
   "description": "Small description for mapgeo-sync goes here",
   "main": "dist/index.js",
+  "repository": {
+    "url": "https://github.com/AppGeo/mapgeo-sync"
+  },
   "scripts": {
     "start": "electron-forge start",
     "predebug": "yarn build:ts",
@@ -68,6 +71,7 @@
     "node-schedule": "^2.0.0",
     "oracledb": "^5.1.0",
     "pg": "^8.6.0",
+    "update-electron-app": "^2.0.1",
     "xstate": "^4.22.0"
   },
   "devDependencies": {
@@ -90,8 +94,8 @@
     "tap": "^15.0.9",
     "tap-spec": "^5.0.0",
     "ts-json-schema-generator": "^0.93.0",
-    "typescript": "^4.3.2",
-    "tsc-watch": "^4.4.0"
+    "tsc-watch": "^4.4.0",
+    "typescript": "^4.3.2"
   },
   "volta": {
     "node": "12.22.1",
