@@ -18,7 +18,7 @@
     "package": "electron-forge package",
     "package:win": "yarn package -p win32",
     "make": "electron-forge make",
-    "publish": "electron-forge publish",
+    "pub": "electron-forge publish",
     "lint": "eslint --ext .ts .",
     "test": "node dist/tests/auth.machine.test.js",
     "generate:store-schema": "yarn ts-json-schema-generator --path 'src/store.ts' --type 'SyncStoreType' --no-type-check -o src/store-schema.json"
@@ -38,7 +38,8 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "mapgeo_sync"
+            "name": "mapgeo_sync",
+            "authors": "Ilya Radchenko"
           }
         },
         {
@@ -54,6 +55,21 @@
         {
           "name": "@electron-forge/maker-rpm",
           "config": {}
+        }
+      ],
+      "publishers": [
+        {
+          "name": "@electron-forge/publisher-github",
+          "platforms": [
+            "darwin"
+          ],
+          "config": {
+            "repository": {
+              "owner": "appgeo",
+              "name": "mapgeo-sync"
+            },
+            "prerelease": true
+          }
         }
       ]
     }
@@ -81,6 +97,7 @@
     "@electron-forge/maker-rpm": "6.0.0-beta.57",
     "@electron-forge/maker-squirrel": "6.0.0-beta.57",
     "@electron-forge/maker-zip": "6.0.0-beta.57",
+    "@electron-forge/publisher-github": "^6.0.0-beta.59",
     "@types/electron-devtools-installer": "^2.2.0",
     "@types/node": "^12.19.13",
     "@types/node-fetch": "^2.5.10",

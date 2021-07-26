@@ -1,13 +1,9 @@
 /* eslint-disable no-console */
 require('update-electron-app')();
 // import installExtension, { EMBER_INSPECTOR } from 'electron-devtools-installer';
-import { pathToFileURL } from 'url';
-import { app, BrowserWindow, Tray, Menu, ipcMain, dialog } from 'electron';
-import { Worker } from 'worker_threads';
-import * as path from 'path';
+import { app, BrowserWindow, dialog, ipcMain, Menu, Tray } from 'electron';
 import * as isDev from 'electron-is-dev';
 import * as windowStateKeeper from 'electron-window-state';
-import handleFileUrls from './handle-file-urls';
 import type {
   LoginData,
   SetupData,
@@ -15,17 +11,21 @@ import type {
   SyncRule,
   SyncState,
 } from 'mapgeo-sync-config';
-import Scheduler from './scheduler';
-import MapgeoService from './mapgeo/service';
+import * as path from 'path';
+import { pathToFileURL } from 'url';
+import { Worker } from 'worker_threads';
 import { EventObject, Interpreter } from 'xstate';
 import { AuthContext } from './auth/machine';
-import { store } from './store/store';
-import { register as registerMapgeoHandlers } from './mapgeo/handlers';
-import { register as registerStoreHandlers } from './store/handlers';
-import { waitForState } from './utils/wait-for-state';
 import { createService as createAuthService } from './auth/service';
-import { QueryActionResponse } from './workers/query-action';
+import handleFileUrls from './handle-file-urls';
 import logger from './logger';
+import { register as registerMapgeoHandlers } from './mapgeo/handlers';
+import MapgeoService from './mapgeo/service';
+import Scheduler from './scheduler';
+import { register as registerStoreHandlers } from './store/handlers';
+import { store } from './store/store';
+import { waitForState } from './utils/wait-for-state';
+import { QueryActionResponse } from './workers/query-action';
 
 const emberAppDir = path.resolve(__dirname, '..', 'ember-dist');
 const emberAppURL = pathToFileURL(
