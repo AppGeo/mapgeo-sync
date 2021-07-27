@@ -304,6 +304,7 @@ function createBrowserWindow() {
       });
     } catch (e) {
       logger.scope('did-finish-load').error(e);
+      throw e;
     }
   });
 
