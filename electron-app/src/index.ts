@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-require('update-electron-app')();
 // import installExtension, { EMBER_INSPECTOR } from 'electron-devtools-installer';
 import { app, BrowserWindow, dialog, ipcMain, Menu, Tray } from 'electron';
 import * as isDev from 'electron-is-dev';
@@ -46,6 +45,12 @@ let authService: Interpreter<
     context: AuthContext;
   }
 >;
+
+try {
+  require('update-electron-app')();
+} catch (e) {
+  logger.error('Failed to start app updater. ', e);
+}
 
 app.setAboutPanelOptions({
   applicationName: app.name,
