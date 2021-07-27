@@ -46,11 +46,11 @@ let authService: Interpreter<
   }
 >;
 
-try {
-  require('update-electron-app')();
-} catch (e) {
-  logger.error('Failed to start app updater. ', e);
-}
+// try {
+//   require('update-electron-app')();
+// } catch (e) {
+//   logger.error('Failed to start app updater. ', e);
+// }
 
 app.setAboutPanelOptions({
   applicationName: app.name,

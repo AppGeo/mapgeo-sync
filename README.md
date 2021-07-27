@@ -73,9 +73,9 @@ To publish to Github releases, you must first get a Github Token.
 
 ```sh
 # MacOS
-GITHUB_TOKEN=<token> yarn pub
-# Windows, running this on macos will take a while 30+ min, it's faster in a Windows VM
-GITHUB_TOKEN=<token> yarn pub --platform win32
+GITHUB_TOKEN=<token> yarn publish:macos
+# Windows, running this macos should work, but currently doesn't due to a bug in the squirrel maker
+GITHUB_TOKEN=<token> yarn publish:windows
 ```
 
 Releases can be seen here: https://github.com/AppGeo/mapgeo-sync/releases
