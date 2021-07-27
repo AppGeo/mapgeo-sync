@@ -4,6 +4,9 @@ import { RecurrenceRule, Range } from 'node-schedule';
 import { SyncStoreType } from './store/store';
 import { SyncRule, SyncState } from 'mapgeo-sync-config';
 import { QueryActionResponse } from './workers/query-action';
+import logger from './logger';
+
+const logScope = logger.scope('scheduler');
 
 type UpdateSyncStateFn = (
   rule: SyncRule,
@@ -41,16 +44,20 @@ export default class Scheduler {
    * Automatically setup jobs for rules that have been scheduled on app start
    */
   autoStartScheduled() {
-    console.log('calling autoStartScheduled');
+    logScope.log('calling autoStartScheduled');
+
     const syncState = this.store.get('syncState') || [];
-    console.log('syncState', syncState);
+    logScope.log('syncState', syncState);
+
     const scheduledOnly = syncState.filter((item) => item.scheduled);
     const scheduledRuleIds = scheduledOnly.map((item) => item.ruleId);
-    console.log('scheduled rule ids', scheduledRuleIds);
-    const rules = this.store
-      .get('syncRules')
-      .filter((rule) => rule.schedule && scheduledRuleIds.includes(rule.id));
-    console.log('rules', rules);
+    logScope.log('scheduled rule ids', scheduledRuleIds);
+
+    const syncRules = this.store.get('syncRules') || [];
+    const rules = syncRules.filter(
+      (rule) => rule.schedule && scheduledRuleIds.includes(rule.id)
+    );
+    logScope.log('rules', rules);
 
     rules.forEach((rule) => {
       this.scheduleRule(rule);
@@ -65,7 +72,7 @@ export default class Scheduler {
 
     // Reschedule if found
     if (found) {
-      console.log(
+      logScope.log(
         `Rescheduling ${rule.name} for ${recurrence.nextInvocationDate(
           new Date()
         )}`
@@ -80,12 +87,12 @@ export default class Scheduler {
       });
     }
 
-    console.log(
+    logScope.log(
       `Scheduling ${rule.name} for ${recurrence.nextInvocationDate(new Date())}`
     );
 
     const job = schedule.scheduleJob(recurrence, async () => {
-      console.log(`Running ${rule.name} rule..`);
+      logScope.log(`Running ${rule.name} rule..`);
       const state = this.updateSyncState(rule, {
         running: true,
       });
@@ -106,7 +113,7 @@ export default class Scheduler {
         nextScheduledRun: this.#getNextInvocation(job),
         logs: logs.slice(0, 5),
       });
-      console.log(`Finished running ${rule.name} rule at ${new Date()}.`);
+      logScope.log(`Finished running ${rule.name} rule at ${new Date()}.`);
     });
 
     this.scheduled.push({
@@ -132,7 +139,7 @@ export default class Scheduler {
         nextScheduledRun: undefined,
       });
       this.scheduled = this.scheduled.filter((item) => item.ruleId !== rule.id);
-      console.log(`Job cancelled for rule ${rule.name}.`);
+      logScope.log(`Job cancelled for rule ${rule.name}.`);
     }
   }
 
@@ -158,15 +165,15 @@ export default class Scheduler {
     run: (done: () => { nextRunDate: Date }) => void
   ) {
     if (this.job) {
-      console.log('rescheduling...');
+      logScope.log('rescheduling...');
       this.store.set('scheduleRule', rule);
 
       this.job.reschedule(rule);
-      console.log(`Next run at ${this.job.nextInvocation()}`);
+      logScope.log(`Next run at ${this.job.nextInvocation()}`);
       return;
     }
 
-    console.log('scheduling...');
+    logScope.log('scheduling...');
 
     this.store.set('scheduleRule', rule);
     this.store.set('scheduleStarted', true);
@@ -182,13 +189,13 @@ export default class Scheduler {
           this.store.set('scheduleRunning', false);
         }
         let nextRunDate = this.job.nextInvocation();
-        console.log(`done. Next run ${nextRunDate}`);
+        logScope.log(`done. Next run ${nextRunDate}`);
 
         return { nextRunDate };
       });
     });
 
-    console.log(`Will run at ${this.job.nextInvocation()}`);
+    logScope.log(`Will run at ${this.job.nextInvocation()}`);
   }
 
   cancel() {
