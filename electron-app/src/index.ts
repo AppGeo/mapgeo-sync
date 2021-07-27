@@ -151,7 +151,7 @@ ipcMain.handle('login', async (event, data: LoginData) => {
   return true;
 });
 
-async function initWorkers(config: SyncConfig) {
+async function initWorkers(config?: SyncConfig) {
   if (queryWorker) {
     await queryWorker.terminate();
   }
@@ -212,25 +212,30 @@ function createBrowserWindow() {
 
   // Load the ember application
   mainWindow.loadURL(emberAppURL);
-  authService = createAuthService({
-    send: (event: string, payload: unknown) =>
-      mainWindow.webContents.send(event, payload),
-    getMapgeoService: () => mapgeoService,
-    setMapgeoService: (value) => (mapgeoService = value),
-  });
-  logger.log('starting auth service');
-  logger.log(authService.start().state.value);
+  // authService = createAuthService({
+  //   send: (event: string, payload: unknown) =>
+  //     mainWindow.webContents.send(event, payload),
+  //   getMapgeoService: () => mapgeoService,
+  //   setMapgeoService: (value) => (mapgeoService = value),
+  // });
+  // logger.log('starting auth service');
+  // logger.log(authService.start().state.value);
 
   // Ember app has loaded, send an event
   mainWindow.webContents.on('did-finish-load', async () => {
     logger.log('did-finish-load');
+
     if (!scheduler) {
+      const logScope = logger.scope('scheduler');
+
+      logScope.info('Setting up scheduler');
+
       scheduler = new Scheduler({
         store,
         updateSyncState,
         run: async (rule) => {
-          logger.log(`handle run of ${rule.name}`);
-          const sources = store.get('sources');
+          logScope.log(`handle run of ${rule.name}`);
+          const sources = store.get('sources') || [];
           const source = sources.find((source) => source.id === rule.sourceId);
 
           queryWorker.postMessage({
@@ -244,7 +249,7 @@ function createBrowserWindow() {
           const result = await new Promise(
             (resolve: (msg: QueryActionResponse) => void, reject) => {
               queryWorker.once('message', (message: QueryActionResponse) => {
-                logger.log('handle-rule result: ' + message);
+                logScope.log('handle-rule result: ' + message);
                 resolve(message);
               });
             }
@@ -255,27 +260,27 @@ function createBrowserWindow() {
       });
     }
 
-    // create/tart the service
+    // create/start the service
     if (!authService) {
+      logger.log('Setting up auth service');
+
       authService = createAuthService({
         send: (event: string, payload: unknown) =>
           mainWindow.webContents.send(event, payload),
         getMapgeoService: () => mapgeoService,
         setMapgeoService: (value) => (mapgeoService = value),
       });
+
       logger.log('starting auth service');
       logger.log(authService.start().state.value);
     }
 
-    let currentConfig = store.get('config') as SyncConfig;
-    mainWindow.webContents.send('config-loaded', currentConfig);
-
     if (!queryWorker) {
-      initWorkers(currentConfig);
+      initWorkers();
     }
 
     ipcMain.on('runRule', async (event, rule: SyncRule) => {
-      const sources = store.get('sources');
+      const sources = store.get('sources') || [];
       const source = sources.find((source) => source.id === rule.sourceId);
 
       queryWorker.postMessage({
@@ -296,7 +301,7 @@ function createBrowserWindow() {
   // If a loading operation goes wrong, we'll send Electron back to
   // Ember App entry point
   mainWindow.webContents.on('did-fail-load', () => {
-    mainWindow.loadURL(emberAppURL);
+    mainWindow?.loadURL(emberAppURL);
   });
 
   mainWindow.webContents.on('render-process-gone', (_event, details) => {
