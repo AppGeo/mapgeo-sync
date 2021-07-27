@@ -46,6 +46,9 @@ let authService: Interpreter<
   }
 >;
 
+// Prevent double startup in windows
+if (require('electron-squirrel-startup')) app.quit();
+
 // try {
 //   require('update-electron-app')();
 // } catch (e) {
@@ -328,10 +331,13 @@ function createBrowserWindow() {
   mainWindow.on('closed', (e: Electron.IpcRendererEvent) => {
     e.preventDefault();
     mainWindow = null;
-    // Stop the service
-    logger.log('window closed, stopping auth service');
-    authService.stop();
-    authService = undefined;
+
+    // Stop the auth service
+    if (authService) {
+      logger.log('window closed, stopping auth service');
+      authService.stop();
+      authService = undefined;
+    }
   });
 
   return mainWindow;
