@@ -226,79 +226,85 @@ function createBrowserWindow() {
 
   // Ember app has loaded, send an event
   mainWindow.webContents.on('did-finish-load', async () => {
-    logger.log('did-finish-load');
+    try {
+      logger.log('did-finish-load');
 
-    if (!scheduler) {
-      const logScope = logger.scope('scheduler');
+      if (!scheduler) {
+        const logScope = logger.scope('scheduler');
 
-      logScope.info('Setting up scheduler');
+        logScope.info('Setting up scheduler');
 
-      scheduler = new Scheduler({
-        store,
-        updateSyncState,
-        run: async (rule) => {
-          logScope.log(`handle run of ${rule.name}`);
-          const sources = store.get('sources') || [];
-          const source = sources.find((source) => source.id === rule.sourceId);
+        scheduler = new Scheduler({
+          store,
+          updateSyncState,
+          run: async (rule) => {
+            logScope.log(`handle run of ${rule.name}`);
+            const sources = store.get('sources') || [];
+            const source = sources.find(
+              (source) => source.id === rule.sourceId
+            );
 
-          queryWorker.postMessage({
-            event: 'handle-rule',
-            data: {
-              rule,
-              source,
-            },
-          });
+            queryWorker.postMessage({
+              event: 'handle-rule',
+              data: {
+                rule,
+                source,
+              },
+            });
 
-          const result = await new Promise(
-            (resolve: (msg: QueryActionResponse) => void, reject) => {
-              queryWorker.once('message', (message: QueryActionResponse) => {
-                logScope.log('handle-rule result: ' + message);
-                resolve(message);
-              });
-            }
-          );
+            const result = await new Promise(
+              (resolve: (msg: QueryActionResponse) => void, reject) => {
+                queryWorker.once('message', (message: QueryActionResponse) => {
+                  logScope.log('handle-rule result: ' + message);
+                  resolve(message);
+                });
+              }
+            );
 
-          return result;
-        },
+            return result;
+          },
+        });
+      }
+
+      // create/start the service
+      if (!authService) {
+        logger.log('Setting up auth service');
+
+        authService = createAuthService({
+          send: (event: string, payload: unknown) =>
+            mainWindow.webContents.send(event, payload),
+          getMapgeoService: () => mapgeoService,
+          setMapgeoService: (value) => (mapgeoService = value),
+        });
+
+        logger.log('starting auth service');
+        logger.log(authService.start().state.value);
+      }
+
+      if (!queryWorker) {
+        initWorkers();
+      }
+
+      ipcMain.on('runRule', async (event, rule: SyncRule) => {
+        const sources = store.get('sources') || [];
+        const source = sources.find((source) => source.id === rule.sourceId);
+
+        queryWorker.postMessage({
+          event: 'handle-rule',
+          data: {
+            rule,
+            source,
+          },
+        });
+
+        queryWorker.once('message', (message) => {
+          // logger.log(message);
+          event.reply('action-result', message);
+        });
       });
+    } catch (e) {
+      logger.scope('did-finish-load').error(e);
     }
-
-    // create/start the service
-    if (!authService) {
-      logger.log('Setting up auth service');
-
-      authService = createAuthService({
-        send: (event: string, payload: unknown) =>
-          mainWindow.webContents.send(event, payload),
-        getMapgeoService: () => mapgeoService,
-        setMapgeoService: (value) => (mapgeoService = value),
-      });
-
-      logger.log('starting auth service');
-      logger.log(authService.start().state.value);
-    }
-
-    if (!queryWorker) {
-      initWorkers();
-    }
-
-    ipcMain.on('runRule', async (event, rule: SyncRule) => {
-      const sources = store.get('sources') || [];
-      const source = sources.find((source) => source.id === rule.sourceId);
-
-      queryWorker.postMessage({
-        event: 'handle-rule',
-        data: {
-          rule,
-          source,
-        },
-      });
-
-      queryWorker.once('message', (message) => {
-        // logger.log(message);
-        event.reply('action-result', message);
-      });
-    });
   });
 
   // If a loading operation goes wrong, we'll send Electron back to
