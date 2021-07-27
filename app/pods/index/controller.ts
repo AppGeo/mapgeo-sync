@@ -1,7 +1,5 @@
 import Controller from '@ember/controller';
 import { inject as service } from '@ember/service';
-import { action } from '@ember/object';
-import { task } from 'ember-concurrency';
 import Platform from 'mapgeo-sync/services/platform';
 import { tracked } from '@glimmer/tracking';
 import { localCopy } from 'tracked-toolbox';
