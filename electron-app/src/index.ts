@@ -217,7 +217,7 @@ function createBrowserWindow() {
   mainWindow.loadURL(emberAppURL);
   authService = createAuthService({
     send: (event: string, payload: unknown) =>
-      mainWindow.webContents.send(event, payload),
+      mainWindow?.webContents?.send(event, payload),
     getMapgeoService: () => mapgeoService,
     setMapgeoService: (value) => (mapgeoService = value),
   });
