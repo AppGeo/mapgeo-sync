@@ -215,14 +215,14 @@ function createBrowserWindow() {
 
   // Load the ember application
   mainWindow.loadURL(emberAppURL);
-  // authService = createAuthService({
-  //   send: (event: string, payload: unknown) =>
-  //     mainWindow.webContents.send(event, payload),
-  //   getMapgeoService: () => mapgeoService,
-  //   setMapgeoService: (value) => (mapgeoService = value),
-  // });
-  // logger.log('starting auth service');
-  // logger.log(authService.start().state.value);
+  authService = createAuthService({
+    send: (event: string, payload: unknown) =>
+      mainWindow.webContents.send(event, payload),
+    getMapgeoService: () => mapgeoService,
+    setMapgeoService: (value) => (mapgeoService = value),
+  });
+  logger.log('starting auth service');
+  logger.log(authService.start().state.value);
 
   // Ember app has loaded, send an event
   mainWindow.webContents.on('did-finish-load', async () => {
