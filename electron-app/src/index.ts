@@ -1,14 +1,14 @@
 /* eslint-disable no-console */
-// import installExtension, { EMBER_INSPECTOR } from 'electron-devtools-installer';
 import {
   app,
   BrowserWindow,
+  crashReporter,
   dialog,
   ipcMain,
   Menu,
   Tray,
-  crashReporter,
 } from 'electron';
+import installExtension, { EMBER_INSPECTOR } from 'electron-devtools-installer';
 import * as isDev from 'electron-is-dev';
 import * as windowStateKeeper from 'electron-window-state';
 import type {
@@ -377,22 +377,20 @@ app.on('window-all-closed', () => {
 });
 
 app.on('ready', async () => {
-  // Mostly broken: Because of some changes in Chrome, in recent Electron versions (>=9 I think) they can't be loaded with file: protocol https://github.com/electron/electron/issues/24011),
-  // and also devtron doesn't work for other reasons (https://github.com/electron/electron/issues/23676)
-  // and also devtron has been mostly abandoned (https://github.com/electron-userland/devtron/issues/200).
-  //
-  // if (isDev) {
-  //   try {
-  //     require('devtron').install();
-  //   } catch (err) {
-  //     logger.log('Failed to install Devtron: ', err);
-  //   }
-  //   try {
-  //     await installExtension(EMBER_INSPECTOR);
-  //   } catch (err) {
-  //     logger.log('Failed to install Ember Inspector: ', err);
-  //   }
-  // }
+  if (isDev) {
+    // devtron doesn't work for other reasons (https://github.com/electron/electron/issues/23676)
+    // and also devtron has been mostly abandoned (https://github.com/electron-userland/devtron/issues/200).
+    // try {
+    //   require('devtron').install();
+    // } catch (err) {
+    //   logger.log('Failed to install Devtron: ', err);
+    // }
+    try {
+      await installExtension(EMBER_INSPECTOR);
+    } catch (err) {
+      logger.log('Failed to install Ember Inspector: ', err);
+    }
+  }
 
   tray = new Tray(path.join(__dirname, '..', 'resources/icon-16.png'));
   const contextMenu = Menu.buildFromTemplate([
