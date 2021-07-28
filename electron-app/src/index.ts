@@ -33,11 +33,13 @@ import { register as registerStoreHandlers } from './store/handlers';
 import { store } from './store/store';
 import { waitForState } from './utils/wait-for-state';
 import { QueryActionResponse } from './workers/query-action';
+import { handleSquirrelEvent } from './squirrel-startup';
 
 const emberAppDir = path.resolve(__dirname, '..', 'ember-dist');
 const emberAppURL = pathToFileURL(
   path.join(emberAppDir, 'index.html')
 ).toString();
+const version = '0.0.0';
 
 let scheduler: Scheduler;
 let mainWindow: BrowserWindow;
@@ -54,9 +56,10 @@ let authService: Interpreter<
   }
 >;
 
-// Prevent double startup in windows
-if (require('electron-squirrel-startup')) app.quit();
+// Prevent double startup in windows and create shortcut and handle some updates
+if (handleSquirrelEvent(app, version)) app.quit();
 
+// TODO: re-enable once code signing figured out
 // try {
 //   require('update-electron-app')();
 // } catch (e) {
@@ -65,7 +68,7 @@ if (require('electron-squirrel-startup')) app.quit();
 
 app.setAboutPanelOptions({
   applicationName: app.name,
-  applicationVersion: '0.0.0',
+  applicationVersion: version,
 });
 
 const isWindows = process.platform === 'win32';
@@ -74,7 +77,7 @@ const isWindows = process.platform === 'win32';
 let loginItemSettings = {};
 
 if (isWindows) {
-  // re-enable once updater is enabled
+  // TODO: re-enable once updater is enabled
   // const appFolder = path.dirname(process.execPath);
   // const updateExe = path.resolve(appFolder, '..', 'Update.exe');
   // const exeName = path.basename(process.execPath);
