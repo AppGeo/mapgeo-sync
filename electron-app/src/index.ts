@@ -1,6 +1,14 @@
 /* eslint-disable no-console */
 // import installExtension, { EMBER_INSPECTOR } from 'electron-devtools-installer';
-import { app, BrowserWindow, dialog, ipcMain, Menu, Tray } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  dialog,
+  ipcMain,
+  Menu,
+  Tray,
+  crashReporter,
+} from 'electron';
 import * as isDev from 'electron-is-dev';
 import * as windowStateKeeper from 'electron-window-state';
 import type {
@@ -350,14 +358,15 @@ function createBrowserWindow() {
   return mainWindow;
 }
 
-// Uncomment the lines below to enable Electron's crash reporter
 // For more information, see http://electron.atom.io/docs/api/crash-reporter/
-// electron.crashReporter.start({
-//     productName: 'YourName',
-//     companyName: 'YourCompany',
-//     submitURL: 'https://your-domain.com/url-to-submit',
-//     autoSubmit: true
-// });
+crashReporter.start({
+  productName: app.name,
+  companyName: 'AppGeo',
+  // submitURL: 'https://your-domain.com/url-to-submit',
+  uploadToServer: false,
+});
+
+logger.log('crash path', app.getPath('crashDumps'));
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
