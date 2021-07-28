@@ -74,19 +74,19 @@ const isWindows = process.platform === 'win32';
 let loginItemSettings = {};
 
 if (isWindows) {
-  const appFolder = path.dirname(process.execPath);
-  const updateExe = path.resolve(appFolder, '..', 'Update.exe');
-  const exeName = path.basename(process.execPath);
-
-  loginItemSettings = {
-    path: updateExe,
-    args: [
-      '--processStart',
-      `"${exeName}"`,
-      '--process-start-args',
-      `"--hidden"`,
-    ],
-  };
+  // re-enable once updater is enabled
+  // const appFolder = path.dirname(process.execPath);
+  // const updateExe = path.resolve(appFolder, '..', 'Update.exe');
+  // const exeName = path.basename(process.execPath);
+  // loginItemSettings = {
+  //   path: updateExe,
+  //   args: [
+  //     '--processStart',
+  //     `"${exeName}"`,
+  //     '--process-start-args',
+  //     `"--hidden"`,
+  //   ],
+  // };
 }
 
 app.setLoginItemSettings({
