@@ -30,14 +30,14 @@ export const createService = ({
           },
           needsMapgeoService(context) {
             return (
-              (getMapgeoService() === undefined &&
-                Boolean(store.get<string>('mapgeo.host'))) ||
-              Boolean(context.host)
+              getMapgeoService() === undefined &&
+              (Boolean(store.get<string>('mapgeo.host')) ||
+                Boolean(context.host))
             );
           },
-          hasLogin() {
-            const mapgeo = store.get('mapgeo');
-            return Boolean(mapgeo?.login);
+          hasLogin(context) {
+            // const mapgeo = store.get('mapgeo');
+            return Boolean(context?.login);
           },
         },
         actions: {
@@ -62,7 +62,7 @@ export const createService = ({
             send('authenticated', {
               isAuthenticated: false,
             });
-            store.set('mapgeo.login', undefined);
+            store.delete('mapgeo.login' as any);
           },
           needsSetup() {
             send('authenticated', {
