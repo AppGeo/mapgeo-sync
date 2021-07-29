@@ -55,13 +55,22 @@
             />
           {{/if}}
         {{else if (eq changeset.sourceType 'file')}}
-          <Form.Input
-            @label='Folder'
-            @fieldName='folder'
-            @containerClass='mt-4'
-            type='file'
-            webkitdirectory
-          />
+          <div class='mt-4 flex space-x-2'>
+            <Form.Input
+              @label='Base Folder'
+              @fieldName='folder'
+              @size='sm'
+              disabled={{true}}
+            />
+
+            <Button
+              class='self-end'
+              @size='sm'
+              {{on 'click' (pipe this.selectFolder (set changeset.folder))}}
+            >
+              Browse Folders
+            </Button>
+          </div>
         {{/if}}
 
         <Button

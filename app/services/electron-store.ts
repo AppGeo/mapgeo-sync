@@ -40,6 +40,13 @@ export default class ElectronStore extends Service {
     const sources = await ipcRenderer.invoke('store/addSource', source);
     return sources;
   }
+
+  @action
+  async selectSourceFolder(): Promise<string> {
+    const folder = await ipcRenderer.invoke('selectSourceFolder');
+    debugger;
+    return folder;
+  }
 }
 
 // DO NOT DELETE: this is how TypeScript knows how to look up your services.
