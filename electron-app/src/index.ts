@@ -35,11 +35,13 @@ import { waitForState } from './utils/wait-for-state';
 import { QueryActionResponse } from './workers/query-action';
 import { handleSquirrelEvent } from './squirrel-startup';
 
+const pkg = require('../package.json');
+
 const emberAppDir = path.resolve(__dirname, '..', 'ember-dist');
 const emberAppURL = pathToFileURL(
   path.join(emberAppDir, 'index.html')
 ).toString();
-const version = '0.0.0';
+const version = pkg.version;
 
 let scheduler: Scheduler;
 let mainWindow: BrowserWindow;
@@ -381,15 +383,10 @@ app.on('window-all-closed', () => {
 
 app.on('ready', async () => {
   if (isDev) {
-    // devtron doesn't work for other reasons (https://github.com/electron/electron/issues/23676)
-    // and also devtron has been mostly abandoned (https://github.com/electron-userland/devtron/issues/200).
-    // try {
-    //   require('devtron').install();
-    // } catch (err) {
-    //   logger.log('Failed to install Devtron: ', err);
-    // }
     try {
-      await installExtension(EMBER_INSPECTOR);
+      await installExtension(EMBER_INSPECTOR, {
+        loadExtensionOptions: { allowFileAccess: true },
+      });
     } catch (err) {
       logger.log('Failed to install Ember Inspector: ', err);
     }
