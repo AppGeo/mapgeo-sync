@@ -97,6 +97,9 @@ export default class MapgeoService {
       });
 
       if (!result.token) {
+        if (result.statusCode) {
+          throw new Error(`MapGeo login error: ${result.statusCode}`);
+        }
         throw new Error(result);
       }
 
