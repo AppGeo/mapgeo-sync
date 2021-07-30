@@ -1,107 +1,112 @@
-<li class='bg-white shadow-lg rounded-lg' ...attributes>
-  <div class='p-4 flex justify-between items-center'>
-    <div class='space-y-2'>
-      <div class='text-gray-800'>
-        {{@rule.name}}
-      </div>
-
-      <div class='flex space-x-2'>
-        <div class='flex items-center space-x-1 text-sm text-gray-600'>
-          <FaIcon @icon='map-marked-alt' />
-          <span title='Dataset'>
-            {{this.dataset.name}}
-          </span>
-          <FaIcon class='text-gray-500 font-bold' @icon='caret-right' />
-          <span title='Table Mapping'>
-            {{this.mapping.name}}
-          </span>
-        </div>
-
-        <Source::Card class='text-sm' @source={{this.source}} />
-      </div>
-
-      <div class='flex space-x-2'>
-        {{#if (and this.state.scheduled this.state.nextScheduledRun)}}
-          <div
-            class='flex items-center space-x-1 text-sm text-gray-600'
-            title='Scheduled to run at'
-          >
-            <FaIcon class='text-green-600' @icon='clock' />
-            <span>
-              {{#if this.state.running}}
-                Running..
-              {{else if this.state.nextScheduledRun}}
-                {{format-date this.state.nextScheduledRun dateFormat='long'}}
-              {{/if}}
-            </span>
-          </div>
-        {{/if}}
-      </div>
+<div class='p-4 flex justify-between items-center' ...attributes>
+  <div class='space-y-2'>
+    <div class='text-gray-800'>
+      {{@rule.name}}
     </div>
 
     <div class='flex space-x-2'>
-      {{#if (and this.state.scheduled this.state.nextScheduledRun)}}
-        <Button
-          @size='sm'
-          @appearance='outlined'
-          {{on 'click' (perform this.cancelRuleSchedule @rule)}}
+      <div class='flex items-center space-x-1 text-sm text-gray-600'>
+        <FaIcon @icon='map-marked-alt' />
+        <span title='Dataset'>
+          {{this.dataset.name}}
+        </span>
+        <FaIcon class='text-gray-500 font-bold' @icon='caret-right' />
+        <span title='Table Mapping'>
+          {{this.mapping.name}}
+        </span>
+      </div>
+
+      <Source::Card class='text-sm' @source={{this.source}} />
+    </div>
+
+    <div class='flex space-x-2'>
+      {{#if (or this.state.running this.state.nextScheduledRun)}}
+        <div
+          class='flex items-center space-x-1 text-sm text-gray-600'
+          title={{if
+            this.state.running
+            'Running right now'
+            'Scheduled to run at'
+          }}
         >
-          <FaIcon @icon='stop' />
-        </Button>
-      {{else if @rule.schedule}}
-        <Button
-          @size='sm'
-          @intent='success'
-          @appearance='outlined'
-          {{on 'click' (perform this.startRuleSchedule @rule)}}
-        >
-          <FaIcon @icon='play' />
-        </Button>
-      {{/if}}
-
-      {{#if @onEdit}}
-        <ButtonWithMore @onClick={{fn @onEdit @rule}}>
-          <:primary>
-            <FaIcon @icon='pen' />
-          </:primary>
-
-          <:secondary as |s|>
-            <ul>
-              <li>
-                <Button
-                  @size='sm'
-                  @appearance='minimal'
-                  class={{s.classNames}}
-                  disabled={{this.runRule.isRunning}}
-                  {{on 'click' (perform this.runRule @rule)}}
-                >
-                  {{#if this.runRule.isRunning}}
-                    Running..
-                  {{else}}
-                    Run Manually
-                  {{/if}}
-                </Button>
-              </li>
-
-              <li>
-                <Button
-                  @size='sm'
-                  @appearance='minimal'
-                  @isRenderless={{true}} as |btn|
-                >
-                  <LinkTo
-                    class="{{btn.classNames}} {{s.classNames}}"
-                    @route='rule.runs'
-                    @model={{@rule.id}}
-                  >
-                    Previous Runs
-                  </LinkTo>
-                </Button>
-              </li>
-            </ul>
-          </:secondary>
-        </ButtonWithMore>
+          {{#if this.state.running}}
+            <Spinner />
+            <span>
+              Running..
+            </span>
+          {{else if this.state.nextScheduledRun}}
+            <FaIcon class='text-green-600' @icon='clock' />
+            <span>
+              {{format-date this.state.nextScheduledRun dateFormat='long'}}
+            </span>
+          {{/if}}
+        </div>
       {{/if}}
     </div>
   </div>
-</li>
+
+  <div class='flex space-x-2'>
+    {{#if (and this.state.scheduled this.state.nextScheduledRun)}}
+      <Button
+        @size='sm'
+        @appearance='outlined'
+        {{on 'click' (perform this.cancelRuleSchedule @rule)}}
+      >
+        <FaIcon @icon='stop' />
+      </Button>
+    {{else if @rule.schedule}}
+      <Button
+        @size='sm'
+        @intent='success'
+        @appearance='outlined'
+        {{on 'click' (perform this.startRuleSchedule @rule)}}
+      >
+        <FaIcon @icon='play' />
+      </Button>
+    {{/if}}
+
+    {{#if @onEdit}}
+      <ButtonWithMore @onClick={{fn @onEdit @rule}}>
+        <:primary>
+          <FaIcon @icon='pen' />
+        </:primary>
+
+        <:secondary as |s|>
+          <ul>
+            <li>
+              <Button
+                @size='sm'
+                @appearance='minimal'
+                class={{s.classNames}}
+                disabled={{this.runRule.isRunning}}
+                {{on 'click' (perform this.runRule @rule)}}
+              >
+                {{#if this.runRule.isRunning}}
+                  Running..
+                {{else}}
+                  Run Manually
+                {{/if}}
+              </Button>
+            </li>
+
+            <li>
+              <Button
+                @size='sm'
+                @appearance='minimal'
+                @isRenderless={{true}} as |btn|
+              >
+                <LinkTo
+                  class="{{btn.classNames}} {{s.classNames}}"
+                  @route='rule.runs'
+                  @model={{@rule.id}}
+                >
+                  Previous Runs
+                </LinkTo>
+              </Button>
+            </li>
+          </ul>
+        </:secondary>
+      </ButtonWithMore>
+    {{/if}}
+  </div>
+</div>

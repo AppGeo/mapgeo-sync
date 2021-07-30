@@ -87,15 +87,24 @@ export interface SyncRule {
   sourceConfig?: SourceConfig;
 }
 
+export interface RuleLogItem {
+  ok: boolean;
+  runMode: 'scheduled' | 'manual';
+  startedAt: Date;
+  endedAt: Date;
+  errors: { message: string }[];
+  intersection?: {
+    ok: boolean;
+    skipped: boolean;
+  };
+}
+
 export interface SyncState {
   ruleId: string;
   scheduled?: boolean;
   running?: boolean;
   nextScheduledRun?: Date;
-  logs?: {
-    message: string;
-    loggedAt: Date;
-  }[];
+  logs?: RuleLogItem[];
 }
 
 export type DbType = 'pg' | 'oracle' | 'mysql' | 'mssql';

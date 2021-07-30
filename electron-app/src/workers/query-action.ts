@@ -30,7 +30,7 @@ export type QueryActionMessage = HandleRuleMessage | CloseMessage;
 export type FinishedResponse = {
   rule: SyncRule;
   source: Source;
-  status: string;
+  status: UploadStatus;
   rows: any[];
 };
 export type ErrorResponse = {
@@ -42,6 +42,19 @@ export type ErrorResponse = {
   }[];
 };
 export type QueryActionResponse = FinishedResponse | ErrorResponse;
+
+export interface UploadStatus {
+  ok: boolean;
+  messages: {
+    type: 'warning' | 'error';
+    message: string;
+  }[];
+  intersection: {
+    ok: boolean;
+    skipped: boolean;
+  };
+  date: string;
+}
 
 const { mapgeo } = workerData as WorkerData;
 
@@ -96,7 +109,7 @@ async function handleRule(ruleBundle: RuleBundle) {
   console.log('status res: ', status);
 
   respond({
-    status: status.content as string,
+    status: status.content as UploadStatus,
     rows: result,
     ...ruleBundle,
   });

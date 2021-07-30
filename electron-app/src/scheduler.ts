@@ -22,7 +22,7 @@ export default class Scheduler {
   private store: Store<SyncStoreType>;
   private job: schedule.Job;
   private updateSyncState: UpdateSyncStateFn;
-  private run: (rule: SyncRule) => Promise<QueryActionResponse>;
+  private run: (rule: SyncRule, nextRun: Date) => Promise<QueryActionResponse>;
   private scheduled: ScheduledRule[] = [];
 
   constructor({
@@ -32,7 +32,7 @@ export default class Scheduler {
   }: {
     store: Store<SyncStoreType>;
     updateSyncState: UpdateSyncStateFn;
-    run: (rule: SyncRule) => Promise<QueryActionResponse>;
+    run: (rule: SyncRule, nextRun: Date) => Promise<QueryActionResponse>;
   }) {
     this.store = store;
     this.updateSyncState = updateSyncState;
@@ -93,26 +93,9 @@ export default class Scheduler {
 
     const job = schedule.scheduleJob(recurrence, async () => {
       logScope.log(`Running ${rule.name} rule..`);
-      const state = this.updateSyncState(rule, {
-        running: true,
-      });
-      const response = await this.run(rule);
-      const logs = state.logs || [];
 
-      if ('status' in response) {
-        logs.unshift({ message: response.status, loggedAt: new Date() });
-      } else {
-        logs.unshift({
-          message: response.errors.map((err) => err.message).join(', '),
-          loggedAt: new Date(),
-        });
-      }
+      await this.run(rule, this.#getNextInvocation(job));
 
-      this.updateSyncState(rule, {
-        running: false,
-        nextScheduledRun: this.#getNextInvocation(job),
-        logs: logs.slice(0, 5),
-      });
       logScope.log(`Finished running ${rule.name} rule at ${new Date()}.`);
     });
 
@@ -150,11 +133,11 @@ export default class Scheduler {
 
     if (rule.schedule?.frequency === 'daily') {
       scheduleRule.dayOfWeek = [new Range(0, 6)];
-      // scheduleRule.hour = rule.schedule?.hour;
-      // scheduleRule.minute = randomQuarter === 4 ? minutes - 5 : minutes;
+      scheduleRule.hour = rule.schedule?.hour;
+      scheduleRule.minute = randomQuarter === 4 ? minutes - 5 : minutes;
       // DEBUG
-      scheduleRule.hour = 16;
-      scheduleRule.minute = 58;
+      // scheduleRule.hour = 16;
+      // scheduleRule.minute = 58;
     }
 
     return scheduleRule;

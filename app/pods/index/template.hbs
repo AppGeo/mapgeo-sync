@@ -5,12 +5,17 @@
 
   <ul class='grid grid-cols-1 gap-4'>
     {{#each this.syncRules as |rule|}}
-      <Rule::Card
-        @rule={{rule}}
-        @datasets={{@model.community.datasets}}
-        @sources={{this.sources}}
-        @onEdit={{queue (set this.isEditRuleOpen true) (set this.ruleEditing)}}
-      />
+      <li class='bg-white shadow-lg rounded-lg'>
+        <Rule::Card
+          @rule={{rule}}
+          @datasets={{@model.community.datasets}}
+          @sources={{this.sources}}
+          @onEdit={{queue
+            (set this.isEditRuleOpen true)
+            (set this.ruleEditing)
+          }}
+        />
+      </li>
     {{/each}}
 
     <li class='bg-white rounded-lg p-4 flex items-center justify-center'>

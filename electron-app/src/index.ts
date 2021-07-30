@@ -33,8 +33,14 @@ import Scheduler from './scheduler';
 import { register as registerStoreHandlers } from './store/handlers';
 import { store } from './store/store';
 import { waitForState } from './utils/wait-for-state';
-import { QueryActionResponse } from './workers/query-action';
+import {
+  ErrorResponse,
+  FinishedResponse,
+  QueryActionResponse,
+} from './workers/query-action';
 import { handleSquirrelEvent } from './squirrel-startup';
+import wrapRule from './utils/wrap-rule';
+import { wrap } from 'module';
 
 const pkg = require('../package.json');
 
@@ -261,19 +267,17 @@ function createBrowserWindow() {
         scheduler = new Scheduler({
           store,
           updateSyncState,
-          run: async (rule) => {
-            logScope.log(`handle run of ${rule.name}`);
-            const sources = store.get('sources') || [];
-            const source = sources.find(
-              (source) => source.id === rule.sourceId
-            );
+          run: async (rule, nextScheduledRun) => {
+            const startedAt = new Date();
+            const ruleBundle = wrapRule(rule);
+
+            updateSyncState(rule, {
+              running: true,
+            });
 
             queryWorker.postMessage({
               event: 'handle-rule',
-              data: {
-                rule,
-                source,
-              },
+              data: ruleBundle,
             });
 
             const result = await new Promise(
@@ -284,6 +288,12 @@ function createBrowserWindow() {
                 });
               }
             );
+
+            updateRuleStateAfterRun(rule, result, {
+              startedAt,
+              wasScheduled: true,
+              otherState: { nextScheduledRun },
+            });
 
             return result;
           },
@@ -310,20 +320,22 @@ function createBrowserWindow() {
       }
 
       ipcMain.on('runRule', async (event, rule: SyncRule) => {
-        const sources = store.get('sources') || [];
-        const source = sources.find((source) => source.id === rule.sourceId);
+        const ruleBundle = wrapRule(rule);
+        const startedAt = new Date();
+
+        updateSyncState(rule, {
+          running: true,
+        });
 
         queryWorker.postMessage({
           event: 'handle-rule',
-          data: {
-            rule,
-            source,
-          },
+          data: ruleBundle,
         });
 
-        queryWorker.once('message', (message) => {
+        queryWorker.once('message', (message: QueryActionResponse) => {
           // logger.log(message);
           event.reply('action-result', message);
+          updateRuleStateAfterRun(rule, message, { startedAt });
         });
       });
     } catch (e) {
@@ -459,3 +471,49 @@ process.on('uncaughtException', (err) => {
   logger.log(`Exception: ${err}`);
   logger.log(err.stack);
 });
+
+function updateRuleStateAfterRun(
+  rule: SyncRule,
+  result: FinishedResponse | ErrorResponse,
+  {
+    startedAt,
+    wasScheduled,
+    otherState,
+  }: {
+    startedAt?: Date;
+    wasScheduled?: boolean;
+    otherState?: Partial<SyncState>;
+  } = {}
+) {
+  const all = store.get('syncState') || [];
+  const state = all.find((item) => item.ruleId === rule.id);
+  const logs = state.logs || [];
+
+  if ('status' in result) {
+    logs.unshift({
+      ok: !!result.status.ok,
+      runMode: wasScheduled ? 'scheduled' : 'manual',
+      errors: result.status.messages,
+      intersection: result.status.intersection,
+      startedAt,
+      endedAt: new Date(),
+    });
+  } else {
+    logs.unshift({
+      ok: result.errors === undefined || result.errors.length === 0,
+      runMode: wasScheduled ? 'scheduled' : 'manual',
+      errors: result.errors.map((err) => ({
+        type: 'error',
+        message: err.message,
+      })),
+      startedAt,
+      endedAt: new Date(),
+    });
+  }
+
+  updateSyncState(rule, {
+    running: false,
+    ...otherState,
+    logs: logs.slice(0, 5),
+  });
+}

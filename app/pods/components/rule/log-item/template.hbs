@@ -1,0 +1,33 @@
+<div ...attributes>
+  <details>
+    <summary class='bg-gray-700 p-2 text-sm'>
+      {{#if @item.ok}}
+        <FaIcon class='text-green-500' @icon='check' />
+        Succeeded at {{format-date @item.endedAt}} by '{{@item.runMode}}' mode.
+      {{else}}
+        <FaIcon class='text-red-500' @icon='times' />
+        Failed at {{format-date @item.endedAt}} by '{{@item.runMode}}' mode.
+      {{/if}}
+    </summary>
+
+    <ul class='bg-gray-800 p-2 space-y-2 text-sm'>
+      {{#each @item.errors as |error|}}
+        <li>
+          {{#if (eq error.type 'error')}}
+            <div class='text-red-400'>
+              <FaIcon @icon='exclamation-circle' />
+
+              {{error.message}}
+            </div>
+          {{else if (eq error.type 'warning')}}
+            <div class='text-yellow-400'>
+              <FaIcon @icon='exclamation-triangle' />
+
+              {{error.message}}
+            </div>
+          {{/if}}
+        </li>
+      {{/each}}
+    </ul>
+  </details>
+</div>

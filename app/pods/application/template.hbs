@@ -11,14 +11,24 @@
         {{#each (breadcrumbs) as |breadcrumb|}}
           {{#let (is-last breadcrumb (breadcrumbs)) as |isLast|}}
             <li class='px-1'>
-              <LinkTo
-                @route={{breadcrumb.data.route}}
-                @models={{breadcrumb.data.models}}
-                class={{if isLast 'text-gray-600' 'text-blue-900'}}
-                aria-current={{if isLast 'page'}}
-              >
-                {{breadcrumb.title}}
-              </LinkTo>
+              {{#if breadcrumb.data.models}}
+                <LinkTo
+                  @route={{breadcrumb.data.route}}
+                  @models={{breadcrumb.data.models}}
+                  class={{if isLast 'text-gray-600' 'text-blue-900'}}
+                  aria-current={{if isLast 'page'}}
+                >
+                  {{breadcrumb.title}}
+                </LinkTo>
+              {{else}}
+                <LinkTo
+                  @route={{breadcrumb.data.route}}
+                  class={{if isLast 'text-gray-600' 'text-blue-900'}}
+                  aria-current={{if isLast 'page'}}
+                >
+                  {{breadcrumb.title}}
+                </LinkTo>
+              {{/if}}
             </li>
 
             {{#unless isLast}}
