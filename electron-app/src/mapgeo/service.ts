@@ -1,7 +1,9 @@
 import fetch, { RequestInit } from 'node-fetch';
 import * as https from 'https';
+import logger from '../logger';
 
 let service: MapgeoService;
+const logScope = logger.scope('mapgeo service');
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false,
 });
@@ -58,7 +60,7 @@ export default class MapgeoService {
       }
       throw new Error('URL is either incorrect or service is down');
     } catch (e) {
-      console.log('ping error: ', e);
+      logScope.log('ping error: ', e);
       throw e;
     }
   }
@@ -76,7 +78,7 @@ export default class MapgeoService {
       this.headers,
       options.headers || {}
     );
-    console.log('Headers: ', JSON.stringify(headers));
+    logScope.log('Headers: ', JSON.stringify(headers));
 
     const response = await fetch(`${baseUrl}${url}`, {
       ...options,
@@ -107,7 +109,7 @@ export default class MapgeoService {
       this.headers = { Authorization: `Bearer ${this.token}` };
       return true;
     } catch (e) {
-      console.log('login error: ', e);
+      logScope.log('login error: ', e);
       throw e;
     }
   }
@@ -146,10 +148,10 @@ export default class MapgeoService {
           }),
         }
       );
-      console.log('notifyUploader: ', result);
+      logScope.log('notifyUploader: ', result);
       return result as CartoDirectResult;
     } catch (e) {
-      console.log('notifyUploader error: ', e.data);
+      logScope.log('notifyUploader error: ', e.data);
       throw e;
     }
   }
