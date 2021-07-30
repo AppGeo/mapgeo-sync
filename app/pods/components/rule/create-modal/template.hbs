@@ -58,12 +58,28 @@
             rows='5'
           />
         {{else if (eq changeset.source.sourceType 'file')}}
-          <Form.Input
-            @label='File'
-            @fieldName='file'
-            @containerClass='mt-4'
-            type='file'
-          />
+          <div class='mt-4 flex space-x-2'>
+            <Form.Input
+              @label='File'
+              @fieldName='file'
+              @size='sm'
+              @containerClass='flex-1'
+              disabled={{true}}
+            />
+
+            <Button
+              class='self-end'
+              @size='sm'
+              {{on
+                'click'
+                (pipe
+                  (fn this.selectFile changeset.source.id) (set changeset.file)
+                )
+              }}
+            >
+              Browse Files
+            </Button>
+          </div>
         {{/if}}
 
         {{#unless this.isAddScheduleVisible}}

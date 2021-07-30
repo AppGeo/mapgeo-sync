@@ -2,9 +2,17 @@ import { URL } from 'url';
 import { workerData, parentPort } from 'worker_threads';
 import MapgeoService from '../mapgeo/service';
 import handleQueryAction from '../action-handlers/query';
+import handleFileAction from '../action-handlers/file';
 import S3Service from '../s3-service';
-import { RuleBundle, Source, SyncConfig, SyncRule } from 'mapgeo-sync-config';
-import { SyncStoreType } from 'src/store/store';
+import {
+  UploadMetadata,
+  RuleBundle,
+  Source,
+  SyncConfig,
+  SyncRule,
+} from 'mapgeo-sync-config';
+import { SyncStoreType } from '../store/store';
+import { typeConversion } from '../utils/table-mappings';
 
 interface WorkerData {
   mapgeo: SyncStoreType['mapgeo'];
@@ -33,7 +41,7 @@ export type ErrorResponse = {
 };
 export type QueryActionResponse = FinishedResponse | ErrorResponse;
 
-const { config, mapgeo } = workerData as WorkerData;
+const { mapgeo } = workerData as WorkerData;
 
 function respond(response: QueryActionResponse) {
   parentPort.postMessage(response);
@@ -46,21 +54,25 @@ async function handleRule(ruleBundle: RuleBundle) {
   const url = new URL(mapgeo.host);
   const subdomain = url.hostname.split('.')[0];
   const mapgeoService = await MapgeoService.fromUrl(mapgeo.host);
+
   await mapgeoService.login(mapgeo.login.email, mapgeo.login.password);
 
-  const result = await handleQueryAction(subdomain, ruleBundle);
+  const result = await loadData(ruleBundle);
+  const metadata = uploadMetadata(subdomain, ruleBundle);
   const tokens = await mapgeoService.getUploaderTokens();
-  const transformed = result.rows.map((row) => {
-    try {
-      return { ...row, the_geom: JSON.parse(row.the_geom) };
-    } catch (e) {
-      return row;
+  const transformed = result.map(
+    (row: Record<string, unknown> & { the_geom: string }) => {
+      try {
+        return { ...row, the_geom: JSON.parse(row.the_geom) };
+      } catch (e) {
+        return row;
+      }
     }
-  });
+  );
   const formatAsGeoJson = false;
   const geojson = formatAsGeoJson
     ? transformed.reduce(
-        (all, row) => {
+        (all: any, row: any) => {
           const { the_geom, ...properties } = row;
           all.features.push({
             type: 'Feature',
@@ -94,8 +106,8 @@ async function handleRule(ruleBundle: RuleBundle) {
       {
         key,
         filename: fileName,
-        fieldname: result.fieldname,
-        table: result.table,
+        fieldname: metadata.fieldname,
+        table: metadata.table, // for finding layers, unused for now
       },
     ],
   });
@@ -106,9 +118,39 @@ async function handleRule(ruleBundle: RuleBundle) {
 
   respond({
     status: status.content as string,
-    rows: result.rows,
+    rows: result,
     ...ruleBundle,
   });
+}
+
+async function loadData(ruleBundle: RuleBundle) {
+  switch (ruleBundle.source.sourceType) {
+    case 'file': {
+      return await handleFileAction(ruleBundle);
+    }
+    case 'database': {
+      return await handleQueryAction(ruleBundle);
+    }
+    default:
+      const exhaustiveCheck: never = ruleBundle.source;
+      throw new Error(`Unhandled case: ${exhaustiveCheck}`);
+  }
+}
+
+function uploadMetadata(community: string, ruleBundle: RuleBundle) {
+  const fileName = `${community}_rule_${ruleBundle.rule.id}.json`;
+
+  console.log(`Uploading query file ${fileName} to cloud`);
+
+  const res: UploadMetadata = {
+    fieldname:
+      typeConversion.get(ruleBundle.rule.mappingId) ||
+      ruleBundle.rule.mappingId,
+    table: fileName.slice(0, fileName.lastIndexOf('.')),
+    typeId: fileName.slice(0, fileName.lastIndexOf('.')),
+  };
+
+  return res;
 }
 
 if (parentPort) {

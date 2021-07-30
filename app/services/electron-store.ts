@@ -44,8 +44,13 @@ export default class ElectronStore extends Service {
   @action
   async selectSourceFolder(): Promise<string> {
     const folder = await ipcRenderer.invoke('selectSourceFolder');
-    debugger;
     return folder;
+  }
+
+  @action
+  async selectSourceFile(sourceId: string): Promise<string> {
+    const file = await ipcRenderer.invoke('selectSourceFile', sourceId);
+    return file;
   }
 }
 
