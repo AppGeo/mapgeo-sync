@@ -13,6 +13,7 @@ import {
 } from 'mapgeo-sync-config';
 import { SyncStoreType } from '../store/store';
 import { typeConversion } from '../utils/table-mappings';
+import logger from '../logger';
 
 interface WorkerData {
   mapgeo: SyncStoreType['mapgeo'];
@@ -167,6 +168,7 @@ if (parentPort) {
         try {
           await handleRule(msg.data);
         } catch (error) {
+          logger.scope('query-action').warn(error);
           respond({
             ...msg.data,
             errors: [
