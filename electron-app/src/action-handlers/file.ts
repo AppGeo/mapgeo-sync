@@ -1,6 +1,7 @@
 import { RuleBundle } from 'mapgeo-sync-config';
 import * as fs from 'fs';
 import * as path from 'path';
+import type { FeatureCollection } from 'geojson';
 
 export default async function fileAction(ruleBundle: RuleBundle) {
   if (ruleBundle.source.sourceType !== 'file') {
@@ -22,13 +23,16 @@ export default async function fileAction(ruleBundle: RuleBundle) {
   const ext = path.extname(ruleBundle.rule.sourceConfig.filePath);
 
   switch (ext) {
-    case '.geojson':
+    case '.geojson': {
+      return { ext, data: JSON.parse(file) as FeatureCollection };
+    }
+
     case '.json': {
-      return JSON.parse(file);
+      return { ext, data: JSON.parse(file) as Record<string, unknown>[] };
     }
 
     default: {
-      return file;
+      throw new Error(`Unsupported file extension '${ext}' for file sync.`);
     }
   }
 }

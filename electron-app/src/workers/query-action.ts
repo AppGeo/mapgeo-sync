@@ -1,5 +1,6 @@
 import { URL } from 'url';
 import { workerData, parentPort } from 'worker_threads';
+import type { FeatureCollection } from 'geojson';
 import MapgeoService from '../mapgeo/service';
 import handleQueryAction from '../action-handlers/query';
 import handleFileAction from '../action-handlers/file';
@@ -61,41 +62,18 @@ async function handleRule(ruleBundle: RuleBundle) {
   const result = await loadData(ruleBundle);
   const metadata = uploadMetadata(subdomain, ruleBundle);
   const tokens = await mapgeoService.getUploaderTokens();
-  const transformed = result.map(
-    (row: Record<string, unknown> & { the_geom: string }) => {
-      try {
-        return { ...row, the_geom: JSON.parse(row.the_geom) };
-      } catch (e) {
-        return row;
-      }
-    }
-  );
-  const formatAsGeoJson = false;
-  const geojson = formatAsGeoJson
-    ? transformed.reduce(
-        (all: any, row: any) => {
-          const { the_geom, ...properties } = row;
-          all.features.push({
-            type: 'Feature',
-            properties,
-            geometry: the_geom,
-          });
-          return all;
-        },
-        { type: 'FeatureCollection', features: [] }
-      )
-    : undefined;
+
   // console.log('action result: ', result);
   const s3 = new S3Service(tokens);
   const folder = `ilya-test-${subdomain}`;
   const ruleFileName = `rule_${ruleBundle.rule.id}.json`;
-  const file = formatAsGeoJson
+  const file = !Array.isArray(result)
     ? ruleFileName.replace('.json', '.geojson')
     : ruleFileName;
   const { key, fileName } = await s3.upload({
     folder,
     fileName: file,
-    data: JSON.stringify(geojson || transformed, null, 2),
+    data: JSON.stringify(result, null, 2),
   });
   // Lets MapGeo know, which validates and uploads to carto
   // An upload-status.json is uploaded to s3 with results of process, failure or success
@@ -124,17 +102,53 @@ async function handleRule(ruleBundle: RuleBundle) {
   });
 }
 
-async function loadData(ruleBundle: RuleBundle) {
+async function loadData(ruleBundle: RuleBundle): Promise<unknown[]> {
   switch (ruleBundle.source.sourceType) {
     case 'file': {
-      return await handleFileAction(ruleBundle);
+      const { ext, data } = await handleFileAction(ruleBundle);
+      const transformed = transformData(data, { ext }) as unknown[];
+      return transformed;
     }
     case 'database': {
-      return await handleQueryAction(ruleBundle);
+      const data = await handleQueryAction(ruleBundle);
+      const transformed = transformData(data) as unknown[];
+      return transformed;
     }
     default:
       const exhaustiveCheck: never = ruleBundle.source;
       throw new Error(`Unhandled case: ${exhaustiveCheck}`);
+  }
+}
+
+function transformData(
+  data: unknown[] | FeatureCollection,
+  options: { toGeoJson?: boolean; ext?: string } = {}
+) {
+  if (Array.isArray(data)) {
+    if (options.toGeoJson) {
+      return data.reduce(
+        (all: any, row: any) => {
+          const { the_geom, ...properties } = row;
+          all.features.push({
+            type: 'Feature',
+            properties,
+            geometry: the_geom,
+          });
+          return all;
+        },
+        { type: 'FeatureCollection', features: [] }
+      );
+    }
+
+    return data.map((row: Record<string, unknown> & { the_geom: string }) => {
+      try {
+        return { ...row, the_geom: JSON.parse(row.the_geom) };
+      } catch (e) {
+        return row;
+      }
+    });
+  } else {
+    return data;
   }
 }
 

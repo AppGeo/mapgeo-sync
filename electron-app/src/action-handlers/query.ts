@@ -1,7 +1,9 @@
 import knex from 'knex';
 import { RuleBundle, SyncDbConfig } from 'mapgeo-sync-config';
 
-export default async function handle(ruleBundle: RuleBundle) {
+export default async function handle(
+  ruleBundle: RuleBundle
+): Promise<unknown[]> {
   const source = ruleBundle.source;
 
   if (!source) {
