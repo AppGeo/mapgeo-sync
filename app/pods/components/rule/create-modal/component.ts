@@ -8,7 +8,12 @@ import { v4 } from 'uuid';
 import { Dataset, TableMapping } from 'mapgeo';
 import ElectronStore from 'mapgeo-sync/services/electron-store';
 import { getAllMappings } from 'mapgeo-sync/utils/dataset-mapping';
-import { ScheduleFrequency, Source, SyncRule } from 'mapgeo-sync-config';
+import {
+  ScheduleFrequency,
+  Source,
+  SourceConfig,
+  SyncRule,
+} from 'mapgeo-sync-config';
 
 interface RuleCreateModalArgs {
   isOpen: boolean;
@@ -24,7 +29,7 @@ interface RuleInput {
   mapping: TableMapping;
   source: Source;
   selectStatement?: string;
-  scheduleRule?: string;
+  file?: string;
   schedule?: {
     frequency: ScheduleFrequency;
     hour: number;
@@ -58,6 +63,14 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
 
   @action
   async createRule(ruleInput: RuleInput) {
+    let sourceConfig;
+
+    if (ruleInput.source.sourceType === 'file') {
+      sourceConfig = { filePath: ruleInput.file as string };
+    } else if (ruleInput.source.sourceType === 'database') {
+      sourceConfig = { selectStatement: ruleInput.selectStatement as string };
+    }
+
     const rules = await this.electronStore.addSyncRule({
       name:
         ruleInput.name ||
@@ -66,13 +79,17 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
       mappingId: ruleInput.mapping.pk,
       sourceId: ruleInput.source.id,
       schedule: ruleInput.schedule,
-      sourceConfig: {
-        selectStatement: ruleInput.selectStatement as string,
-      },
+      sourceConfig,
       id: v4(),
     });
 
     this.args.onSubmit(rules);
+  }
+
+  @action
+  async selectFile(sourceId: string) {
+    const file = await this.electronStore.selectSourceFile(sourceId);
+    return file;
   }
 
   @task

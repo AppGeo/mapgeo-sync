@@ -1,10 +1,20 @@
 import { URL } from 'url';
 import { workerData, parentPort } from 'worker_threads';
+import type { FeatureCollection } from 'geojson';
 import MapgeoService from '../mapgeo/service';
 import handleQueryAction from '../action-handlers/query';
+import handleFileAction from '../action-handlers/file';
 import S3Service from '../s3-service';
-import { RuleBundle, Source, SyncConfig, SyncRule } from 'mapgeo-sync-config';
-import { SyncStoreType } from 'src/store/store';
+import {
+  UploadMetadata,
+  RuleBundle,
+  Source,
+  SyncConfig,
+  SyncRule,
+} from 'mapgeo-sync-config';
+import { SyncStoreType } from '../store/store';
+import { typeConversion } from '../utils/table-mappings';
+import logger from '../logger';
 
 interface WorkerData {
   mapgeo: SyncStoreType['mapgeo'];
@@ -33,7 +43,7 @@ export type ErrorResponse = {
 };
 export type QueryActionResponse = FinishedResponse | ErrorResponse;
 
-const { config, mapgeo } = workerData as WorkerData;
+const { mapgeo } = workerData as WorkerData;
 
 function respond(response: QueryActionResponse) {
   parentPort.postMessage(response);
@@ -46,43 +56,24 @@ async function handleRule(ruleBundle: RuleBundle) {
   const url = new URL(mapgeo.host);
   const subdomain = url.hostname.split('.')[0];
   const mapgeoService = await MapgeoService.fromUrl(mapgeo.host);
+
   await mapgeoService.login(mapgeo.login.email, mapgeo.login.password);
 
-  const result = await handleQueryAction(subdomain, ruleBundle);
+  const result = await loadData(ruleBundle);
+  const metadata = uploadMetadata(subdomain, ruleBundle);
   const tokens = await mapgeoService.getUploaderTokens();
-  const transformed = result.rows.map((row) => {
-    try {
-      return { ...row, the_geom: JSON.parse(row.the_geom) };
-    } catch (e) {
-      return row;
-    }
-  });
-  const formatAsGeoJson = false;
-  const geojson = formatAsGeoJson
-    ? transformed.reduce(
-        (all, row) => {
-          const { the_geom, ...properties } = row;
-          all.features.push({
-            type: 'Feature',
-            properties,
-            geometry: the_geom,
-          });
-          return all;
-        },
-        { type: 'FeatureCollection', features: [] }
-      )
-    : undefined;
+
   // console.log('action result: ', result);
   const s3 = new S3Service(tokens);
   const folder = `ilya-test-${subdomain}`;
   const ruleFileName = `rule_${ruleBundle.rule.id}.json`;
-  const file = formatAsGeoJson
+  const file = !Array.isArray(result)
     ? ruleFileName.replace('.json', '.geojson')
     : ruleFileName;
   const { key, fileName } = await s3.upload({
     folder,
     fileName: file,
-    data: JSON.stringify(geojson || transformed, null, 2),
+    data: JSON.stringify(result, null, 2),
   });
   // Lets MapGeo know, which validates and uploads to carto
   // An upload-status.json is uploaded to s3 with results of process, failure or success
@@ -94,8 +85,8 @@ async function handleRule(ruleBundle: RuleBundle) {
       {
         key,
         filename: fileName,
-        fieldname: result.fieldname,
-        table: result.table,
+        fieldname: metadata.fieldname,
+        table: metadata.table, // for finding layers, unused for now
       },
     ],
   });
@@ -106,9 +97,75 @@ async function handleRule(ruleBundle: RuleBundle) {
 
   respond({
     status: status.content as string,
-    rows: result.rows,
+    rows: result,
     ...ruleBundle,
   });
+}
+
+async function loadData(ruleBundle: RuleBundle): Promise<unknown[]> {
+  switch (ruleBundle.source.sourceType) {
+    case 'file': {
+      const { ext, data } = await handleFileAction(ruleBundle);
+      const transformed = transformData(data, { ext }) as unknown[];
+      return transformed;
+    }
+    case 'database': {
+      const data = await handleQueryAction(ruleBundle);
+      const transformed = transformData(data) as unknown[];
+      return transformed;
+    }
+    default:
+      const exhaustiveCheck: never = ruleBundle.source;
+      throw new Error(`Unhandled case: ${exhaustiveCheck}`);
+  }
+}
+
+function transformData(
+  data: unknown[] | FeatureCollection,
+  options: { toGeoJson?: boolean; ext?: string } = {}
+) {
+  if (Array.isArray(data)) {
+    if (options.toGeoJson) {
+      return data.reduce(
+        (all: any, row: any) => {
+          const { the_geom, ...properties } = row;
+          all.features.push({
+            type: 'Feature',
+            properties,
+            geometry: the_geom,
+          });
+          return all;
+        },
+        { type: 'FeatureCollection', features: [] }
+      );
+    }
+
+    return data.map((row: Record<string, unknown> & { the_geom: string }) => {
+      try {
+        return { ...row, the_geom: JSON.parse(row.the_geom) };
+      } catch (e) {
+        return row;
+      }
+    });
+  } else {
+    return data;
+  }
+}
+
+function uploadMetadata(community: string, ruleBundle: RuleBundle) {
+  const fileName = `${community}_rule_${ruleBundle.rule.id}.json`;
+
+  console.log(`Uploading query file ${fileName} to cloud`);
+
+  const res: UploadMetadata = {
+    fieldname:
+      typeConversion.get(ruleBundle.rule.mappingId) ||
+      ruleBundle.rule.mappingId,
+    table: fileName.slice(0, fileName.lastIndexOf('.')),
+    typeId: fileName.slice(0, fileName.lastIndexOf('.')),
+  };
+
+  return res;
 }
 
 if (parentPort) {
@@ -125,6 +182,7 @@ if (parentPort) {
         try {
           await handleRule(msg.data);
         } catch (error) {
+          logger.scope('query-action').warn(error);
           respond({
             ...msg.data,
             errors: [

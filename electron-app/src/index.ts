@@ -20,6 +20,7 @@ import type {
 } from 'mapgeo-sync-config';
 import * as path from 'path';
 import { pathToFileURL } from 'url';
+import * as os from 'os';
 import { Worker } from 'worker_threads';
 import { EventObject, Interpreter } from 'xstate';
 import { AuthContext } from './auth/machine';
@@ -122,6 +123,15 @@ function updateSyncState(rule: SyncRule, data: Omit<Partial<SyncState>, 'id'>) {
   return state;
 }
 
+ipcMain.handle('selectSourceFolder', async (event) => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    defaultPath: os.homedir(),
+    properties: ['openDirectory'],
+  });
+
+  return result.filePaths[0];
+});
+
 ipcMain.handle('selectSourceFile', async (event, sourceId: string) => {
   const sources = store.get('sources');
   const source = sources.find((source) => source.id === sourceId);
@@ -129,7 +139,8 @@ ipcMain.handle('selectSourceFile', async (event, sourceId: string) => {
   if (source.sourceType === 'file') {
     const result = await dialog.showOpenDialog(mainWindow, {
       defaultPath: source.folder,
-      properties: ['openFile', 'openDirectory'],
+      properties: ['openFile'],
+      filters: [{ name: 'Default', extensions: ['json', 'geojson'] }],
     });
 
     return result.filePaths[0];

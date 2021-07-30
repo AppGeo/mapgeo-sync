@@ -30,11 +30,10 @@ export type QueryAction = {
   FormatAsGeoJson: boolean;
 };
 
-export interface QueryOutput {
+export interface UploadMetadata {
   fieldname: string;
   table: string;
   typeId: string;
-  rows: any[];
 }
 
 export interface SyncConfig {
@@ -73,6 +72,8 @@ export interface RuleBundle {
 
 export type ScheduleFrequency = 'daily';
 
+export type SourceConfig = SyncDbConfig | SyncFileConfig;
+
 export interface SyncRule {
   id: string;
   name: string;
@@ -83,7 +84,7 @@ export interface SyncRule {
     frequency: ScheduleFrequency;
     hour: number;
   };
-  sourceConfig: SyncDbConfig | SyncFileConfig;
+  sourceConfig?: SourceConfig;
 }
 
 export interface SyncState {

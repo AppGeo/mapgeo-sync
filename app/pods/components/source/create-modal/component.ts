@@ -31,4 +31,10 @@ export default class SourceCreateModal extends Component<SourceCreateModalArgs> 
     this.isAddSourceVisible = false;
     this.args.onSubmit(sources);
   }
+
+  @action
+  async selectFolder() {
+    const folder = await this.electronStore.selectSourceFolder();
+    return folder;
+  }
 }
