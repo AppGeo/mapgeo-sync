@@ -40,7 +40,6 @@ import {
 } from './workers/query-action';
 import { handleSquirrelEvent } from './squirrel-startup';
 import wrapRule from './utils/wrap-rule';
-import { wrap } from 'module';
 
 const pkg = require('../package.json');
 
@@ -240,9 +239,6 @@ function createBrowserWindow() {
     mainWindow.webContents.openDevTools();
   }
 
-  // If you want to open up dev tools programmatically, call
-  // mainWindow.openDevTools();
-
   // Load the ember application
   mainWindow.loadURL(emberAppURL);
   authService = createAuthService({
@@ -387,6 +383,7 @@ function createBrowserWindow() {
 }
 
 // For more information, see http://electron.atom.io/docs/api/crash-reporter/
+// TODO: setup a crash reporting server? Or maybe use gcp?
 crashReporter.start({
   productName: app.name,
   companyName: 'AppGeo',
