@@ -31,7 +31,7 @@ export type FinishedResponse = {
   rule: SyncRule;
   source: Source;
   status: UploadStatus;
-  rows: any[];
+  rows: unknown[] | FeatureCollection;
 };
 export type ErrorResponse = {
   rule: SyncRule;
@@ -115,7 +115,9 @@ async function handleRule(ruleBundle: RuleBundle) {
   });
 }
 
-async function loadData(ruleBundle: RuleBundle): Promise<unknown[]> {
+async function loadData(
+  ruleBundle: RuleBundle
+): Promise<unknown[] | FeatureCollection> {
   switch (ruleBundle.source.sourceType) {
     case 'file': {
       const { ext, data } = await handleFileAction(ruleBundle);
@@ -124,7 +126,9 @@ async function loadData(ruleBundle: RuleBundle): Promise<unknown[]> {
     }
     case 'database': {
       const data = await handleQueryAction(ruleBundle);
-      const transformed = transformData(data) as unknown[];
+      const transformed = transformData(data, {
+        toGeoJson: true,
+      }) as FeatureCollection;
       return transformed;
     }
     default:
@@ -142,10 +146,16 @@ function transformData(
       return data.reduce(
         (all: any, row: any) => {
           const { the_geom, ...properties } = row;
+          const geometry =
+            typeof the_geom === 'string'
+              ? JSON.parse(the_geom)
+              : typeof the_geom === 'object'
+              ? the_geom
+              : null;
           all.features.push({
             type: 'Feature',
             properties,
-            geometry: the_geom,
+            geometry,
           });
           return all;
         },

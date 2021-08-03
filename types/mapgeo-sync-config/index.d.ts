@@ -93,6 +93,7 @@ export interface RuleLogItem {
   startedAt: Date;
   endedAt: Date;
   errors: { message: string }[];
+  numItems?: number;
   intersection?: {
     ok: boolean;
     skipped: boolean;

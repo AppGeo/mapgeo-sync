@@ -485,11 +485,19 @@ function updateRuleStateAfterRun(
   const all = store.get('syncState') || [];
   const state = all.find((item) => item.ruleId === rule.id);
   const logs = state.logs || [];
+  const runMode = wasScheduled ? 'scheduled' : 'manual';
+  const numRows =
+    'rows' in result && !('features' in result.rows) ? result.rows.length : 0;
+  const numItems =
+    'rows' in result && 'features' in result.rows
+      ? result.rows.features.length
+      : numRows;
 
   if ('status' in result) {
     logs.unshift({
       ok: !!result.status.ok,
-      runMode: wasScheduled ? 'scheduled' : 'manual',
+      runMode,
+      numItems,
       errors: result.status.messages,
       intersection: result.status.intersection,
       startedAt,
@@ -498,7 +506,8 @@ function updateRuleStateAfterRun(
   } else {
     logs.unshift({
       ok: result.errors === undefined || result.errors.length === 0,
-      runMode: wasScheduled ? 'scheduled' : 'manual',
+      runMode,
+      numItems,
       errors: result.errors.map((err) => ({
         type: 'error',
         message: err.message,

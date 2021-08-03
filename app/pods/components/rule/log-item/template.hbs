@@ -1,14 +1,18 @@
 <div ...attributes>
   <details>
-    <summary class='bg-gray-700 p-2 text-sm flex justify-between'>
+    <summary
+      class='bg-gray-700 p-2 text-sm flex justify-between hover:bg-gray-600'
+    >
       <div>
         {{#if @item.ok}}
-          <FaIcon class='text-green-500' @icon='check' />
-          Succeeded on {{format-date @item.endedAt}} (took {{this.distance
-            @item
-          }}).
+          <FaIcon class='text-green-500 mr-1' @icon='check' />
+          Succeeded on {{format-date
+            @item.endedAt
+            dateFormat='long'
+            timeFormat='short'
+          }} (took {{this.distance @item}}).
         {{else}}
-          <FaIcon class='text-red-500' @icon='times' />
+          <FaIcon class='text-red-500 mr-1' @icon='times' />
           Failed on {{format-date
             @item.endedAt
             dateFormat='long'
@@ -22,24 +26,40 @@
       </div>
     </summary>
 
-    <ul class='bg-gray-800 p-2 space-y-2 text-sm'>
-      {{#each @item.errors as |error|}}
-        <li>
-          {{#if (eq error.type 'error')}}
-            <div class='text-red-400'>
-              <FaIcon @icon='exclamation-circle' />
+    <div class='bg-gray-800 p-2 space-y-2'>
+      {{#unless @item.ok}}
+        <p class='text-white'>
+          Processed {{@item.numItems}} items from the source.
+        </p>
+      {{/unless}}
 
-              {{error.message}}
-            </div>
-          {{else if (eq error.type 'warning')}}
-            <div class='text-yellow-400'>
-              <FaIcon @icon='exclamation-triangle' />
+      {{#if @item.errors}}
+        <ul class='bg-gray-800 p-2 space-y-2 text-sm'>
+          {{#each @item.errors as |error|}}
+            <li>
+              {{#if (eq error.type 'success')}}
+                <div class='text-green-400'>
+                  <FaIcon @icon='check-circle' />
 
-              {{error.message}}
-            </div>
-          {{/if}}
-        </li>
-      {{/each}}
-    </ul>
+                  {{error.message}}
+                </div>
+              {{else if (eq error.type 'error')}}
+                <div class='text-red-400'>
+                  <FaIcon @icon='exclamation-circle' />
+
+                  {{error.message}}
+                </div>
+              {{else if (eq error.type 'warning')}}
+                <div class='text-yellow-400'>
+                  <FaIcon @icon='exclamation-triangle' />
+
+                  {{error.message}}
+                </div>
+              {{/if}}
+            </li>
+          {{/each}}
+        </ul>
+      {{/if}}
+    </div>
   </details>
 </div>
