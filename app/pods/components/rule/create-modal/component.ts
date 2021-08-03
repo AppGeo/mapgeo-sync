@@ -14,6 +14,7 @@ import {
   SourceConfig,
   SyncRule,
 } from 'mapgeo-sync-config';
+import { helper } from '@ember/component/helper';
 
 interface RuleCreateModalArgs {
   isOpen: boolean;
@@ -42,7 +43,15 @@ const hours = [
   0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
   22, 23,
 ];
-const days = [0, 1, 2, 3, 4, 5, 6];
+const days = {
+  0: 'Sunday',
+  1: 'Monday',
+  2: 'Tuesday',
+  3: 'Wednesday',
+  4: 'Thursday',
+  5: 'Friday',
+  6: 'Saturday',
+} as const;
 
 export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
   @service('electron-store') declare electronStore: ElectronStore;
@@ -57,7 +66,11 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
   };
   frequencies: ScheduleFrequency[] = [defaultFrequency, 'weekly'];
   hours = hours;
-  days = days;
+  days = Object.keys(days);
+
+  dayFormat = helper(([day]: [keyof typeof days]) => {
+    return days[day];
+  });
 
   @cached
   get mappings() {

@@ -115,11 +115,10 @@
             <Form.Select
               @label='Schedule Day'
               @fieldName='schedule.day'
-              @hint='0 is Sunday'
               @options={{this.days}}
               @containerClass='mt-4' as |day|
             >
-              {{day}}
+              {{this.dayFormat day}}
             </Form.Select>
           {{/if}}
 
