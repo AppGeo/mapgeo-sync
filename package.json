@@ -62,6 +62,7 @@
     "@typescript-eslint/eslint-plugin": "^4.14.1",
     "@typescript-eslint/parser": "^4.14.1",
     "broccoli-asset-rev": "^3.0.0",
+    "date-fns": "^2.23.0",
     "ember-auto-import": "^1.11.2",
     "ember-basic-dropdown": "^3.0.19",
     "ember-breadcrumb-trail": "^0.2.0",

@@ -1,13 +1,25 @@
 <div ...attributes>
   <details>
-    <summary class='bg-gray-700 p-2 text-sm'>
-      {{#if @item.ok}}
-        <FaIcon class='text-green-500' @icon='check' />
-        Succeeded at {{format-date @item.endedAt}} by '{{@item.runMode}}' mode.
-      {{else}}
-        <FaIcon class='text-red-500' @icon='times' />
-        Failed at {{format-date @item.endedAt}} by '{{@item.runMode}}' mode.
-      {{/if}}
+    <summary class='bg-gray-700 p-2 text-sm flex justify-between'>
+      <div>
+        {{#if @item.ok}}
+          <FaIcon class='text-green-500' @icon='check' />
+          Succeeded on {{format-date @item.endedAt}} (took {{this.distance
+            @item
+          }}).
+        {{else}}
+          <FaIcon class='text-red-500' @icon='times' />
+          Failed on {{format-date
+            @item.endedAt
+            dateFormat='long'
+            timeFormat='short'
+          }} (took {{this.distance @item}}).
+        {{/if}}
+      </div>
+
+      <div>
+        {{@item.runMode}}
+      </div>
     </summary>
 
     <ul class='bg-gray-800 p-2 space-y-2 text-sm'>
