@@ -26,7 +26,7 @@
       </div>
     </summary>
 
-    <div class='bg-gray-800 p-2 space-y-2'>
+    <div class='bg-gray-800 p-2 space-y-2 text-sm'>
       {{#unless @item.ok}}
         <p class='text-white'>
           Processed {{@item.numItems}} items from the source.
@@ -34,7 +34,7 @@
       {{/unless}}
 
       {{#if @item.errors}}
-        <ul class='bg-gray-800 p-2 space-y-2 text-sm'>
+        <ul class='bg-gray-800 p-2 space-y-2'>
           {{#each @item.errors as |error|}}
             <li>
               {{#if (eq error.type 'success')}}
