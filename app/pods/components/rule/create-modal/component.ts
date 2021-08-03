@@ -42,6 +42,7 @@ const hours = [
   0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
   22, 23,
 ];
+const days = [0, 1, 2, 3, 4, 5, 6];
 
 export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
   @service('electron-store') declare electronStore: ElectronStore;
@@ -54,8 +55,9 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
       frequency: defaultFrequency,
     },
   };
-  frequencies: ScheduleFrequency[] = [defaultFrequency];
+  frequencies: ScheduleFrequency[] = [defaultFrequency, 'weekly'];
   hours = hours;
+  days = days;
 
   @cached
   get mappings() {

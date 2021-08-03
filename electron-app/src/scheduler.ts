@@ -133,12 +133,15 @@ export default class Scheduler {
 
     if (rule.schedule?.frequency === 'daily') {
       scheduleRule.dayOfWeek = [new Range(0, 6)];
-      scheduleRule.hour = rule.schedule?.hour;
-      scheduleRule.minute = randomQuarter === 4 ? minutes - 5 : minutes;
-      // DEBUG
-      // scheduleRule.hour = 16;
-      // scheduleRule.minute = 58;
+    } else if (rule.schedule?.frequency === 'weekly' && rule.schedule?.day) {
+      scheduleRule.dayOfWeek = rule.schedule?.day;
     }
+
+    // DEBUG
+    // scheduleRule.hour = 16;
+    // scheduleRule.minute = 58;
+    scheduleRule.hour = rule.schedule?.hour;
+    scheduleRule.minute = randomQuarter === 4 ? minutes - 5 : minutes;
 
     return scheduleRule;
   }

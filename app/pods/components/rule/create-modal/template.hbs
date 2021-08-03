@@ -111,6 +111,18 @@
             {{frequency}}
           </Form.Select>
 
+          {{#if (eq changeset.schedule.frequency 'weekly')}}
+            <Form.Select
+              @label='Schedule Day'
+              @fieldName='schedule.day'
+              @hint='0 is Sunday'
+              @options={{this.days}}
+              @containerClass='mt-4' as |day|
+            >
+              {{day}}
+            </Form.Select>
+          {{/if}}
+
           <Form.Select
             @label='Schedule Hour'
             @fieldName='schedule.hour'

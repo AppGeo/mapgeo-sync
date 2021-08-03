@@ -70,7 +70,7 @@ export interface RuleBundle {
   source: Source;
 }
 
-export type ScheduleFrequency = 'daily';
+export type ScheduleFrequency = 'daily' | 'weekly';
 
 export type SourceConfig = SyncDbConfig | SyncFileConfig;
 
@@ -84,6 +84,7 @@ export interface SyncRule {
   schedule?: {
     frequency: ScheduleFrequency;
     hour: number;
+    day?: number;
   };
   sourceConfig?: SourceConfig;
 }
