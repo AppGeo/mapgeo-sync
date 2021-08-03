@@ -93,7 +93,9 @@ async function handleRule(ruleBundle: RuleBundle) {
   const res = await mapgeoService.notifyUploader({
     datasetId: ruleBundle.rule.datasetId,
     updateDate: true,
-    // notificationEmail: 'ivradchenko@appgeo.com',
+    notificationEmail: ruleBundle.rule.sendNotificationEmail
+      ? mapgeo.login?.email
+      : undefined,
     uploads: [
       {
         key,

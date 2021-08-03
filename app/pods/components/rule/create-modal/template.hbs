@@ -82,6 +82,14 @@
           </div>
         {{/if}}
 
+        <Form.Checkbox
+          @label='Send Notification Email'
+          @hint='Will email to the logged in account on success/failure'
+          @fieldName='sendNotificationEmail'
+          @containerClass='mt-4'
+          type='checkbox'
+        />
+
         {{#unless this.isAddScheduleVisible}}
           <Button
             @intent='primary'

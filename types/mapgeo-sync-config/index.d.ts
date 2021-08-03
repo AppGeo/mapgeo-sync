@@ -80,6 +80,7 @@ export interface SyncRule {
   datasetId: string;
   sourceId: string;
   mappingId: string;
+  sendNotificationEmail: boolean;
   schedule?: {
     frequency: ScheduleFrequency;
     hour: number;

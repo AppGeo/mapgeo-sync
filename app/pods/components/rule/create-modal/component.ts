@@ -34,6 +34,7 @@ interface RuleInput {
     frequency: ScheduleFrequency;
     hour: number;
   };
+  sendNotificationEmail: boolean;
 }
 
 const defaultFrequency: ScheduleFrequency = 'daily';
@@ -79,6 +80,7 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
       mappingId: ruleInput.mapping.pk,
       sourceId: ruleInput.source.id,
       schedule: ruleInput.schedule,
+      sendNotificationEmail: ruleInput.sendNotificationEmail,
       sourceConfig,
       id: v4(),
     });
