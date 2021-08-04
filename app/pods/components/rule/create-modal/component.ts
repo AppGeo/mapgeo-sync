@@ -9,6 +9,7 @@ import { Dataset, TableMapping } from 'mapgeo';
 import { getAllMappings } from 'mapgeo-sync/utils/dataset-mapping';
 import { ScheduleFrequency, Source, SyncRule } from 'mapgeo-sync-config';
 import { helper } from '@ember/component/helper';
+import { NotificationsService } from '@frontile/notifications';
 
 interface Step {
   name: 'dataset' | 'mapping' | 'config' | 'schedule';
@@ -55,6 +56,7 @@ type DayValue = keyof typeof days;
 
 export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
   @service('platform') declare platform: Platform;
+  @service('notifications') declare notifications: NotificationsService;
 
   @tracked dataset?: Dataset;
   @tracked ruleInput: Partial<RuleInput> = {
@@ -103,6 +105,17 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
 
   @action
   async createRule(ruleInput: RuleInput) {
+    if (!this.stepAccessible.compute(['schedule', ruleInput])) {
+      const isFile = ruleInput.source?.sourceType === 'file';
+      this.notifications.add(
+        `Please fill in the ${
+          isFile ? 'file' : 'select statement'
+        } to finish creating this rule`,
+        { appearance: 'warning' }
+      );
+      return;
+    }
+
     let sourceConfig;
 
     if (ruleInput.source.sourceType === 'file') {
