@@ -4,7 +4,7 @@ import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import { v4 } from 'uuid';
 import { DbType, Source } from 'mapgeo-sync-config';
-import ElectronStore from 'mapgeo-sync/services/electron-store';
+import Platform from 'mapgeo-sync/services/platform';
 
 const databaseTypes: DbType[] = ['pg', 'oracle', 'mysql', 'mssql'];
 interface SourceCreateModalArgs {
@@ -15,7 +15,7 @@ interface SourceCreateModalArgs {
 }
 
 export default class SourceCreateModal extends Component<SourceCreateModalArgs> {
-  @service('electron-store') declare electronStore: ElectronStore;
+  @service('platform') declare platform: Platform;
 
   databaseTypes = databaseTypes;
 
@@ -23,7 +23,7 @@ export default class SourceCreateModal extends Component<SourceCreateModalArgs> 
 
   @action
   async createSource(sourceInput: Source) {
-    const sources = await this.electronStore.addSource({
+    const sources = await this.platform.addSource({
       ...sourceInput,
       id: v4(),
     });
@@ -34,7 +34,7 @@ export default class SourceCreateModal extends Component<SourceCreateModalArgs> 
 
   @action
   async selectFolder() {
-    const folder = await this.electronStore.selectSourceFolder();
+    const folder = await this.platform.selectSourceFolder();
     return folder;
   }
 }

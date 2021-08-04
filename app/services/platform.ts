@@ -1,6 +1,6 @@
 import { action } from '@ember/object';
 import Service from '@ember/service';
-import { SyncRule, SyncState } from 'mapgeo-sync-config';
+import { Source, SyncRule, SyncState } from 'mapgeo-sync-config';
 import type { IpcRendererEvent } from 'electron';
 import { tracked } from '@glimmer/tracking';
 const { ipcRenderer } = requireNode('electron/renderer');
@@ -80,6 +80,55 @@ export default class Platform extends Service {
     const res = await ipcRenderer.invoke('cancelSyncRuleSchedule', rule);
 
     return res as SyncState;
+  }
+
+  @action
+  async getValue(key: string) {
+    const value = await ipcRenderer.invoke('getStoreValue', key);
+
+    return value;
+  }
+
+  @action
+  async findSyncRules(): Promise<SyncRule[]> {
+    const value = await ipcRenderer.invoke('store/findSyncRules');
+    return value;
+  }
+
+  @action
+  async addSyncRule(rule: SyncRule): Promise<SyncRule[]> {
+    const rules = await ipcRenderer.invoke('store/addSyncRule', rule);
+    return rules;
+  }
+
+  @action
+  async removeSyncRule(rule: SyncRule): Promise<SyncRule[]> {
+    const rules = await ipcRenderer.invoke('store/removeSyncRule', rule);
+    return rules;
+  }
+
+  @action
+  async findSources(): Promise<Source[]> {
+    const sources = await ipcRenderer.invoke('store/findSources');
+    return sources;
+  }
+
+  @action
+  async addSource(source: Source): Promise<Source[]> {
+    const sources = await ipcRenderer.invoke('store/addSource', source);
+    return sources;
+  }
+
+  @action
+  async selectSourceFolder(): Promise<string> {
+    const folder = await ipcRenderer.invoke('selectSourceFolder');
+    return folder;
+  }
+
+  @action
+  async selectSourceFile(sourceId: string): Promise<string> {
+    const file = await ipcRenderer.invoke('selectSourceFile', sourceId);
+    return file;
   }
 
   @action

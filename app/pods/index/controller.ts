@@ -3,12 +3,10 @@ import { inject as service } from '@ember/service';
 import Platform from 'mapgeo-sync/services/platform';
 import { tracked } from '@glimmer/tracking';
 import { localCopy } from 'tracked-toolbox';
-import ElectronStore from 'mapgeo-sync/services/electron-store';
 import { Model } from './route';
 import { Source, SyncRule } from 'mapgeo-sync-config';
 
 export default class Index extends Controller {
-  @service('electron-store') declare electronStore: ElectronStore;
   @service('platform') declare platform: Platform;
 
   declare model: Model;
