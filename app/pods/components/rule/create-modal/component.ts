@@ -10,6 +10,10 @@ import { getAllMappings } from 'mapgeo-sync/utils/dataset-mapping';
 import { ScheduleFrequency, Source, SyncRule } from 'mapgeo-sync-config';
 import { helper } from '@ember/component/helper';
 
+interface Step {
+  name: 'dataset' | 'mapping' | 'config' | 'schedule';
+}
+
 interface RuleCreateModalArgs {
   isOpen: boolean;
   datasets: Dataset[];
@@ -68,6 +72,28 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
 
   dayFormat = helper(([day]: [DayValue]) => {
     return days[day];
+  });
+
+  stepAccessible = helper(([step, changeset]: [Step | string, RuleInput]) => {
+    const name = typeof step === 'string' ? step : step.name;
+
+    switch (name) {
+      case 'dataset': {
+        return true;
+      }
+      case 'mapping': {
+        return Boolean(changeset.dataset);
+      }
+      case 'config': {
+        return Boolean(changeset.source);
+      }
+      case 'schedule': {
+        return Boolean(changeset.selectStatement || changeset.file);
+      }
+      default: {
+        return false;
+      }
+    }
   });
 
   @cached
