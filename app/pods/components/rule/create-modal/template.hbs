@@ -10,7 +10,13 @@
     <m.Body>
       <StepManager as |w|>
         <w.Step @name='dataset'>
-          <Form.Input @label='Name' @fieldName='name' @containerClass='mt-4' />
+          <Form.Input
+            @label='Name'
+            @hint='Optional; will be auto generated.'
+            @fieldName='name'
+            @containerClass='mt-4'
+            placeholder='Properties Sync'
+          />
 
           <Form.Select
             @label='Dataset'
@@ -20,7 +26,8 @@
               (perform this.findDataset changeset.dataset.id)
               w.transition-to-next
             }}
-            @containerClass='mt-4' as |dataset|
+            @containerClass='mt-4'
+            @placeholder='Select A Dataset' as |dataset|
           >
             {{dataset.name}}
           </Form.Select>
@@ -42,7 +49,8 @@
                 @label='Mapping'
                 @fieldName='mapping'
                 @options={{this.mappings}}
-                @containerClass='mt-4' as |mapping|
+                @containerClass='mt-4'
+                @placeholder='Select Table Mapping' as |mapping|
               >
                 {{mapping.name}}
               </Form.Select>
@@ -55,7 +63,8 @@
               @fieldName='source'
               @options={{@sources}}
               @containerClass='mt-4'
-              @onChange={{w.transition-to-next}} as |source|
+              @onChange={{w.transition-to-next}}
+              @placeholder='Select Local Source' as |source|
             >
               <Source::Card class='p-2' @source={{source}} />
             </Form.Select>
