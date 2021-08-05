@@ -1,10 +1,10 @@
-<Modal @isOpen={{@isOpen}} @onClose={{@onClose}} as |m|>
+<Modal @isOpen={{@isOpen}} @onClose={{this.onClose}} as |m|>
   <m.Header>
     New Sync Rule
   </m.Header>
 
   <ChangesetForm
-    @changeset={{changeset this.ruleInput}}
+    @changeset={{this.changeset}}
     @onSubmit={{this.createRule}} as |Form changeset|
   >
     <m.Body>
@@ -115,15 +115,29 @@
               type='checkbox'
             />
 
-            <Button
-              @intent='primary'
-              @appearance='outlined'
-              class='mt-4'
-              disabled={{not (this.stepAccessible 'schedule' changeset)}}
-              {{on 'click' w.transition-to-next}}
-            >
-              Add Schedule
-            </Button>
+            <div class='flex space-x-2'>
+              <Button
+                @intent='primary'
+                @appearance='outlined'
+                @size='sm'
+                class='mt-4'
+                disabled={{not (this.stepAccessible 'schedule' changeset)}}
+                {{on 'click' (fn w.transition-to 'schedule')}}
+              >
+                Add Schedule
+              </Button>
+
+              <Button
+                @intent='primary'
+                @appearance='outlined'
+                @size='sm'
+                class='mt-4'
+                disabled={{not (this.stepAccessible 'optouts' changeset)}}
+                {{on 'click' (fn w.transition-to 'optouts')}}
+              >
+                Add Optouts
+              </Button>
+            </div>
           {{/if}}
         </w.Step>
 
@@ -157,6 +171,10 @@
           >
             {{hour}}
           </Form.Select>
+        </w.Step>
+
+        <w.Step @name='optouts'>
+          Optout
         </w.Step>
 
         <div class='flex justify-center mt-4 space-x-2'>

@@ -10,6 +10,7 @@ import { getAllMappings } from 'mapgeo-sync/utils/dataset-mapping';
 import { ScheduleFrequency, Source, SyncRule } from 'mapgeo-sync-config';
 import { helper } from '@ember/component/helper';
 import { NotificationsService } from '@frontile/notifications';
+import { Changeset } from 'ember-changeset';
 
 interface Step {
   name: 'dataset' | 'mapping' | 'config' | 'schedule';
@@ -59,12 +60,8 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
   @service('notifications') declare notifications: NotificationsService;
 
   @tracked dataset?: Dataset;
-  @tracked ruleInput: Partial<RuleInput> = {
-    schedule: {
-      hour: 1,
-      frequency: defaultFrequency,
-    },
-  };
+  @tracked ruleInput: Partial<RuleInput> = {};
+  changeset = Changeset(this.ruleInput);
   frequencies: readonly ScheduleFrequency[] = [
     defaultFrequency,
     'weekly',
@@ -104,6 +101,18 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
   }
 
   @action
+  onClose() {
+    if (this.changeset.isDirty) {
+      if (confirm('Are you sure you want to cancel creating this rule?')) {
+        this.changeset.rollback();
+        this.args.onClose();
+      }
+    } else {
+      this.args.onClose();
+    }
+  }
+
+  @action
   async createRule(ruleInput: RuleInput) {
     if (!this.stepAccessible.compute(['schedule', ruleInput])) {
       const isFile = ruleInput.source?.sourceType === 'file';
@@ -137,6 +146,7 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
       id: v4(),
     });
 
+    this.changeset.rollback();
     this.args.onSubmit(rules);
   }
 
