@@ -13,7 +13,7 @@ import { NotificationsService } from '@frontile/notifications';
 import { Changeset } from 'ember-changeset';
 
 interface Step {
-  name: 'dataset' | 'mapping' | 'config' | 'schedule';
+  name: 'dataset' | 'mapping' | 'config' | 'schedule' | 'optouts';
 }
 
 interface RuleCreateModalArgs {
@@ -104,7 +104,7 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
   }
 
   @action
-  onClose() {
+  confirmCloseIfDirty() {
     if (this.changeset.isDirty) {
       if (confirm('Are you sure you want to cancel creating this rule?')) {
         this.changeset.rollback();
