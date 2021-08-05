@@ -31,6 +31,8 @@ interface RuleInput {
   source: Source;
   selectStatement?: string;
   file?: string;
+  optoutSelectStatement?: string;
+  optoutFile?: string;
   schedule?: {
     frequency: ScheduleFrequency;
     hour: number;
@@ -86,7 +88,8 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
       case 'config': {
         return Boolean(changeset.source);
       }
-      case 'schedule': {
+      case 'schedule':
+      case 'optouts': {
         return Boolean(changeset.selectStatement || changeset.file);
       }
       default: {
@@ -133,17 +136,41 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
       sourceConfig = { selectStatement: ruleInput.selectStatement as string };
     }
 
+    const name =
+      ruleInput.name || `${ruleInput.dataset.name} - ${ruleInput.mapping.name}`;
+    let optoutRule: SyncRule | undefined;
+
+    if (ruleInput.optoutSelectStatement || ruleInput.optoutFile) {
+      let sourceConfig;
+
+      if (ruleInput.source.sourceType === 'file') {
+        sourceConfig = { filePath: ruleInput.optoutFile as string };
+      } else if (ruleInput.source.sourceType === 'database') {
+        sourceConfig = {
+          selectStatement: ruleInput.optoutSelectStatement as string,
+        };
+      }
+
+      optoutRule = {
+        name: `${name} Optouts`,
+        datasetId: ruleInput.dataset.id,
+        mappingId: ruleInput.mapping.pk,
+        sourceId: ruleInput.source.id,
+        sourceConfig,
+        id: v4(),
+      };
+    }
+
     const rules = await this.platform.addSyncRule({
-      name:
-        ruleInput.name ||
-        `${ruleInput.dataset.name} - ${ruleInput.mapping.name}`,
+      id: v4(),
+      name,
       datasetId: ruleInput.dataset.id,
       mappingId: ruleInput.mapping.pk,
       sourceId: ruleInput.source.id,
       schedule: ruleInput.schedule,
       sendNotificationEmail: ruleInput.sendNotificationEmail,
       sourceConfig,
-      id: v4(),
+      optoutRule,
     });
 
     this.changeset.rollback();
