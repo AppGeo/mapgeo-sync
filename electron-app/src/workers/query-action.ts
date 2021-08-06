@@ -86,7 +86,7 @@ if (parentPort) {
             const optoutResult = await handleOptoutRule(
               mapgeoService,
               optoutBundle,
-              optoutData as unknown[]
+              optoutData as Record<string, unknown>[]
             );
 
             data.status.messages.push(optoutResult.message);
@@ -188,11 +188,33 @@ async function handleRule(
 async function handleOptoutRule(
   mapgeoService: MapgeoService,
   ruleBundle: RuleBundle,
-  data: unknown[]
+  data: Record<string, unknown>[]
 ): Promise<{
   ok: boolean;
   message: { type: 'warning' | 'error' | 'success'; message: string };
 }> {
+  if (!data || !data.length) {
+    return {
+      ok: true,
+      message: {
+        type: 'warning',
+        message: `Skipping optouts because there is no data.`,
+      },
+    };
+  }
+
+  const firstItem = data[0];
+
+  if (!('optout' in firstItem)) {
+    return {
+      ok: false,
+      message: {
+        type: 'error',
+        message: `Optout data is invalid, each row must contain a 'optout' property that is the identifier.`,
+      },
+    };
+  }
+
   const logScope = logger.scope('handleOptoutRule');
   const rule = ruleBundle.rule;
   const currentOptouts = await mapgeoService.getOptouts(rule.datasetId);
@@ -208,7 +230,7 @@ async function handleOptoutRule(
 
   await mapgeoService.insertOptouts(
     rule.datasetId,
-    data.map((item: any) => item.optout)
+    data.map((item: { optout: string }) => item.optout)
   );
 
   return {
@@ -232,7 +254,7 @@ async function loadData(
     case 'database': {
       const data = await handleDatabaseSource(ruleBundle);
       const transformed = transformData(data, {
-        toGeoJson: (data[0] as any).the_geom ? true : false,
+        toGeoJson: data.length && (data[0] as any).the_geom ? true : false,
       }) as FeatureCollection;
       return transformed;
     }
