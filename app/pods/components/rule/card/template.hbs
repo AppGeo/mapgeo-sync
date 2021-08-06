@@ -20,6 +20,30 @@
     </div>
 
     <div class='flex space-x-2'>
+      {{#if this.state.logs.length}}
+        <Button
+          @size='xs'
+          @appearance='minimal'
+          @isRenderless={{true}} as |btn|
+        >
+          <LinkTo
+            class="{{btn.classNames}} flex space-x-1"
+            @route='rule.runs'
+            @model={{@rule.id}}
+          >
+            <span class='sr-only'>
+              Previous Runs
+            </span>
+
+            {{#each this.state.logs as |log|}}
+              <div
+                class="w-2 h-2 {{if log.ok 'bg-green-500' 'bg-red-500'}}"
+              ></div>
+            {{/each}}
+          </LinkTo>
+        </Button>
+      {{/if}}
+
       {{#if (or this.state.running this.state.nextScheduledRun)}}
         <div
           class='flex items-center space-x-1 text-sm text-gray-600'

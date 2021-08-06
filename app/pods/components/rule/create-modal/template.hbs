@@ -105,6 +105,29 @@
                   Browse Files
                 </Button>
               </div>
+
+              {{#if changeset.file}}
+                <Form.Select
+                  @label='File Type'
+                  @fieldName='fileType'
+                  @options={{this.fileTypeKeys}}
+                  @containerClass='mt-4'
+                  @placeholder='Select File Type' as |type|
+                >
+                  {{this.fileTypeFormat type}}
+                </Form.Select>
+              {{/if}}
+
+              {{#if (eq changeset.fileType 'gdb')}}
+                <Form.Input
+                  @label='Layer Name'
+                  @hint='The layer name inside the File GeoDatabase'
+                  @fieldName='gdbLayerName'
+                  @containerClass='mt-4'
+                  required={{true}}
+                  placeholder='layer1'
+                />
+              {{/if}}
             {{/if}}
 
             <Form.Checkbox

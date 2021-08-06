@@ -144,8 +144,8 @@ ipcMain.handle('selectSourceFile', async (event, sourceId: string) => {
   if (source.sourceType === 'file') {
     const result = await dialog.showOpenDialog(mainWindow, {
       defaultPath: source.folder,
-      properties: ['openFile'],
-      filters: [{ name: 'Default', extensions: ['json', 'geojson'] }],
+      properties: ['openFile', 'openDirectory'],
+      filters: [{ name: 'Default', extensions: ['json', 'geojson', 'zip'] }],
     });
 
     return result.filePaths[0];
@@ -278,10 +278,15 @@ function createBrowserWindow() {
 
             const result = await new Promise(
               (resolve: (msg: QueryActionResponse) => void, reject) => {
-                queryWorker.once('message', (message: QueryActionResponse) => {
-                  logScope.log('handle-rule result: ' + message);
-                  resolve(message);
-                });
+                const handleMessage = (message: QueryActionResponse) => {
+                  if (message.rule.id === rule.id) {
+                    queryWorker.off('message', handleMessage);
+                    logScope.log('handle-rule result: ' + message);
+                    resolve(message);
+                  }
+                };
+
+                queryWorker.on('message', handleMessage);
               }
             );
 
@@ -328,11 +333,16 @@ function createBrowserWindow() {
           data: ruleBundle,
         });
 
-        queryWorker.once('message', (message: QueryActionResponse) => {
-          // logger.log(message);
-          event.reply('action-result', message);
-          updateRuleStateAfterRun(rule, message, { startedAt });
-        });
+        const handleMessage = (message: QueryActionResponse) => {
+          if (message.rule.id === rule.id) {
+            queryWorker.off('message', handleMessage);
+            // logger.log(message);
+            event.reply('action-result', message);
+            updateRuleStateAfterRun(rule, message, { startedAt });
+          }
+        };
+
+        queryWorker.on('message', handleMessage);
       });
     } catch (e) {
       logger.scope('did-finish-load').error(e);

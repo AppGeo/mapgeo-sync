@@ -25,7 +25,7 @@ export function formatDate(
       timeStyle: timeFormat || 'long',
     });
   }
-  return intl.format(new Date(date));
+  return intl.format(new Date(date)).trim();
 }
 
 export default helper(formatDate);

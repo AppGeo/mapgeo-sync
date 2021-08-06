@@ -7,7 +7,12 @@ import { tracked, cached } from '@glimmer/tracking';
 import { v4 } from 'uuid';
 import { Dataset, TableMapping } from 'mapgeo';
 import { getAllMappings } from 'mapgeo-sync/utils/dataset-mapping';
-import { ScheduleFrequency, Source, SyncRule } from 'mapgeo-sync-config';
+import {
+  ScheduleFrequency,
+  Source,
+  SyncFileConfig,
+  SyncRule,
+} from 'mapgeo-sync-config';
 import { helper } from '@ember/component/helper';
 import { NotificationsService } from '@frontile/notifications';
 import { Changeset } from 'ember-changeset';
@@ -31,6 +36,8 @@ interface RuleInput {
   source: Source;
   selectStatement?: string;
   file?: string;
+  fileType?: SyncFileConfig['fileType'];
+  gdbLayerName?: SyncFileConfig['gdbLayerName'];
   optoutSelectStatement?: string;
   optoutFile?: string;
   schedule?: {
@@ -40,6 +47,13 @@ interface RuleInput {
   sendNotificationEmail: boolean;
 }
 
+const fileTypes: { [FileType in SyncFileConfig['fileType']]: string } = {
+  json: '.json (Array With Rows)',
+  geojson: '.geojson (Feature Collection)',
+  csv: '.csv (Usually exported from Excel or a similar tool)',
+  gdb: 'File GeoDatabase (A folder containing all the files. Unzip your zip file.)',
+} as const;
+const fileTypeKeys = Object.keys(fileTypes) as (keyof typeof fileTypes)[];
 const defaultFrequency: ScheduleFrequency = 'daily';
 const hours = [
   0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
@@ -70,6 +84,11 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
   ] as const;
   hours = hours;
   days = Object.keys(days);
+  fileTypeKeys = fileTypeKeys;
+
+  fileTypeFormat = helper(([type]: [SyncFileConfig['fileType']]) => {
+    return fileTypes[type];
+  });
 
   dayFormat = helper(([day]: [DayValue]) => {
     return days[day];
@@ -131,7 +150,11 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
     let sourceConfig;
 
     if (ruleInput.source.sourceType === 'file') {
-      sourceConfig = { filePath: ruleInput.file as string };
+      sourceConfig = {
+        filePath: ruleInput.file as string,
+        fileType: ruleInput.fileType!,
+        gdbLayerName: ruleInput.gdbLayerName,
+      };
     } else if (ruleInput.source.sourceType === 'database') {
       sourceConfig = { selectStatement: ruleInput.selectStatement as string };
     }
@@ -144,7 +167,11 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
       let sourceConfig;
 
       if (ruleInput.source.sourceType === 'file') {
-        sourceConfig = { filePath: ruleInput.optoutFile as string };
+        sourceConfig = {
+          filePath: ruleInput.optoutFile as string,
+          fileType: ruleInput.fileType!,
+          gdbLayerName: ruleInput.gdbLayerName,
+        };
       } else if (ruleInput.source.sourceType === 'database') {
         sourceConfig = {
           selectStatement: ruleInput.optoutSelectStatement as string,

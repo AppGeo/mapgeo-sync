@@ -63,6 +63,8 @@ export interface SyncDbConfig {
 
 export interface SyncFileConfig {
   filePath: string;
+  fileType: 'json' | 'geojson' | 'gdb' | 'csv';
+  gdbLayerName?: string;
 }
 
 export interface RuleBundle {
