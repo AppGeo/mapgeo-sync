@@ -3,24 +3,18 @@ import { setupRenderingTest } from 'ember-qunit';
 import { render } from '@ember/test-helpers';
 import hbs from 'htmlbars-inline-precompile';
 
-module('Integration | Component | rule/log-item', function(hooks) {
+module('Integration | Component | rule/log-item', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('it renders', async function(assert) {
+  test('it renders', async function (assert) {
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
+    this.set('item', {
+      ok: false,
+    });
 
-    await render(hbs`{{rule/log-item}}`);
+    await render(hbs`<Rule::LogItem @item={{this.item}} />`);
 
-    assert.equal(this.element.textContent.trim(), '');
-
-    // Template block usage:
-    await render(hbs`
-      {{#rule/log-item}}
-        template block text
-      {{/rule/log-item}}
-    `);
-
-    assert.equal(this.element.textContent.trim(), 'template block text');
+    assert.dom(this.element).containsText('');
   });
 });

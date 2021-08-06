@@ -10,9 +10,10 @@ import { getAllMappings } from 'mapgeo-sync/utils/dataset-mapping';
 import { ScheduleFrequency, Source, SyncRule } from 'mapgeo-sync-config';
 import { helper } from '@ember/component/helper';
 import { NotificationsService } from '@frontile/notifications';
+import { Changeset } from 'ember-changeset';
 
 interface Step {
-  name: 'dataset' | 'mapping' | 'config' | 'schedule';
+  name: 'dataset' | 'mapping' | 'config' | 'schedule' | 'optouts';
 }
 
 interface RuleCreateModalArgs {
@@ -30,6 +31,8 @@ interface RuleInput {
   source: Source;
   selectStatement?: string;
   file?: string;
+  optoutSelectStatement?: string;
+  optoutFile?: string;
   schedule?: {
     frequency: ScheduleFrequency;
     hour: number;
@@ -59,12 +62,8 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
   @service('notifications') declare notifications: NotificationsService;
 
   @tracked dataset?: Dataset;
-  @tracked ruleInput: Partial<RuleInput> = {
-    schedule: {
-      hour: 1,
-      frequency: defaultFrequency,
-    },
-  };
+  @tracked ruleInput: Partial<RuleInput> = {};
+  changeset = Changeset(this.ruleInput);
   frequencies: readonly ScheduleFrequency[] = [
     defaultFrequency,
     'weekly',
@@ -89,7 +88,8 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
       case 'config': {
         return Boolean(changeset.source);
       }
-      case 'schedule': {
+      case 'schedule':
+      case 'optouts': {
         return Boolean(changeset.selectStatement || changeset.file);
       }
       default: {
@@ -101,6 +101,18 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
   @cached
   get mappings() {
     return this.dataset ? getAllMappings(this.dataset) : [];
+  }
+
+  @action
+  confirmCloseIfDirty() {
+    if (this.changeset.isDirty) {
+      if (confirm('Are you sure you want to cancel creating this rule?')) {
+        this.changeset.rollback();
+        this.args.onClose();
+      }
+    } else {
+      this.args.onClose();
+    }
   }
 
   @action
@@ -124,19 +136,44 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
       sourceConfig = { selectStatement: ruleInput.selectStatement as string };
     }
 
+    const name =
+      ruleInput.name || `${ruleInput.dataset.name} - ${ruleInput.mapping.name}`;
+    let optoutRule: SyncRule | undefined;
+
+    if (ruleInput.optoutSelectStatement || ruleInput.optoutFile) {
+      let sourceConfig;
+
+      if (ruleInput.source.sourceType === 'file') {
+        sourceConfig = { filePath: ruleInput.optoutFile as string };
+      } else if (ruleInput.source.sourceType === 'database') {
+        sourceConfig = {
+          selectStatement: ruleInput.optoutSelectStatement as string,
+        };
+      }
+
+      optoutRule = {
+        name: `${name} Optouts`,
+        datasetId: ruleInput.dataset.id,
+        mappingId: ruleInput.mapping.pk,
+        sourceId: ruleInput.source.id,
+        sourceConfig,
+        id: v4(),
+      };
+    }
+
     const rules = await this.platform.addSyncRule({
-      name:
-        ruleInput.name ||
-        `${ruleInput.dataset.name} - ${ruleInput.mapping.name}`,
+      id: v4(),
+      name,
       datasetId: ruleInput.dataset.id,
       mappingId: ruleInput.mapping.pk,
       sourceId: ruleInput.source.id,
       schedule: ruleInput.schedule,
       sendNotificationEmail: ruleInput.sendNotificationEmail,
       sourceConfig,
-      id: v4(),
+      optoutRule,
     });
 
+    this.changeset.rollback();
     this.args.onSubmit(rules);
   }
 

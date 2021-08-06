@@ -1,10 +1,10 @@
-<Modal @isOpen={{@isOpen}} @onClose={{@onClose}} as |m|>
+<Modal @isOpen={{@isOpen}} @onClose={{this.confirmCloseIfDirty}} as |m|>
   <m.Header>
     New Sync Rule
   </m.Header>
 
   <ChangesetForm
-    @changeset={{changeset this.ruleInput}}
+    @changeset={{this.changeset}}
     @onSubmit={{this.createRule}} as |Form changeset|
   >
     <m.Body>
@@ -78,7 +78,7 @@
                 @label='Select Statement'
                 @hint='Select should return a the_geom column in the GeoJSON format'
                 @fieldName='selectStatement'
-                placeholder='select *, ST_AsGeoJSON(geom) as the_geom from "sync-test"'
+                placeholder='select *, ST_AsGeoJSON(geom) as the_geom from "properties"'
                 rows='5'
               />
             {{else if (eq changeset.source.sourceType 'file')}}
@@ -115,15 +115,29 @@
               type='checkbox'
             />
 
-            <Button
-              @intent='primary'
-              @appearance='outlined'
-              class='mt-4'
-              disabled={{not (this.stepAccessible 'schedule' changeset)}}
-              {{on 'click' w.transition-to-next}}
-            >
-              Add Schedule
-            </Button>
+            <div class='flex space-x-2'>
+              <Button
+                @intent='primary'
+                @appearance='outlined'
+                @size='sm'
+                class='mt-4'
+                disabled={{not (this.stepAccessible 'schedule' changeset)}}
+                {{on 'click' (fn w.transition-to 'schedule')}}
+              >
+                Add Schedule
+              </Button>
+
+              <Button
+                @intent='primary'
+                @appearance='outlined'
+                @size='sm'
+                class='mt-4'
+                disabled={{not (this.stepAccessible 'optouts' changeset)}}
+                {{on 'click' (fn w.transition-to 'optouts')}}
+              >
+                Add Optouts
+              </Button>
+            </div>
           {{/if}}
         </w.Step>
 
@@ -157,6 +171,42 @@
           >
             {{hour}}
           </Form.Select>
+        </w.Step>
+
+        <w.Step @name='optouts'>
+          {{#if (eq changeset.source.sourceType 'database')}}
+            <Form.Textarea
+              @label='Optout Select Statement'
+              @hint='Select should return a column called optout'
+              @fieldName='optoutSelectStatement'
+              placeholder='select id as optout from "properties" where optout = true'
+              rows='5'
+            />
+          {{else if (eq changeset.source.sourceType 'file')}}
+            <div class='flex space-x-2'>
+              <Form.Input
+                @label='Optout File'
+                @fieldName='optoutFile'
+                @size='sm'
+                @containerClass='flex-1'
+                disabled={{true}}
+              />
+
+              <Button
+                class='self-end'
+                @size='sm'
+                {{on
+                  'click'
+                  (pipe
+                    (fn this.selectFile changeset.source.id)
+                    (set changeset.optoutFile)
+                  )
+                }}
+              >
+                Browse Files
+              </Button>
+            </div>
+          {{/if}}
         </w.Step>
 
         <div class='flex justify-center mt-4 space-x-2'>

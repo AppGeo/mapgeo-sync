@@ -80,13 +80,14 @@ export interface SyncRule {
   datasetId: string;
   sourceId: string;
   mappingId: string;
-  sendNotificationEmail: boolean;
+  sendNotificationEmail?: boolean;
   schedule?: {
     frequency: ScheduleFrequency;
     hour: number;
     day?: number;
   };
   sourceConfig?: SourceConfig;
+  optoutRule?: SyncRule;
 }
 
 export interface RuleLogItem {

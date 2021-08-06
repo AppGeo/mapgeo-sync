@@ -42,6 +42,14 @@ Then start the electron app (`cd electron-app/`) with something like this, remem
 NODE_EXTRA_CA_CERTS="/Users/iradchenko/Library/Application Support/devcert/certificate-authority/certificate.cert" yarn debug
 ```
 
+### Testing File Formats
+
+To create a File GeoDatabase, you can use GeoJSON to create it using this command:
+
+```sh
+ogr2ogr -f "FileGDB" output.gdb input.geojson
+```
+
 ## Changed Config
 
 - `UploadActions` now requires a `DbType` filed, valid values include 'pg'
