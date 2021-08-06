@@ -49,9 +49,9 @@ export default class Platform extends Service {
   }
 
   @action
-  runSyncRule(rule: SyncRule) {
+  runSyncRule(rule: SyncRule, runId: string) {
     return new Promise((resolve) => {
-      ipcRenderer.send('runRule', rule);
+      ipcRenderer.send('runRule', rule, runId);
       ipcRenderer.on(
         'action-result',
         (

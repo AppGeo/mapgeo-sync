@@ -94,6 +94,7 @@ export interface SyncRule {
 
 export interface RuleLogItem {
   ok: boolean;
+  runId: string;
   runMode: 'scheduled' | 'manual';
   startedAt: Date;
   endedAt: Date;

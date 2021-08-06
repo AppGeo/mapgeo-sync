@@ -7,6 +7,7 @@ import { Source, SyncRule } from 'mapgeo-sync-config';
 import { Dataset } from 'mapgeo';
 import { getAllMappings } from 'mapgeo-sync/utils/dataset-mapping';
 import { taskFor } from 'ember-concurrency-ts';
+import { v4 } from 'uuid';
 
 interface RuleCardArgs {
   rule: SyncRule;
@@ -48,7 +49,7 @@ export default class RuleCard extends Component<RuleCardArgs> {
 
   @task
   async runRule(rule: SyncRule) {
-    const result = await this.platform.runSyncRule(rule);
+    const result = await this.platform.runSyncRule(rule, v4());
     return result;
   }
 

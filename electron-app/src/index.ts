@@ -40,6 +40,7 @@ import {
 } from './workers/query-action';
 import { handleSquirrelEvent } from './squirrel-startup';
 import wrapRule from './utils/wrap-rule';
+import { v4 } from 'uuid';
 
 const pkg = require('../package.json');
 
@@ -264,6 +265,7 @@ function createBrowserWindow() {
           store,
           updateSyncState,
           run: async (rule, nextScheduledRun) => {
+            const runId = v4();
             const startedAt = new Date();
             const ruleBundle = wrapRule(rule);
 
@@ -290,7 +292,7 @@ function createBrowserWindow() {
               }
             );
 
-            updateRuleStateAfterRun(rule, result, {
+            updateRuleStateAfterRun(rule, result, runId, {
               startedAt,
               wasScheduled: true,
               otherState: { nextScheduledRun },
@@ -320,7 +322,7 @@ function createBrowserWindow() {
         initWorkers();
       }
 
-      ipcMain.on('runRule', async (event, rule: SyncRule) => {
+      ipcMain.on('runRule', async (event, rule: SyncRule, runId: string) => {
         const ruleBundle = wrapRule(rule);
         const startedAt = new Date();
 
@@ -338,7 +340,7 @@ function createBrowserWindow() {
             queryWorker.off('message', handleMessage);
             // logger.log(message);
             event.reply('action-result', message);
-            updateRuleStateAfterRun(rule, message, { startedAt });
+            updateRuleStateAfterRun(rule, message, runId, { startedAt });
           }
         };
 
@@ -482,6 +484,7 @@ process.on('uncaughtException', (err) => {
 function updateRuleStateAfterRun(
   rule: SyncRule,
   result: FinishedResponse | ErrorResponse,
+  runId: string,
   {
     startedAt,
     wasScheduled,
@@ -503,33 +506,37 @@ function updateRuleStateAfterRun(
       ? result.rows.features.length
       : numRows;
 
-  if ('status' in result) {
-    logs.unshift({
-      ok: !!result.status.ok,
-      runMode,
-      numItems,
-      errors: result.status.messages,
-      intersection: result.status.intersection,
-      startedAt,
-      endedAt: new Date(),
-    });
-  } else {
-    logs.unshift({
-      ok: result.errors === undefined || result.errors.length === 0,
-      runMode,
-      numItems,
-      errors: result.errors.map((err) => ({
-        type: 'error',
-        message: err.message,
-      })),
-      startedAt,
-      endedAt: new Date(),
+  if (!logs.find((log) => log.runId === runId)) {
+    if ('status' in result) {
+      logs.unshift({
+        ok: !!result.status.ok,
+        runMode,
+        runId,
+        numItems,
+        errors: result.status.messages,
+        intersection: result.status.intersection,
+        startedAt,
+        endedAt: new Date(),
+      });
+    } else {
+      logs.unshift({
+        ok: result.errors === undefined || result.errors.length === 0,
+        runMode,
+        runId,
+        numItems,
+        errors: result.errors.map((err) => ({
+          type: 'error',
+          message: err.message,
+        })),
+        startedAt,
+        endedAt: new Date(),
+      });
+    }
+
+    updateSyncState(rule, {
+      running: false,
+      ...otherState,
+      logs: logs.slice(0, 5),
     });
   }
-
-  updateSyncState(rule, {
-    running: false,
-    ...otherState,
-    logs: logs.slice(0, 5),
-  });
 }

@@ -46,14 +46,25 @@ export default class Scheduler {
   autoStartScheduled() {
     logScope.log('calling autoStartScheduled');
 
+    const syncRules = this.store.get('syncRules') || [];
     const syncState = this.store.get('syncState') || [];
     logScope.log('syncState', syncState);
+
+    // Reset state that might have been set on close
+    syncState.forEach((state) => {
+      const rule = syncRules.find((rule) => rule.id === state.ruleId);
+      if (!rule) {
+        return;
+      }
+      return this.updateSyncState(rule, {
+        running: false,
+      });
+    });
 
     const scheduledOnly = syncState.filter((item) => item.scheduled);
     const scheduledRuleIds = scheduledOnly.map((item) => item.ruleId);
     logScope.log('scheduled rule ids', scheduledRuleIds);
 
-    const syncRules = this.store.get('syncRules') || [];
     const rules = syncRules.filter(
       (rule) => rule.schedule && scheduledRuleIds.includes(rule.id)
     );
