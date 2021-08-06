@@ -34,6 +34,12 @@ export type CartoDirectResult = {
   key: string;
 };
 
+export interface Optout {
+  dataset: string;
+  datasetItemId: string;
+  id: string;
+}
+
 export default class MapgeoService {
   token: string;
   config: Record<string, unknown>;
@@ -156,68 +162,49 @@ export default class MapgeoService {
     }
   }
 
-  async getOptouts(datasetId: string) {
+  async getOptouts(datasetId: string): Promise<Optout[]> {
     const result = await this.#fetch(`/api/optouts/${datasetId}`);
-    let response;
 
-    switch (result.status) {
-      case 200: {
-        response = result;
-        break;
-      }
-
-      case 401: {
-        response = this.createError('getOptouts: Unauthorized');
-        break;
-      }
-
-      case 404: {
-        response = this.createError('getOptouts: Bad Host (404)');
-        break;
-      }
-
-      default: {
-        response = this.createError(
-          `getOptouts: (${result.statusText}) ${JSON.stringify(result.data)}`
-        );
-      }
-    }
-
-    return response;
+    return result.optouts;
   }
 
-  async deleteOptouts(datasetId: string, ids: string[]) {
+  async insertOptouts(datasetId: string, ids: string[]) {
     const result = await this.#fetch(`/api/optouts/${datasetId}`, {
       method: 'put',
       body: JSON.stringify(ids),
     });
-    let response;
 
     switch (result.status) {
       case 200: {
-        response = result;
-        response.deleted = 1;
-        break;
+        return {
+          data: result,
+          numDeleted: ids.length,
+        };
       }
 
       case 401: {
-        response = this.createError('deleteOptouts: Unauthorized');
-        break;
+        return this.createError('deleteOptouts: Unauthorized');
       }
 
       case 404: {
-        response = this.createError('deleteOptouts: Bad Host (404)');
-        break;
+        return this.createError('deleteOptouts: Bad Host (404)');
       }
 
       default: {
-        response = this.createError(
+        return this.createError(
           `deleteOptouts: (${result.statusText}) ${JSON.stringify(result.data)}`
         );
       }
     }
+  }
 
-    return response;
+  async deleteOptouts(datasetId: string, ids: string[]) {
+    const result = await this.#fetch(`/api/optouts/${datasetId}/delete`, {
+      method: 'put',
+      body: JSON.stringify(ids),
+    });
+
+    return result.optout ? true : false;
   }
 
   private createError(message: string) {

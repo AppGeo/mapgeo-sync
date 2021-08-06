@@ -2,8 +2,8 @@ import { URL } from 'url';
 import { workerData, parentPort } from 'worker_threads';
 import type { FeatureCollection } from 'geojson';
 import MapgeoService from '../mapgeo/service';
-import handleQueryAction from '../action-handlers/query';
-import handleFileAction from '../action-handlers/file';
+import handleDatabaseSource from '../source-handlers/database';
+import handleFileSource from '../source-handlers/file';
 import S3Service from '../s3-service';
 import {
   UploadMetadata,
@@ -46,7 +46,7 @@ export type QueryActionResponse = FinishedResponse | ErrorResponse;
 export interface UploadStatus {
   ok: boolean;
   messages: {
-    type: 'warning' | 'error';
+    type: 'warning' | 'error' | 'success';
     message: string;
   }[];
   intersection: {
@@ -62,15 +62,83 @@ function respond(response: QueryActionResponse) {
   parentPort.postMessage(response);
 }
 
-async function handleRule(ruleBundle: RuleBundle) {
+if (parentPort) {
+  parentPort.on('message', async (msg: string | QueryActionMessage) => {
+    if (typeof msg !== 'object') {
+      console.log('Low-level event: ', msg);
+      return;
+    }
+
+    console.log(`Handling '${msg.event}'...`);
+
+    switch (msg.event) {
+      case 'handle-rule': {
+        try {
+          const mapgeoService = await setupMapGeo();
+          const data = await handleRule(mapgeoService, msg.data);
+
+          if (msg.data.rule.optoutRule) {
+            const optoutBundle = {
+              rule: msg.data.rule.optoutRule,
+              source: msg.data.source,
+            };
+            const optoutData = await loadData(optoutBundle);
+            const optoutResult = await handleOptoutRule(
+              mapgeoService,
+              optoutBundle,
+              optoutData as unknown[]
+            );
+
+            data.status.messages.push(optoutResult.message);
+            data.status.ok = optoutResult.ok;
+          }
+
+          respond(data);
+        } catch (error) {
+          logger.scope('query-action').warn(error);
+          respond({
+            ...msg.data,
+            errors: [
+              {
+                message: error.toString(),
+                event: msg.event,
+              },
+            ],
+          });
+        }
+        break;
+      }
+
+      case 'close': {
+        parentPort.postMessage('done');
+        break;
+      }
+
+      default:
+        const exhaustiveCheck: never = msg;
+        throw new Error(`Unhandled case: ${exhaustiveCheck}`);
+    }
+  });
+}
+
+async function setupMapGeo() {
   if (!mapgeo.host) {
     throw new Error('mapgeo.host is a required config property');
   }
-  const url = new URL(mapgeo.host);
-  const subdomain = url.hostname.split('.')[0];
+
   const mapgeoService = await MapgeoService.fromUrl(mapgeo.host);
 
   await mapgeoService.login(mapgeo.login.email, mapgeo.login.password);
+
+  return mapgeoService;
+}
+
+async function handleRule(
+  mapgeoService: MapgeoService,
+  ruleBundle: RuleBundle
+) {
+  const url = new URL(mapgeo.host);
+  const subdomain = url.hostname.split('.')[0];
 
   const result = await loadData(ruleBundle);
   const metadata = uploadMetadata(subdomain, ruleBundle);
@@ -105,16 +173,51 @@ async function handleRule(ruleBundle: RuleBundle) {
       },
     ],
   });
-  console.log('notify res: ', res);
+  console.log('notify uploader res: ', res);
   // Poll for upload-status.json file to know if error or success
   const status = await s3.waitForFile(res.key);
-  console.log('status res: ', status);
+  console.log('upload status res: ', status.content);
 
-  respond({
+  return {
     status: status.content as UploadStatus,
     rows: result,
     ...ruleBundle,
-  });
+  };
+}
+
+async function handleOptoutRule(
+  mapgeoService: MapgeoService,
+  ruleBundle: RuleBundle,
+  data: unknown[]
+): Promise<{
+  ok: boolean;
+  message: { type: 'warning' | 'error' | 'success'; message: string };
+}> {
+  const logScope = logger.scope('handleOptoutRule');
+  const rule = ruleBundle.rule;
+  const currentOptouts = await mapgeoService.getOptouts(rule.datasetId);
+
+  logScope.log(`Had ${currentOptouts?.length} optouts previously`);
+
+  if (currentOptouts?.length) {
+    await mapgeoService.deleteOptouts(
+      rule.datasetId,
+      currentOptouts.map((optout) => optout.datasetItemId)
+    );
+  }
+
+  await mapgeoService.insertOptouts(
+    rule.datasetId,
+    data.map((item: any) => item.optout)
+  );
+
+  return {
+    ok: true,
+    message: {
+      type: 'success',
+      message: `Successfully inserted ${data.length} optouts.`,
+    },
+  };
 }
 
 async function loadData(
@@ -122,14 +225,14 @@ async function loadData(
 ): Promise<unknown[] | FeatureCollection> {
   switch (ruleBundle.source.sourceType) {
     case 'file': {
-      const { ext, data } = await handleFileAction(ruleBundle);
+      const { ext, data } = await handleFileSource(ruleBundle);
       const transformed = transformData(data, { ext }) as unknown[];
       return transformed;
     }
     case 'database': {
-      const data = await handleQueryAction(ruleBundle);
+      const data = await handleDatabaseSource(ruleBundle);
       const transformed = transformData(data, {
-        toGeoJson: true,
+        toGeoJson: (data[0] as any).the_geom ? true : false,
       }) as FeatureCollection;
       return transformed;
     }
@@ -191,44 +294,4 @@ function uploadMetadata(community: string, ruleBundle: RuleBundle) {
   };
 
   return res;
-}
-
-if (parentPort) {
-  parentPort.on('message', async (msg: string | QueryActionMessage) => {
-    if (typeof msg !== 'object') {
-      console.log('Low-level event: ', msg);
-      return;
-    }
-
-    console.log(`Handling '${msg.event}'...`);
-
-    switch (msg.event) {
-      case 'handle-rule': {
-        try {
-          await handleRule(msg.data);
-        } catch (error) {
-          logger.scope('query-action').warn(error);
-          respond({
-            ...msg.data,
-            errors: [
-              {
-                message: error.toString(),
-                event: msg.event,
-              },
-            ],
-          });
-        }
-        break;
-      }
-
-      case 'close': {
-        parentPort.postMessage('done');
-        break;
-      }
-
-      default:
-        const exhaustiveCheck: never = msg;
-        throw new Error(`Unhandled case: ${exhaustiveCheck}`);
-    }
-  });
 }
