@@ -12,6 +12,7 @@
   },
   "scripts": {
     "dev": "nodemon",
+    "build:dev": "ember build",
     "build": "ember build --environment=production",
     "watch": "ember electron:build --watch",
     "lint": "npm-run-all --aggregate-output --continue-on-error --parallel 'lint:!(fix)'",
