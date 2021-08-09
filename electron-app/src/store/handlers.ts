@@ -35,8 +35,16 @@ export const removeSyncRule = (rule: SyncRule) => {
   if (!rules) {
     return [];
   }
+
+  // Remove rule
   rules = rules.filter((item) => item.id !== rule.id);
   store.set('syncRules', rules);
+
+  // Remove it's state
+  let states = store.get('syncState') || [];
+  states = states.filter((item) => item.ruleId !== rule.id);
+  store.set('syncState', states);
+
   return rules;
 };
 
