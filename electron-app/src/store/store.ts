@@ -1,5 +1,6 @@
 import * as Store from 'electron-store';
 import { Source, SyncRule, SyncState } from '../../../types/mapgeo-sync-config';
+import logger from '../logger';
 
 export type SyncStoreType = {
   configUpdate?: Date;
@@ -23,4 +24,4 @@ export type SyncStore = Store<SyncStoreType>;
 
 export const store = new Store<SyncStoreType>();
 
-console.log(`Store path: ${store.path}`);
+logger.log(`Store path: ${store.path}`);

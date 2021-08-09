@@ -47,26 +47,29 @@ export default class MapgeoService {
   host: string = '';
 
   static async fromUrl(host: string) {
+    const url = new URL(host);
+    const origin = url.origin;
+
     // cached instance
-    if (host && service?.host === host) {
+    if (origin && service?.host === origin) {
       return service;
     }
 
     try {
-      const result = await fetch(`${host}/api/config/current`, {
+      const result = await fetch(`${origin}/api/config/current`, {
         agent: httpsAgent,
       });
       const data = await result.json();
       const config = result.status < 400 && data;
 
       if (config) {
-        const instance = new MapgeoService(host, config);
+        const instance = new MapgeoService(origin, config);
         service = instance;
         return instance;
       }
       throw new Error('URL is either incorrect or service is down');
     } catch (e) {
-      logScope.log('ping error: ', e);
+      logScope.log('setting up mapgeo service error: ', e);
       throw e;
     }
   }
