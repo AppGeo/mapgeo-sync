@@ -22,6 +22,7 @@ export default class Login extends Controller {
       this.router.transitionTo('index');
     } catch (e) {
       console.log(e);
+      this.notifications.add(`Login failed. ${e}`, { appearance: 'warning' });
     }
   }
 }

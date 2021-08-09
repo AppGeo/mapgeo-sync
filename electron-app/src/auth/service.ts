@@ -58,11 +58,9 @@ export const createService = ({
             });
           },
           authenticationFailed(context, other) {
-            debugger;
             send('authenticated', {
               isAuthenticated: false,
             });
-            store.delete('mapgeo.login' as any);
           },
           needsSetup() {
             send('authenticated', {

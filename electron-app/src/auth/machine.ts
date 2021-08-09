@@ -9,6 +9,7 @@ export interface AuthContext {
     email: string;
     password: string;
   };
+  loginError?: any;
   setupError?: any;
 }
 
@@ -103,7 +104,18 @@ export const authMachine = createMachine<AuthContext, AuthEvent, AuthState>({
                 onDone: '#auth.authenticated',
                 onError: {
                   target: '#auth.unauthenticated.idle',
-                  actions: 'authenticationFailed',
+                  actions: [
+                    'authenticationFailed',
+                    assign({
+                      loginError: (context, event) => {
+                        return event.data.message;
+                      },
+                      login: (context, event) => {
+                        store.delete('mapgeo.login' as any);
+                        return undefined;
+                      },
+                    }),
+                  ],
                 },
               },
             },

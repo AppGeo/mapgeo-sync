@@ -180,7 +180,15 @@ ipcMain.handle('login', async (event, data: LoginData) => {
   }
 
   authService.send({ type: 'LOGIN', payload: data } as any);
-  await waitForState(authService, ['authenticated']);
+
+  try {
+    await waitForState(authService, ['authenticated']);
+  } catch (e) {
+    if (authService.state.context.loginError) {
+      throw new Error(authService.state.context.loginError);
+    }
+    throw new Error('Encountered an issue logging in.');
+  }
   return true;
 });
 
