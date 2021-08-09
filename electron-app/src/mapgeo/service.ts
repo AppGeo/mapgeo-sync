@@ -1,6 +1,7 @@
 import fetch, { RequestInit } from 'node-fetch';
 import * as https from 'https';
 import logger from '../logger';
+import { URL } from 'url';
 
 let service: MapgeoService;
 const logScope = logger.scope('mapgeo service');
