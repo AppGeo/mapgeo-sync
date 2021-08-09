@@ -12,7 +12,12 @@
   </div>
 
   {{#if @onDelete}}
-    <Button @intent='warning' @appearance='minimal' @size='xs'>
+    <Button
+      @intent='warning'
+      @appearance='minimal'
+      @size='xs'
+      {{on 'click' @onDelete}}
+    >
       Delete
     </Button>
   {{/if}}

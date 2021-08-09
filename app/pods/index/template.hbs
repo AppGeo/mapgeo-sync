@@ -61,5 +61,6 @@
   @isOpen={{this.isSyncSourceOpen}}
   @onClose={{set this.isSyncSourceOpen false}}
   @onSubmit={{pipe (set this.sources) (set this.isSyncSourceOpen false)}}
+  @onDelete={{set this.sources}}
   @sources={{this.sources}}
 />

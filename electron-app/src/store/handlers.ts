@@ -14,6 +14,7 @@ export function register(ipcMain: IpcMain) {
   add('findSyncState', findSyncState);
   add('findSources', findSources);
   add('addSource', addSource);
+  add('removeSource', removeSource);
 }
 
 export const findSyncRules = () => {
@@ -63,5 +64,18 @@ export const addSource = (source: Source) => {
   }
   sources.push(source);
   store.set('sources', sources);
+  return sources;
+};
+
+export const removeSource = (source: Source) => {
+  let sources = store.get('sources');
+  if (!sources) {
+    return [];
+  }
+
+  // Remove source
+  sources = sources.filter((item) => item.id !== source.id);
+  store.set('sources', sources);
+
   return sources;
 };

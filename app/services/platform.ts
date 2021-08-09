@@ -120,6 +120,12 @@ export default class Platform extends Service {
   }
 
   @action
+  async removeSource(source: Source): Promise<Source[]> {
+    const sources = await ipcRenderer.invoke('store/removeSource', source);
+    return sources;
+  }
+
+  @action
   async selectSourceFolder(): Promise<string> {
     const folder = await ipcRenderer.invoke('selectSourceFolder');
     return folder;

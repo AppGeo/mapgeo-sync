@@ -11,6 +11,7 @@ interface SourceCreateModalArgs {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (sources: Source[]) => void;
+  onDelete: (sources: Source[]) => void;
   sources: Source[];
 }
 
@@ -30,6 +31,13 @@ export default class SourceCreateModal extends Component<SourceCreateModalArgs> 
 
     this.isAddSourceVisible = false;
     this.args.onSubmit(sources);
+  }
+
+  @action
+  async removeSource(source: Source) {
+    const sources = await this.platform.removeSource(source);
+
+    this.args.onDelete(sources);
   }
 
   @action
