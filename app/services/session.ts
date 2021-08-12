@@ -12,7 +12,7 @@ export default class Session extends Service {
   @service declare notifications: NotificationsService;
   @service declare router: RouterService;
 
-  @tracked isAuthenticated = false;
+  @tracked isAuthenticated?: boolean;
 
   @action
   setup(): void {
