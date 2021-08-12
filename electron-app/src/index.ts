@@ -155,6 +155,26 @@ ipcMain.handle('selectSourceFile', async (event, sourceId: string) => {
   return [];
 });
 
+ipcMain.handle('loadClient', async (event) => {
+  authService = createAuthService({
+    send: (event: string, payload: unknown) =>
+      mainWindow?.webContents?.send(event, payload),
+    getMapgeoService: () => mapgeoService,
+    setMapgeoService: (value) => (mapgeoService = value),
+  });
+
+  logger.log('starting auth service');
+  logger.log(authService.start().state.value);
+
+  return new Promise((resolve) => {
+    mainWindow.webContents.once('did-finish-load', () => {
+      authService.send({ type: 'LOAD' });
+
+      resolve(true);
+    });
+  });
+});
+
 ipcMain.handle('startSyncRuleSchedule', async (event, rule: SyncRule) => {
   return scheduler.scheduleRule(rule);
 });
@@ -165,13 +185,6 @@ ipcMain.handle('cancelSyncRuleSchedule', async (event, rule: SyncRule) => {
 
 ipcMain.handle('getStoreValue', (event, key: string) => {
   return store.get(key);
-});
-
-ipcMain.handle('restoreAuth', async (event) => {
-  if (authService.state.matches('authenticated')) {
-    return true;
-  }
-  return false;
 });
 
 ipcMain.handle('login', async (event, data: LoginData) => {
@@ -250,14 +263,6 @@ function createBrowserWindow() {
 
   // Load the ember application
   mainWindow.loadURL(emberAppURL);
-  authService = createAuthService({
-    send: (event: string, payload: unknown) =>
-      mainWindow?.webContents?.send(event, payload),
-    getMapgeoService: () => mapgeoService,
-    setMapgeoService: (value) => (mapgeoService = value),
-  });
-  logger.log('starting auth service');
-  logger.log(authService.start().state.value);
 
   // Ember app has loaded, send an event
   mainWindow.webContents.on('did-finish-load', async () => {

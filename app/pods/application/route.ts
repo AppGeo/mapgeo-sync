@@ -11,7 +11,11 @@ export default class Application extends Route {
   @service('platform') declare platform: Platform;
 
   async beforeModel() {
-    await this.session.restore();
+    this.session.setup();
+  }
+
+  async model() {
+    await this.platform.loadClient();
   }
 
   afterModel() {

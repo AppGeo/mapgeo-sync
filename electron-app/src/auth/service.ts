@@ -2,6 +2,9 @@ import { interpret } from 'xstate';
 import MapgeoService from '../mapgeo/service';
 import { store } from '../store/store';
 import { authMachine } from './machine';
+import logger from '../logger';
+
+const log = logger.scope('auth service');
 
 interface ServiceOptions {
   send: (event: string, payload?: unknown) => void;
@@ -29,14 +32,9 @@ export const createService = ({
             );
           },
           needsMapgeoService(context) {
-            return (
-              getMapgeoService() === undefined &&
-              (Boolean(store.get<string>('mapgeo.host')) ||
-                Boolean(context.host))
-            );
+            return getMapgeoService() === undefined && Boolean(context.host);
           },
           hasLogin(context) {
-            // const mapgeo = store.get('mapgeo');
             return Boolean(context?.login);
           },
         },
@@ -95,7 +93,7 @@ export const createService = ({
           },
         },
       })
-  ).onTransition((state) => console.log(state.value));
+  ).onTransition((state) => log.log(state.value));
 
   return authService;
 };

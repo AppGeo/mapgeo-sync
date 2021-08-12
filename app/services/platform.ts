@@ -1,18 +1,24 @@
 import { action } from '@ember/object';
-import Service from '@ember/service';
+import Service, { inject as service } from '@ember/service';
 import { Source, SyncRule, SyncState } from 'mapgeo-sync-config';
 import type { IpcRendererEvent } from 'electron';
 import { tracked } from '@glimmer/tracking';
+import { NotificationsService } from '@frontile/notifications';
+import RouterService from '@ember/routing/router-service';
 const { ipcRenderer } = requireNode('electron/renderer');
 
 export default class Platform extends Service {
+  @service declare notifications: NotificationsService;
+  @service declare router: RouterService;
+
   // once(name: string, cb: (...args: any[]) => void) {
   //   ipcRenderer.once(name, cb);
   // }
   @tracked syncState: SyncState[] = [];
 
-  constructor() {
-    super();
+  // @ts-ignore
+  constructor(...params) {
+    super(...params);
     ipcRenderer.on(
       'syncStateUpdated',
       (_event: IpcRendererEvent, results: SyncState[]) => {
@@ -21,6 +27,29 @@ export default class Platform extends Service {
     );
 
     this.findSyncState().then((results) => (this.syncState = results));
+  }
+
+  @action
+  async loadClient() {
+    ipcRenderer.on(
+      'redirect',
+      (
+        _event: IpcRendererEvent,
+        { route, error }: { route: string; error?: any }
+      ) => {
+        if (error) {
+          this.notifications.add(error, { appearance: 'error' });
+          return;
+        }
+        console.log(`redirecting to '${route}'..`);
+
+        this.router.transitionTo(route);
+      }
+    );
+
+    const isOk = await ipcRenderer.invoke('loadClient');
+
+    return isOk as boolean;
   }
 
   @action
