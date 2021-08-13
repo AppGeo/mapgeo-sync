@@ -112,6 +112,10 @@ app.setLoginItemSettings({
 registerMapgeoHandlers(ipcMain);
 registerStoreHandlers(ipcMain);
 
+if (!queryWorker) {
+  initWorkers();
+}
+
 function updateSyncState(rule: SyncRule, data: Omit<Partial<SyncState>, 'id'>) {
   const all = store.get('syncState') || [];
   let state = all.find((item) => item.ruleId === rule.id);
@@ -208,13 +212,13 @@ ipcMain.handle('login', async (event, data: LoginData) => {
   return true;
 });
 
-async function initWorkers(config?: SyncConfig) {
+async function initWorkers() {
   if (queryWorker) {
     await queryWorker.terminate();
   }
 
   queryWorker = new Worker(path.join(__dirname, 'workers', 'query-action.js'), {
-    workerData: { config, mapgeo: store.get('mapgeo') },
+    workerData: { mapgeo: store.get('mapgeo') },
   });
 }
 
@@ -332,10 +336,6 @@ function createBrowserWindow() {
 
         logger.log('starting auth service');
         logger.log(authService.start().state.value);
-      }
-
-      if (!queryWorker) {
-        initWorkers();
       }
 
       ipcMain.on('runRule', async (event, rule: SyncRule, runId: string) => {
@@ -474,8 +474,8 @@ app.on('ready', async () => {
         {
           label: 'Open Logs',
           click: () => {
-            console.log(getLogPath());
-            shell.openPath(getLogPath());
+            // Copied path from https://github.com/megahertz/electron-log/issues/270#issuecomment-898495244
+            shell.openPath(logger.transports.file.getFile().path);
           },
         },
         {
@@ -587,26 +587,5 @@ function updateRuleStateAfterRun(
       ...otherState,
       logs: logs.slice(0, 5),
     });
-  }
-}
-
-// since there is no way to get the path electron-log uses programmatically
-function getLogPath() {
-  const home = os.homedir();
-  const name = app.getName();
-  const log = 'main.log';
-
-  switch (process.platform) {
-    case 'darwin': {
-      return path.join(home, 'Library', 'Logs', name, log);
-    }
-
-    case 'win32': {
-      return path.join(home, 'AppData', 'Roaming', name, 'logs', log);
-    }
-
-    default: {
-      return path.join(home, '.config', name, 'logs', log);
-    }
   }
 }

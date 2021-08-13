@@ -9,10 +9,14 @@ export const primaryTypes: [PrimaryType, PrimaryType, PrimaryType] = [
 ];
 
 export const getAllMappings = (dataset: Dataset) => {
-  return [
-    dataset.dataMapping,
-    dataset.geometryMapping,
-    dataset.intersectionMapping,
-    ...dataset.tableMappings,
-  ];
+  if (dataset.dataMapping.multiTable) {
+    return [
+      dataset.dataMapping,
+      dataset.geometryMapping,
+      dataset.intersectionMapping,
+      ...dataset.tableMappings,
+    ];
+  }
+
+  return [dataset.dataMapping, ...dataset.tableMappings];
 };
