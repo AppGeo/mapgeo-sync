@@ -6,6 +6,8 @@ import {
   dialog,
   ipcMain,
   Menu,
+  MenuItem,
+  shell,
   Tray,
 } from 'electron';
 import installExtension, { EMBER_INSPECTOR } from 'electron-devtools-installer';
@@ -41,6 +43,7 @@ import {
 import { handleSquirrelEvent } from './squirrel-startup';
 import wrapRule from './utils/wrap-rule';
 import { v4 } from 'uuid';
+import { MenuItemConstructorOptions } from 'electron/main';
 
 const pkg = require('../package.json');
 
@@ -417,6 +420,7 @@ crashReporter.start({
 });
 
 logger.log('crash path', app.getPath('crashDumps'));
+logger.log('log path', app.getPath('userData'));
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -438,7 +442,7 @@ app.on('ready', async () => {
   }
 
   tray = new Tray(path.join(__dirname, '..', 'resources/icon-16.png'));
-  const contextMenu = Menu.buildFromTemplate([
+  const menuItems: MenuItemConstructorOptions[] = [
     {
       label: 'Preferences',
       type: 'normal',
@@ -454,6 +458,38 @@ app.on('ready', async () => {
     {
       type: 'separator',
     },
+  ];
+
+  if (isDev) {
+    menuItems.push({
+      type: 'submenu',
+      label: 'Debugging',
+      submenu: [
+        {
+          label: 'Open Config',
+          click: () => {
+            shell.openPath(store.path);
+          },
+        },
+        {
+          label: 'Open Logs',
+          click: () => {
+            console.log(getLogPath());
+            shell.openPath(getLogPath());
+          },
+        },
+        {
+          label: 'Open Crash Report',
+          click: () => {
+            shell.openPath(app.getPath('crashDumps'));
+          },
+        },
+      ],
+    });
+  }
+
+  const contextMenu = Menu.buildFromTemplate([
+    ...menuItems,
     {
       label: 'Quit',
       type: 'normal',
@@ -551,5 +587,26 @@ function updateRuleStateAfterRun(
       ...otherState,
       logs: logs.slice(0, 5),
     });
+  }
+}
+
+// since there is no way to get the path electron-log uses programmatically
+function getLogPath() {
+  const home = os.homedir();
+  const name = app.getName();
+  const log = 'main.log';
+
+  switch (process.platform) {
+    case 'darwin': {
+      return path.join(home, 'Library', 'Logs', name, log);
+    }
+
+    case 'win32': {
+      return path.join(home, 'AppData', 'Roaming', name, 'logs', log);
+    }
+
+    default: {
+      return path.join(home, '.config', name, 'logs', log);
+    }
   }
 }
