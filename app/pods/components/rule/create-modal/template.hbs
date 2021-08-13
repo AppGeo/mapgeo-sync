@@ -250,7 +250,11 @@
     </m.Body>
 
     <m.Footer class='flex justify-between'>
-      <Button @appearance='minimal' class='mr-4' {{on 'click' @onClose}}>
+      <Button
+        @appearance='minimal'
+        class='mr-4'
+        {{on 'click' this.confirmCloseIfDirty}}
+      >
         Cancel
       </Button>
       <Button @type='submit' @intent='primary'>
