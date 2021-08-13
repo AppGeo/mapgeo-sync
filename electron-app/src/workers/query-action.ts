@@ -16,6 +16,8 @@ import { SyncStoreType } from '../store/store';
 import { typeConversion } from '../utils/table-mappings';
 import logger from '../logger';
 
+const logScope = logger.scope('worker/query-action');
+
 interface WorkerData {
   mapgeo: SyncStoreType['mapgeo'];
   config: SyncConfig;
@@ -164,6 +166,7 @@ async function handleRule(
     notificationEmail: ruleBundle.rule.sendNotificationEmail
       ? mapgeo.login?.email
       : undefined,
+    intersect: ruleBundle.rule.updateIntersection,
     uploads: [
       {
         key,
@@ -173,13 +176,13 @@ async function handleRule(
       },
     ],
   });
-  console.log('notify uploader res: ', res);
+  logScope.log('notify uploader res: ', res);
   // Poll for upload-status.json file to know if error or success
-  const status = await s3.waitForFile(res.key);
-  console.log('upload status res: ', status.content);
+  const status = (await s3.waitForFile(res.key)) as { content: UploadStatus };
+  logScope.log('upload status res: ', status.content);
 
   return {
-    status: status.content as UploadStatus,
+    status: status.content,
     rows: result,
     ...ruleBundle,
   };

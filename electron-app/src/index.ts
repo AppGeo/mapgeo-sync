@@ -44,6 +44,7 @@ import { handleSquirrelEvent } from './squirrel-startup';
 import wrapRule from './utils/wrap-rule';
 import { v4 } from 'uuid';
 import { MenuItemConstructorOptions } from 'electron/main';
+import logState from './utils/log-state';
 
 const pkg = require('../package.json');
 
@@ -116,25 +117,64 @@ if (!queryWorker) {
   initWorkers();
 }
 
-function updateSyncState(rule: SyncRule, data: Omit<Partial<SyncState>, 'id'>) {
-  const all = store.get('syncState') || [];
-  let state = all.find((item) => item.ruleId === rule.id);
+if (!scheduler) {
+  const logScope = logger.scope('scheduler');
 
-  if (!state) {
-    state = {
-      ruleId: rule.id,
-      ...data,
-    };
+  logScope.info('Setting up scheduler');
 
-    all.push(state);
-  } else {
-    Object.assign(state, { ...data });
-  }
+  scheduler = new Scheduler({
+    store,
+    updateSyncState,
+    run: async (rule, nextScheduledRun) => {
+      const runId = v4();
+      const startedAt = new Date();
+      const ruleBundle = wrapRule(rule);
 
-  store.set('syncState', all);
-  mainWindow?.webContents.send('syncStateUpdated', all);
-  return state;
+      updateSyncState(rule, {
+        running: true,
+      });
+
+      queryWorker.postMessage({
+        event: 'handle-rule',
+        data: ruleBundle,
+      });
+
+      const result = await new Promise(
+        (resolve: (msg: QueryActionResponse) => void, reject) => {
+          const handleMessage = (message: QueryActionResponse) => {
+            if (message.rule.id === rule.id) {
+              queryWorker.off('message', handleMessage);
+              logScope.log('handle-rule result: ' + message);
+              resolve(message);
+            }
+          };
+
+          queryWorker.on('message', handleMessage);
+        }
+      );
+
+      updateRuleStateAfterRun(rule, result, runId, {
+        startedAt,
+        wasScheduled: true,
+        otherState: { nextScheduledRun },
+      });
+
+      return result;
+    },
+  });
 }
+
+authService = createAuthService({
+  send: (event: string, payload: unknown) =>
+    mainWindow?.webContents?.send(event, payload),
+  getMapgeoService: () => mapgeoService,
+  setMapgeoService: (value) => (mapgeoService = value),
+});
+
+logger.log('starting auth service');
+
+authService.start();
+logger.log(logState(authService));
 
 ipcMain.handle('selectSourceFolder', async (event) => {
   const result = await dialog.showOpenDialog(mainWindow, {
@@ -163,19 +203,10 @@ ipcMain.handle('selectSourceFile', async (event, sourceId: string) => {
 });
 
 ipcMain.handle('loadClient', async (event) => {
-  authService = createAuthService({
-    send: (event: string, payload: unknown) =>
-      mainWindow?.webContents?.send(event, payload),
-    getMapgeoService: () => mapgeoService,
-    setMapgeoService: (value) => (mapgeoService = value),
-  });
-
-  logger.log('starting auth service');
-  logger.log(authService.start().state.value);
-
   return new Promise((resolve) => {
     mainWindow.webContents.once('did-finish-load', () => {
       authService.send({ type: 'LOAD' });
+      logger.log('after load state: ', logState(authService));
 
       resolve(true);
     });
@@ -211,16 +242,6 @@ ipcMain.handle('login', async (event, data: LoginData) => {
   }
   return true;
 });
-
-async function initWorkers() {
-  if (queryWorker) {
-    await queryWorker.terminate();
-  }
-
-  queryWorker = new Worker(path.join(__dirname, 'workers', 'query-action.js'), {
-    workerData: { mapgeo: store.get('mapgeo') },
-  });
-}
 
 ipcMain.handle('checkMapgeo', async (event, data: SetupData) => {
   authService.send({ type: 'SETUP', payload: data } as any);
@@ -273,70 +294,10 @@ function createBrowserWindow() {
 
   // Ember app has loaded, send an event
   mainWindow.webContents.on('did-finish-load', async () => {
+    authService.send({ type: 'LOAD' });
+
     try {
       logger.log('did-finish-load');
-
-      if (!scheduler) {
-        const logScope = logger.scope('scheduler');
-
-        logScope.info('Setting up scheduler');
-
-        scheduler = new Scheduler({
-          store,
-          updateSyncState,
-          run: async (rule, nextScheduledRun) => {
-            const runId = v4();
-            const startedAt = new Date();
-            const ruleBundle = wrapRule(rule);
-
-            updateSyncState(rule, {
-              running: true,
-            });
-
-            queryWorker.postMessage({
-              event: 'handle-rule',
-              data: ruleBundle,
-            });
-
-            const result = await new Promise(
-              (resolve: (msg: QueryActionResponse) => void, reject) => {
-                const handleMessage = (message: QueryActionResponse) => {
-                  if (message.rule.id === rule.id) {
-                    queryWorker.off('message', handleMessage);
-                    logScope.log('handle-rule result: ' + message);
-                    resolve(message);
-                  }
-                };
-
-                queryWorker.on('message', handleMessage);
-              }
-            );
-
-            updateRuleStateAfterRun(rule, result, runId, {
-              startedAt,
-              wasScheduled: true,
-              otherState: { nextScheduledRun },
-            });
-
-            return result;
-          },
-        });
-      }
-
-      // create/start the service
-      if (!authService) {
-        logger.log('Setting up auth service');
-
-        authService = createAuthService({
-          send: (event: string, payload: unknown) =>
-            mainWindow.webContents.send(event, payload),
-          getMapgeoService: () => mapgeoService,
-          setMapgeoService: (value) => (mapgeoService = value),
-        });
-
-        logger.log('starting auth service');
-        logger.log(authService.start().state.value);
-      }
 
       ipcMain.on('runRule', async (event, rule: SyncRule, runId: string) => {
         const ruleBundle = wrapRule(rule);
@@ -529,6 +490,36 @@ process.on('uncaughtException', (err) => {
   logger.log(`Exception: ${err}`);
   logger.log(err.stack);
 });
+
+async function initWorkers() {
+  if (queryWorker) {
+    await queryWorker.terminate();
+  }
+
+  queryWorker = new Worker(path.join(__dirname, 'workers', 'query-action.js'), {
+    workerData: { mapgeo: store.get('mapgeo') },
+  });
+}
+
+function updateSyncState(rule: SyncRule, data: Omit<Partial<SyncState>, 'id'>) {
+  const all = store.get('syncState') || [];
+  let state = all.find((item) => item.ruleId === rule.id);
+
+  if (!state) {
+    state = {
+      ruleId: rule.id,
+      ...data,
+    };
+
+    all.push(state);
+  } else {
+    Object.assign(state, { ...data });
+  }
+
+  store.set('syncState', all);
+  mainWindow?.webContents.send('syncStateUpdated', all);
+  return state;
+}
 
 function updateRuleStateAfterRun(
   rule: SyncRule,

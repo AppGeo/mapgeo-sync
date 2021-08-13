@@ -139,10 +139,12 @@ export default class MapgeoService {
     uploads,
     updateDate,
     notificationEmail,
+    intersect,
   }: {
     datasetId: string;
     uploads: UploadedMetadata[];
     notificationEmail?: string;
+    intersect?: boolean;
     updateDate?: boolean;
   }) {
     try {
@@ -154,6 +156,7 @@ export default class MapgeoService {
             earlyFinish: true,
             updateDate,
             email: notificationEmail,
+            intersect,
             uploads,
           }),
         }

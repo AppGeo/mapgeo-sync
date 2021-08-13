@@ -138,6 +138,19 @@
               type='checkbox'
             />
 
+            {{#if
+              (and
+                (eq changeset.mapping.pk 'data') changeset.mapping.multiTable
+              )
+            }}
+              <Form.Checkbox
+                @label='Update Intersection Table'
+                @fieldName='updateIntersection'
+                @containerClass='mt-4'
+                type='checkbox'
+              />
+            {{/if}}
+
             <div class='flex space-x-2'>
               <Button
                 @intent='primary'
@@ -257,6 +270,7 @@
       >
         Cancel
       </Button>
+
       <Button @type='submit' @intent='primary'>
         Create Rule
       </Button>

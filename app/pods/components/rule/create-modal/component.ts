@@ -44,6 +44,7 @@ interface RuleInput {
     frequency: ScheduleFrequency;
     hour: number;
   };
+  updateIntersection?: boolean;
   sendNotificationEmail: boolean;
 }
 
@@ -196,6 +197,7 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
       sourceId: ruleInput.source.id,
       schedule: ruleInput.schedule,
       sendNotificationEmail: ruleInput.sendNotificationEmail,
+      updateIntersection: ruleInput.updateIntersection,
       sourceConfig,
       optoutRule,
     });

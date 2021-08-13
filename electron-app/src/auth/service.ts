@@ -3,6 +3,7 @@ import MapgeoService from '../mapgeo/service';
 import { store } from '../store/store';
 import { authMachine } from './machine';
 import logger from '../logger';
+import logState from '../utils/log-state';
 
 const log = logger.scope('auth service');
 
@@ -93,7 +94,9 @@ export const createService = ({
           },
         },
       })
-  ).onTransition((state) => log.log(state.value));
+  ).onTransition((state) =>
+    log.log('auth transition: ', logState({ state } as any))
+  );
 
   return authService;
 };

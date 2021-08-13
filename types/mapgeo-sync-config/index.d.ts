@@ -83,6 +83,7 @@ export interface SyncRule {
   sourceId: string;
   mappingId: string;
   sendNotificationEmail?: boolean;
+  updateIntersection?: boolean;
   schedule?: {
     frequency: ScheduleFrequency;
     hour: number;
