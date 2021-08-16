@@ -112,10 +112,7 @@ app.setLoginItemSettings({
 
 registerMapgeoHandlers(ipcMain);
 registerStoreHandlers(ipcMain);
-
-if (!queryWorker) {
-  initWorkers();
-}
+initWorkers();
 
 if (!scheduler) {
   const logScope = logger.scope('scheduler');
@@ -136,13 +133,16 @@ if (!scheduler) {
 
       queryWorker.postMessage({
         event: 'handle-rule',
-        data: ruleBundle,
+        data: {
+          runId,
+          ruleBundle,
+        },
       });
 
       const result = await new Promise(
         (resolve: (msg: QueryActionResponse) => void, reject) => {
           const handleMessage = (message: QueryActionResponse) => {
-            if (message.rule.id === rule.id) {
+            if (message.rule.id === rule.id && message.runId === runId) {
               queryWorker.off('message', handleMessage);
               logScope.log('handle-rule result: ' + message);
               resolve(message);
@@ -309,11 +309,11 @@ function createBrowserWindow() {
 
         queryWorker.postMessage({
           event: 'handle-rule',
-          data: ruleBundle,
+          data: { ruleBundle, runId },
         });
 
         const handleMessage = (message: QueryActionResponse) => {
-          if (message.rule.id === rule.id) {
+          if (message.rule.id === rule.id && message.runId === runId) {
             queryWorker.off('message', handleMessage);
             // logger.log(message);
             event.reply('action-result', message);
@@ -492,10 +492,6 @@ process.on('uncaughtException', (err) => {
 });
 
 async function initWorkers() {
-  if (queryWorker) {
-    await queryWorker.terminate();
-  }
-
   queryWorker = new Worker(path.join(__dirname, 'workers', 'query-action.js'), {
     workerData: { mapgeo: store.get('mapgeo') },
   });

@@ -25,17 +25,22 @@ interface WorkerData {
 
 type HandleRuleMessage = {
   event: 'handle-rule';
-  data: RuleBundle;
+  data: {
+    runId: string;
+    ruleBundle: RuleBundle;
+  };
 };
 type CloseMessage = { event: 'close' };
 export type QueryActionMessage = HandleRuleMessage | CloseMessage;
 export type FinishedResponse = {
+  runId: string;
   rule: SyncRule;
   source: Source;
   status: UploadStatus;
   rows: unknown[] | FeatureCollection;
 };
 export type ErrorResponse = {
+  runId: string;
   rule: SyncRule;
   source: Source;
   errors: {
@@ -77,12 +82,17 @@ if (parentPort) {
       case 'handle-rule': {
         try {
           const mapgeoService = await setupMapGeo();
-          const data = await handleRule(mapgeoService, msg.data);
+          const data = await handleRule(
+            mapgeoService,
+            msg.data.ruleBundle,
+            msg.data.runId
+          );
+          const ruleBundle = msg.data.ruleBundle;
 
-          if (msg.data.rule.optoutRule) {
+          if (ruleBundle.rule.optoutRule) {
             const optoutBundle = {
-              rule: msg.data.rule.optoutRule,
-              source: msg.data.source,
+              rule: ruleBundle.rule.optoutRule,
+              source: ruleBundle.source,
             };
             const optoutData = await loadData(optoutBundle);
             const optoutResult = await handleOptoutRule(
@@ -95,11 +105,15 @@ if (parentPort) {
             data.status.ok = optoutResult.ok;
           }
 
-          respond(data);
+          respond({
+            runId: msg.data.runId,
+            ...data,
+          });
         } catch (error) {
           logger.scope('query-action').warn(error);
           respond({
-            ...msg.data,
+            runId: msg.data.runId,
+            ...msg.data.ruleBundle,
             errors: [
               {
                 message: error.toString(),
@@ -137,7 +151,8 @@ async function setupMapGeo() {
 
 async function handleRule(
   mapgeoService: MapgeoService,
-  ruleBundle: RuleBundle
+  ruleBundle: RuleBundle,
+  runId: string
 ) {
   const url = new URL(mapgeo.host);
   const subdomain = url.hostname.split('.')[0];
@@ -149,7 +164,7 @@ async function handleRule(
   // console.log('action result: ', result);
   const s3 = new S3Service(tokens);
   const folder = `ilya-test-${subdomain}`;
-  const ruleFileName = `rule_${ruleBundle.rule.id}.json`;
+  const ruleFileName = `rule_${ruleBundle.rule.id}__${runId}.json`;
   const file = !Array.isArray(result)
     ? ruleFileName.replace('.json', '.geojson')
     : ruleFileName;
@@ -158,6 +173,7 @@ async function handleRule(
     fileName: file,
     data: JSON.stringify(result, null, 2),
   });
+
   // Lets MapGeo know, which validates and uploads to carto
   // An upload-status.json is uploaded to s3 with results of process, failure or success
   const res = await mapgeoService.notifyUploader({
