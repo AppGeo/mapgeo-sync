@@ -85,6 +85,7 @@ yarn build:dev
 
 # Build Electron Code
 cd ./electron-app
+# Update version in package.json
 yarn build:ts
 
 # Publish
