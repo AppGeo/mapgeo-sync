@@ -80,6 +80,14 @@ Are located here:
 To publish to Github releases, you must first get a Github Token.
 
 ```sh
+# Build Client Code
+yarn build:dev
+
+# Build Electron Code
+cd ./electron-app
+yarn build:ts
+
+# Publish
 # MacOS
 GITHUB_TOKEN=<token> yarn publish:macos
 # Windows, running this macos should work, but currently doesn't due to a bug in the squirrel maker
