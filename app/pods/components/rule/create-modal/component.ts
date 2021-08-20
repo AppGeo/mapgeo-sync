@@ -212,6 +212,12 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
     return file;
   }
 
+  @action
+  async selectFolder(sourceId: string) {
+    const file = await this.platform.selectSourceFolder(sourceId);
+    return file;
+  }
+
   @task
   async findDataset(datasetId: string) {
     const dataset = await this.platform.findDataset(datasetId);

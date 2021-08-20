@@ -155,8 +155,14 @@ export default class Platform extends Service {
   }
 
   @action
-  async selectSourceFolder(): Promise<string> {
-    const folder = await ipcRenderer.invoke('selectSourceFolder');
+  async selectSourceBaseFolder(): Promise<string> {
+    const folder = await ipcRenderer.invoke('selectSourceBaseFolder');
+    return folder;
+  }
+
+  @action
+  async selectSourceFolder(sourceId: string): Promise<string> {
+    const folder = await ipcRenderer.invoke('selectSourceFolder', sourceId);
     return folder;
   }
 

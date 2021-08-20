@@ -42,7 +42,7 @@ export default class SourceCreateModal extends Component<SourceCreateModalArgs> 
 
   @action
   async selectFolder() {
-    const folder = await this.platform.selectSourceFolder();
+    const folder = await this.platform.selectSourceBaseFolder();
     return folder;
   }
 }

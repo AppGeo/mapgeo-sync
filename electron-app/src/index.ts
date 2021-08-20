@@ -176,7 +176,7 @@ logger.log('starting auth service');
 authService.start();
 logger.log(logState(authService));
 
-ipcMain.handle('selectSourceFolder', async (event) => {
+ipcMain.handle('selectSourceBaseFolder', async (event) => {
   const result = await dialog.showOpenDialog(mainWindow, {
     defaultPath: os.homedir(),
     properties: ['openDirectory'],
@@ -192,8 +192,24 @@ ipcMain.handle('selectSourceFile', async (event, sourceId: string) => {
   if (source.sourceType === 'file') {
     const result = await dialog.showOpenDialog(mainWindow, {
       defaultPath: source.folder,
-      properties: ['openFile', 'openDirectory'],
-      filters: [{ name: 'Default', extensions: ['json', 'geojson', 'zip'] }],
+      properties: ['openFile'],
+      filters: [{ name: 'Default', extensions: ['json', 'geojson'] }],
+    });
+
+    return result.filePaths[0];
+  }
+
+  return [];
+});
+
+ipcMain.handle('selectSourceFolder', async (event, sourceId: string) => {
+  const sources = store.get('sources');
+  const source = sources.find((source) => source.id === sourceId);
+
+  if (source.sourceType === 'file') {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      defaultPath: source.folder,
+      properties: ['openDirectory'],
     });
 
     return result.filePaths[0];
@@ -205,6 +221,7 @@ ipcMain.handle('selectSourceFile', async (event, sourceId: string) => {
 ipcMain.handle('loadClient', async (event) => {
   return new Promise((resolve) => {
     mainWindow.webContents.once('did-finish-load', () => {
+      authService.start();
       authService.send({ type: 'LOAD' });
       logger.log('after load state: ', logState(authService));
 
@@ -364,7 +381,6 @@ function createBrowserWindow() {
     if (authService) {
       logger.log('window closed, stopping auth service');
       authService.stop();
-      authService = undefined;
     }
   });
 
@@ -421,33 +437,31 @@ app.on('ready', async () => {
     },
   ];
 
-  if (isDev) {
-    menuItems.push({
-      type: 'submenu',
-      label: 'Debugging',
-      submenu: [
-        {
-          label: 'Open Config',
-          click: () => {
-            shell.openPath(store.path);
-          },
+  menuItems.push({
+    type: 'submenu',
+    label: 'Debugging',
+    submenu: [
+      {
+        label: 'Open Config',
+        click: () => {
+          shell.openPath(store.path);
         },
-        {
-          label: 'Open Logs',
-          click: () => {
-            // Copied path from https://github.com/megahertz/electron-log/issues/270#issuecomment-898495244
-            shell.openPath(logger.transports.file.getFile().path);
-          },
+      },
+      {
+        label: 'Open Logs',
+        click: () => {
+          // Copied path from https://github.com/megahertz/electron-log/issues/270#issuecomment-898495244
+          shell.openPath(logger.transports.file.getFile().path);
         },
-        {
-          label: 'Open Crash Report',
-          click: () => {
-            shell.openPath(app.getPath('crashDumps'));
-          },
+      },
+      {
+        label: 'Open Crash Report',
+        click: () => {
+          shell.openPath(app.getPath('crashDumps'));
         },
-      ],
-    });
-  }
+      },
+    ],
+  });
 
   const contextMenu = Menu.buildFromTemplate([
     ...menuItems,

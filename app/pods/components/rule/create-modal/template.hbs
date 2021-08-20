@@ -14,7 +14,6 @@
             @label='Name'
             @hint='Optional; will be auto generated.'
             @fieldName='name'
-            @containerClass='mt-4'
             placeholder='Properties Sync'
           />
 
@@ -82,51 +81,78 @@
                 rows='5'
               />
             {{else if (eq changeset.source.sourceType 'file')}}
-              <div class='flex space-x-2'>
-                <Form.Input
-                  @label='File'
-                  @fieldName='file'
-                  @size='sm'
-                  @containerClass='flex-1'
-                  disabled={{true}}
-                />
+              <Form.Select
+                @label='File Type'
+                @fieldName='fileType'
+                @options={{this.fileTypeKeys}}
+                @placeholder='Select File Type' as |type|
+              >
+                {{this.fileTypeFormat type}}
+              </Form.Select>
 
-                <Button
-                  class='self-end'
-                  @size='sm'
-                  {{on
-                    'click'
-                    (pipe
-                      (fn this.selectFile changeset.source.id)
-                      (set changeset.file)
-                    )
-                  }}
-                >
-                  Browse Files
-                </Button>
-              </div>
+              {{#if changeset.fileType}}
+                {{#if (eq changeset.fileType 'gdb')}}
+                  <div class='flex space-x-2 mt-4'>
+                    <Form.Input
+                      @label='Folder'
+                      @fieldName='file'
+                      @size='sm'
+                      @containerClass='flex-1'
+                      disabled={{true}}
+                    />
 
-              {{#if changeset.file}}
-                <Form.Select
-                  @label='File Type'
-                  @fieldName='fileType'
-                  @options={{this.fileTypeKeys}}
-                  @containerClass='mt-4'
-                  @placeholder='Select File Type' as |type|
-                >
-                  {{this.fileTypeFormat type}}
-                </Form.Select>
+                    <Button
+                      class='self-end'
+                      @size='sm'
+                      {{on
+                        'click'
+                        (pipe
+                          (fn this.selectFolder changeset.source.id)
+                          (set changeset.file)
+                        )
+                      }}
+                    >
+                      Browse Folders
+                    </Button>
+                  </div>
+                {{else}}
+                  <div class='flex space-x-2'>
+                    <Form.Input
+                      @label='File'
+                      @fieldName='file'
+                      @size='sm'
+                      @containerClass='flex-1'
+                      disabled={{true}}
+                    />
+
+                    <Button
+                      class='self-end'
+                      @size='sm'
+                      {{on
+                        'click'
+                        (pipe
+                          (fn this.selectFile changeset.source.id)
+                          (set changeset.file)
+                        )
+                      }}
+                    >
+                      Browse Files
+                    </Button>
+                  </div>
+                {{/if}}
               {{/if}}
 
-              {{#if (eq changeset.fileType 'gdb')}}
-                <Form.Input
-                  @label='Layer Name'
-                  @hint='The layer name inside the File GeoDatabase'
-                  @fieldName='gdbLayerName'
-                  @containerClass='mt-4'
-                  required={{true}}
-                  placeholder='layer1'
-                />
+              {{#if changeset.file}}
+                {{#if (eq changeset.fileType 'gdb')}}
+                  <Form.Input
+                    @label='Layer Name'
+                    @hint='The layer name inside the File GeoDatabase'
+                    @fieldName='gdbLayerName'
+                    @containerClass='mt-4'
+                    required={{true}}
+                    placeholder='layer1'
+                  />
+                {{/if}}
               {{/if}}
             {{/if}}
 
