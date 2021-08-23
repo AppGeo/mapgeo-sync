@@ -88,7 +88,10 @@ export default class MapgeoService {
       this.headers,
       options.headers || {}
     );
-    logScope.log('Headers: ', JSON.stringify(headers));
+
+    if (!('Authorization' in headers)) {
+      logScope.log('Headers Without Authorization: ', headers);
+    }
 
     const response = await fetch(`${baseUrl}${url}`, {
       ...options,
