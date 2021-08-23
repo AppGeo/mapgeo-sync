@@ -37,7 +37,9 @@ export default async function fileAction(ruleBundle: RuleBundle) {
         try {
           file = await fgdb(rule.sourceConfig.filePath);
         } catch (e) {
-          logScope.log(e.stack);
+          logScope.log(
+            `Processing '${rule.sourceConfig.filePath}' stack: ${e.stack}`
+          );
           throw new Error(
             `Processing '${rule.sourceConfig.filePath}' failed due to: ` +
               e.message || e
