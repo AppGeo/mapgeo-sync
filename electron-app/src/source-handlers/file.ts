@@ -4,6 +4,9 @@ import * as path from 'path';
 import type { FeatureCollection } from 'geojson';
 import * as fgdb from 'fgdb';
 import * as csv from 'csvtojson';
+import logger from '../logger';
+
+const logScope = logger.scope('source-handlers/file');
 
 export default async function fileAction(ruleBundle: RuleBundle) {
   const rule = ruleBundle.rule;
@@ -29,7 +32,18 @@ export default async function fileAction(ruleBundle: RuleBundle) {
   switch (rule.sourceConfig.fileType) {
     case 'gdb': {
       if (fs.lstatSync(rule.sourceConfig.filePath).isDirectory()) {
-        const file = await fgdb(rule.sourceConfig.filePath);
+        let file: Record<string, unknown>;
+
+        try {
+          file = await fgdb(rule.sourceConfig.filePath);
+        } catch (e) {
+          logScope.log(e.stack);
+          throw new Error(
+            `Processing '${rule.sourceConfig.filePath}' failed due to: ` +
+              e.message || e
+          );
+        }
+
         const layer = file[rule.sourceConfig.gdbLayerName];
 
         if (!layer) {
