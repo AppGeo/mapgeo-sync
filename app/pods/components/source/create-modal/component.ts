@@ -5,6 +5,7 @@ import { tracked } from '@glimmer/tracking';
 import { v4 } from 'uuid';
 import { DbType, Source } from 'mapgeo-sync-config';
 import Platform from 'mapgeo-sync/services/platform';
+import { NotificationsService } from '@frontile/notifications';
 
 const databaseTypes: DbType[] = ['pg', 'oracle', 'mysql', 'mssql'];
 interface SourceCreateModalArgs {
@@ -17,6 +18,7 @@ interface SourceCreateModalArgs {
 
 export default class SourceCreateModal extends Component<SourceCreateModalArgs> {
   @service('platform') declare platform: Platform;
+  @service('notifications') declare notifications: NotificationsService;
 
   databaseTypes = databaseTypes;
 
@@ -30,13 +32,19 @@ export default class SourceCreateModal extends Component<SourceCreateModalArgs> 
     });
 
     this.isAddSourceVisible = false;
+    this.notifications.add(
+      'Source successfully created, you can now use it to create a rule',
+      { appearance: 'success' }
+    );
     this.args.onSubmit(sources);
   }
 
   @action
   async removeSource(source: Source) {
     const sources = await this.platform.removeSource(source);
-
+    this.notifications.add('Source successfully removed', {
+      appearance: 'success',
+    });
     this.args.onDelete(sources);
   }
 
