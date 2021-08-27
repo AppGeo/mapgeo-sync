@@ -303,10 +303,9 @@ function createBrowserWindow() {
     mainWindow.webContents.openDevTools();
   }
 
-  debugger;
   const hash =
     flatState(authService) === 'unauthenticated.withConfig.validated'
-      ? '#/'
+      ? '#/login'
       : '';
   // Load the ember application
   mainWindow.loadURL(`${emberAppURL}${hash}`);
