@@ -72,7 +72,7 @@ export const createService = ({
             });
           },
           logout() {
-            setMapgeoService(undefined);
+            getMapgeoService()?.logout();
             store.delete('mapgeo.login' as any);
           },
         },

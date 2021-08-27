@@ -11,26 +11,26 @@ export default class Application extends Route {
   @service('session') declare session: Session;
   @service('platform') declare platform: Platform;
 
-  async beforeModel() {
+  beforeModel() {
     this.session.setup();
   }
 
   async model() {
     await this.platform.loadClient();
-    await waitForProperty(
-      this.session,
-      'isAuthenticated',
-      (value) => value !== undefined && value !== null
-    );
+    // await waitForProperty(
+    //   this.session,
+    //   'isAuthenticated',
+    //   (value) => value !== undefined && value !== null
+    // );
   }
 
-  afterModel() {
-    next(() => {
-      if (!this.session.isAuthenticated) {
-        this.router.transitionTo('setup');
-      } else {
-        this.router.transitionTo('index');
-      }
-    });
-  }
+  // afterModel() {
+  //   next(() => {
+  //     if (!this.session.isAuthenticated) {
+  //       this.router.transitionTo('setup');
+  //     } else {
+  //       this.router.transitionTo('index');
+  //     }
+  //   });
+  // }
 }

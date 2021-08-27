@@ -44,7 +44,7 @@ import { handleSquirrelEvent } from './squirrel-startup';
 import wrapRule from './utils/wrap-rule';
 import { v4 } from 'uuid';
 import { MenuItemConstructorOptions } from 'electron/main';
-import logState from './utils/log-state';
+import flatState from './utils/log-state';
 
 const pkg = require('../package.json');
 
@@ -175,7 +175,7 @@ authService = createAuthService({
 logger.log('starting auth service');
 
 authService.start();
-logger.log(logState(authService));
+logger.log('initial state: ', flatState(authService));
 
 ipcMain.handle('selectSourceBaseFolder', async (event) => {
   const result = await dialog.showOpenDialog(mainWindow, {
@@ -222,10 +222,6 @@ ipcMain.handle('selectSourceFolder', async (event, sourceId: string) => {
 ipcMain.handle('loadClient', async (event) => {
   return new Promise((resolve) => {
     mainWindow.webContents.once('did-finish-load', () => {
-      authService.start();
-      authService.send({ type: 'LOAD' });
-      logger.log('after load state: ', logState(authService));
-
       resolve(true);
     });
   });
@@ -307,13 +303,16 @@ function createBrowserWindow() {
     mainWindow.webContents.openDevTools();
   }
 
+  debugger;
+  const hash =
+    flatState(authService) === 'unauthenticated.withConfig.validated'
+      ? '#/'
+      : '';
   // Load the ember application
-  mainWindow.loadURL(emberAppURL);
+  mainWindow.loadURL(`${emberAppURL}${hash}`);
 
   // Ember app has loaded, send an event
   mainWindow.webContents.on('did-finish-load', async () => {
-    authService.send({ type: 'LOAD' });
-
     try {
       logger.log('did-finish-load');
 
@@ -379,10 +378,10 @@ function createBrowserWindow() {
     mainWindow = null;
 
     // Stop the auth service
-    if (authService) {
-      logger.log('window closed, stopping auth service');
-      authService.stop();
-    }
+    // if (authService) {
+    //   logger.log('window closed, stopping auth service');
+    //   authService.stop();
+    // }
   });
 
   return mainWindow;

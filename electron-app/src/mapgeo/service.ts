@@ -127,6 +127,11 @@ export default class MapgeoService {
     }
   }
 
+  logout() {
+    this.token = undefined;
+    this.headers = {};
+  }
+
   async getUploaderTokens() {
     const result = await this.#fetch(`/api/uploader/token`);
     return result as UploaderTokenResult;

@@ -14,7 +14,6 @@ export interface AuthContext {
 }
 
 export type AuthEvent =
-  | { type: 'LOAD' }
   | { type: 'SETUP'; payload: SetupData }
   | { type: 'LOGIN'; payload: LoginData }
   | { type: 'LOGOUT' };
@@ -41,13 +40,8 @@ export const authMachine = createMachine<AuthContext, AuthEvent, AuthState>({
     login: undefined,
   },
   // Initial state
-  initial: 'initial',
+  initial: 'unauthenticated',
   states: {
-    initial: {
-      on: {
-        LOAD: 'unauthenticated',
-      },
-    },
     unauthenticated: {
       initial: 'idle',
       entry: 'sendIsUnauthenticated',
@@ -159,7 +153,7 @@ export const authMachine = createMachine<AuthContext, AuthEvent, AuthState>({
             assign({
               login: undefined,
             }),
-          ],
+          ] as any,
         },
       },
     },

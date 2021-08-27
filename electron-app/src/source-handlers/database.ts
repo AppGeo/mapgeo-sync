@@ -1,7 +1,7 @@
 import knex from 'knex';
 import { RuleBundle, SyncDbConfig } from 'mapgeo-sync-config';
 // @ts-ignore
-import ConnectionsString from 'mssql/lib/connectionstring';
+import * as ConnectionsString from 'mssql/lib/connectionstring';
 
 export default async function handle(
   ruleBundle: RuleBundle
