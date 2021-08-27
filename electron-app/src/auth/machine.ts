@@ -154,7 +154,12 @@ export const authMachine = createMachine<AuthContext, AuthEvent, AuthState>({
       on: {
         LOGOUT: {
           target: 'unauthenticated',
-          actions: 'logout',
+          actions: [
+            'logout',
+            assign({
+              login: undefined,
+            }),
+          ],
         },
       },
     },

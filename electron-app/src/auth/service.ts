@@ -28,12 +28,10 @@ export const createService = ({
       .withConfig({
         guards: {
           hasCommunityConfig(context) {
-            return (
-              Boolean(store.get<string>('mapgeo.host')) || Boolean(context.host)
-            );
+            return Boolean(context.host);
           },
           needsMapgeoService(context) {
-            return getMapgeoService() === undefined && Boolean(context.host);
+            return getMapgeoService() === undefined;
           },
           hasLogin(context) {
             return Boolean(context?.login);
@@ -75,7 +73,7 @@ export const createService = ({
           },
           logout() {
             setMapgeoService(undefined);
-            store.clear();
+            store.delete('mapgeo.login' as any);
           },
         },
         services: {

@@ -136,6 +136,7 @@ if (!scheduler) {
         data: {
           runId,
           ruleBundle,
+          mapgeo: store.get('mapgeo'),
         },
       });
 
@@ -326,7 +327,7 @@ function createBrowserWindow() {
 
         queryWorker.postMessage({
           event: 'handle-rule',
-          data: { ruleBundle, runId },
+          data: { ruleBundle, runId, mapgeo: store.get('mapgeo') },
         });
 
         const handleMessage = (message: QueryActionResponse) => {

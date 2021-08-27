@@ -1,5 +1,5 @@
 import { URL } from 'url';
-import { workerData, parentPort } from 'worker_threads';
+import { parentPort } from 'worker_threads';
 import type { FeatureCollection } from 'geojson';
 import MapgeoService from '../mapgeo/service';
 import handleDatabaseSource from '../source-handlers/database';
@@ -9,7 +9,6 @@ import {
   UploadMetadata,
   RuleBundle,
   Source,
-  SyncConfig,
   SyncRule,
 } from 'mapgeo-sync-config';
 import { SyncStoreType } from '../store/store';
@@ -18,16 +17,12 @@ import logger from '../logger';
 
 const logScope = logger.scope('worker/query-action');
 
-interface WorkerData {
-  mapgeo: SyncStoreType['mapgeo'];
-  config: SyncConfig;
-}
-
 type HandleRuleMessage = {
   event: 'handle-rule';
   data: {
     runId: string;
     ruleBundle: RuleBundle;
+    mapgeo: SyncStoreType['mapgeo'];
   };
 };
 type CloseMessage = { event: 'close' };
@@ -63,8 +58,6 @@ export interface UploadStatus {
   date: string;
 }
 
-const { mapgeo } = workerData as WorkerData;
-
 function respond(response: QueryActionResponse) {
   parentPort.postMessage(response);
 }
@@ -81,11 +74,12 @@ if (parentPort) {
     switch (msg.event) {
       case 'handle-rule': {
         try {
-          const mapgeoService = await setupMapGeo();
+          const mapgeoService = await setupMapGeo(msg.data.mapgeo);
           const data = await handleRule(
             mapgeoService,
             msg.data.ruleBundle,
-            msg.data.runId
+            msg.data.runId,
+            msg.data.mapgeo
           );
           const ruleBundle = msg.data.ruleBundle;
 
@@ -137,7 +131,7 @@ if (parentPort) {
   });
 }
 
-async function setupMapGeo() {
+async function setupMapGeo(mapgeo: SyncStoreType['mapgeo']) {
   if (!mapgeo.host) {
     throw new Error('mapgeo.host is a required config property');
   }
@@ -152,7 +146,8 @@ async function setupMapGeo() {
 async function handleRule(
   mapgeoService: MapgeoService,
   ruleBundle: RuleBundle,
-  runId: string
+  runId: string,
+  mapgeo: SyncStoreType['mapgeo']
 ) {
   const url = new URL(mapgeo.host);
   const subdomain = url.hostname.split('.')[0];
