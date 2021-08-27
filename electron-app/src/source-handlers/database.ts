@@ -1,5 +1,7 @@
 import knex from 'knex';
 import { RuleBundle, SyncDbConfig } from 'mapgeo-sync-config';
+// @ts-ignore
+import ConnectionsString from 'mssql/lib/connectionstring';
 
 export default async function handle(
   ruleBundle: RuleBundle
@@ -16,9 +18,14 @@ export default async function handle(
     );
   }
 
+  const connection =
+    source.databaseType === 'mssql'
+      ? ConnectionsString.resolve(source.connectionString)
+      : source.connectionString;
+
   const db = knex({
     client: source.databaseType,
-    connection: source.connectionString,
+    connection,
   });
   let result = await db.raw(
     (ruleBundle.rule.sourceConfig as SyncDbConfig).selectStatement

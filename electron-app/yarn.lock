@@ -879,6 +879,15 @@
   resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-3.0.3.tgz#3dca0e3f33b200fc7d1139c0cd96c1268cadfd9d"
   integrity sha512-tHq6qdbT9U1IRSGf14CL0pUlULksvY9OZ+5eEgl1N7t+OA3tGvNpxJCzuKQlsNgCVwbAs670L1vcVQi8j9HjnA==
 
+"@types/mssql@^7.1.3":
+  version "7.1.3"
+  resolved "https://registry.yarnpkg.com/@types/mssql/-/mssql-7.1.3.tgz#cb5af1a9ddb95d2bf6ab99ab587f0c8e184fbba3"
+  integrity sha512-+Se0r7Xbm9EoyAJ01bKY1789FkxyZvxa0OEv3YGQzULF/DnepGLMqkrVtaCIMci2MDGsZuImaWmiI6TRLv/Cgw==
+  dependencies:
+    "@types/node" "*"
+    "@types/tedious" "*"
+    tarn "^3.0.1"
+
 "@types/node-fetch@^2.5.10":
   version "2.5.10"
   resolved "https://registry.yarnpkg.com/@types/node-fetch/-/node-fetch-2.5.10.tgz#9b4d4a0425562f9fcea70b12cb3fcdd946ca8132"
@@ -944,6 +953,13 @@
   version "15.0.4"
   resolved "https://registry.yarnpkg.com/@types/tap/-/tap-15.0.4.tgz#6017ace0ca17e04d3a737b910d80573ff72a2fc8"
   integrity sha512-oOZWq0ySiTxhm9BrHTmYSF5Xh3HbzDv6i4dT/pY55Jm8dAabInT9Nbwtm7Y/G9mArtJqZaukcEq1TlFGG23weA==
+  dependencies:
+    "@types/node" "*"
+
+"@types/tedious@*":
+  version "4.0.5"
+  resolved "https://registry.yarnpkg.com/@types/tedious/-/tedious-4.0.5.tgz#388c4b4fb14b18e282ffecff70a9a160750c44b1"
+  integrity sha512-zlnChTP63Bds6kMBuKOR+qJPB9wcYf1zVm78qiXTnT1gbcU6wdTmSp28cd2BPxePy4mrGM6TnQG1fmHxQW1pZw==
   dependencies:
     "@types/node" "*"
 
