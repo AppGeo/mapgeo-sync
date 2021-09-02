@@ -194,7 +194,7 @@ ipcMain.handle('selectSourceFile', async (event, sourceId: string) => {
     const result = await dialog.showOpenDialog(mainWindow, {
       defaultPath: source.folder,
       properties: ['openFile'],
-      filters: [{ name: 'Default', extensions: ['json', 'geojson'] }],
+      filters: [{ name: 'Default', extensions: ['json', 'geojson', 'csv'] }],
     });
 
     return result.filePaths[0];
