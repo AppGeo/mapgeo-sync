@@ -2,7 +2,7 @@ import { URL } from 'url';
 import { parentPort } from 'worker_threads';
 import type { FeatureCollection } from 'geojson';
 import MapgeoService from '../mapgeo/service';
-import handleDatabaseSource from '../source-handlers/database';
+import { query as queryDatabaseSource } from '../source-handlers/database';
 import handleFileSource from '../source-handlers/file';
 import S3Service from '../s3-service';
 import {
@@ -266,7 +266,7 @@ async function loadData(
       return transformed;
     }
     case 'database': {
-      const data = await handleDatabaseSource(ruleBundle);
+      const data = await queryDatabaseSource(ruleBundle);
       const transformed = transformData(data, {
         toGeoJson: data.length && (data[0] as any).the_geom ? true : false,
       }) as FeatureCollection;

@@ -56,6 +56,41 @@
               @containerClass='mt-4'
               placeholder='host=HOST port=5432 dbname=YOUR_DB connect_timeout=10'
             />
+
+            <div class='flex justify-end mt-4'>
+              <Button
+                disabled={{or
+                  (not changeset.connectionString)
+                  this.testConnection.isRunning
+                }}
+                {{on 'click' (perform this.testConnection changeset)}}
+              >
+                {{#if this.testConnection.isRunning}}
+                  <Spinner />
+                  Testing..
+                {{else}}
+                  Test Connection
+                {{/if}}
+              </Button>
+            </div>
+
+            {{#if this.testConnection.last.isFinished}}
+              <div class='mt-4'>
+                {{#if this.testConnection.last.isError}}
+                  <code class='text-red-700'>
+                    {{this.testConnection.last.error}}
+                  </code>
+                {{else if this.testConnection.last.value}}
+                  <p class='text-green-700'>
+                    Connected successfully.
+                  </p>
+                {{else}}
+                  <p class='text-red-700'>
+                    Connection failed for unknown reason.
+                  </p>
+                {{/if}}
+              </div>
+            {{/if}}
           {{/if}}
         {{else if (eq changeset.sourceType 'file')}}
           <div class='mt-4 flex space-x-2'>
@@ -77,14 +112,15 @@
           </div>
         {{/if}}
 
-        <Button
-          @type='submit'
-          @intent='primary'
-          class='mt-4'
-          disabled={{not (or changeset.folder changeset.connectionString)}}
-        >
-          Add Source
-        </Button>
+        <div class='mt-4'>
+          <Button
+            @type='submit'
+            @intent='primary'
+            disabled={{not (or changeset.folder changeset.connectionString)}}
+          >
+            Add Source
+          </Button>
+        </div>
       </ChangesetForm>
     {{else}}
       <Button

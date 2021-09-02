@@ -12,6 +12,7 @@
       "camelcase",
       "compat",
       "cond",
+      "connectionstring",
       "delete",
       "devtron",
       "fieldname",

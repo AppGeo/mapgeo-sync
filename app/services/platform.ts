@@ -78,6 +78,17 @@ export default class Platform extends Service {
   }
 
   @action
+  async testDbConnection(source: Source) {
+    const value = await ipcRenderer.invoke('testConnection', source);
+
+    if (value.code) {
+      throw new Error(value.message || value.code);
+    }
+
+    return value;
+  }
+
+  @action
   runSyncRule(rule: SyncRule, runId: string) {
     return new Promise((resolve) => {
       ipcRenderer.send('runRule', rule, runId);

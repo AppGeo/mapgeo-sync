@@ -16,6 +16,7 @@ import * as windowStateKeeper from 'electron-window-state';
 import type {
   LoginData,
   SetupData,
+  Source,
   SyncConfig,
   SyncRule,
   SyncState,
@@ -45,6 +46,7 @@ import wrapRule from './utils/wrap-rule';
 import { v4 } from 'uuid';
 import { MenuItemConstructorOptions } from 'electron/main';
 import flatState from './utils/log-state';
+import { test } from './source-handlers/database';
 
 const pkg = require('../package.json');
 
@@ -176,6 +178,14 @@ logger.log('starting auth service');
 
 authService.start();
 logger.log('initial state: ', flatState(authService));
+
+ipcMain.handle('testConnection', async (event, source: Source) => {
+  try {
+    return await test(source);
+  } catch (e) {
+    return e;
+  }
+});
 
 ipcMain.handle('selectSourceBaseFolder', async (event) => {
   const result = await dialog.showOpenDialog(mainWindow, {

@@ -6,6 +6,7 @@ import { v4 } from 'uuid';
 import { DbType, Source } from 'mapgeo-sync-config';
 import Platform from 'mapgeo-sync/services/platform';
 import { NotificationsService } from '@frontile/notifications';
+import { task } from 'ember-concurrency';
 
 const databaseTypes: DbType[] = ['pg', 'oracle', 'mysql', 'mssql'];
 interface SourceCreateModalArgs {
@@ -23,6 +24,11 @@ export default class SourceCreateModal extends Component<SourceCreateModalArgs> 
   databaseTypes = databaseTypes;
 
   @tracked isAddSourceVisible = false;
+
+  @task
+  async testConnection(changeset: any) {
+    return this.platform.testDbConnection(changeset.pendingData as Source);
+  }
 
   @action
   async createSource(sourceInput: Source) {
