@@ -46,7 +46,7 @@
             @options={{this.databaseTypes}}
             @containerClass='mt-4' as |db|
           >
-            {{db}}
+            {{this.databaseName db}}
           </Form.Select>
 
           {{#if changeset.databaseType}}

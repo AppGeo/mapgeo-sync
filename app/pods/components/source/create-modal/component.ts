@@ -7,8 +7,16 @@ import { DbType, Source } from 'mapgeo-sync-config';
 import Platform from 'mapgeo-sync/services/platform';
 import { NotificationsService } from '@frontile/notifications';
 import { task } from 'ember-concurrency';
+import { helper } from '@ember/component/helper';
 
-const databaseTypes: DbType[] = ['pg', 'oracle', 'mysql', 'mssql'];
+const databaseTypes: DbType[] = ['pg', 'mssql', 'mysql', 'oracle'];
+const databaseMap: { [DbKey in DbType]: string } = {
+  pg: 'Postgres',
+  oracle: 'Oracle',
+  mssql: 'SQL Server',
+  mysql: 'MySQL',
+} as const;
+
 interface SourceCreateModalArgs {
   isOpen: boolean;
   onClose: () => void;
@@ -22,6 +30,9 @@ export default class SourceCreateModal extends Component<SourceCreateModalArgs> 
   @service('notifications') declare notifications: NotificationsService;
 
   databaseTypes = databaseTypes;
+  databaseName = helper(([type]: [DbType]) => {
+    return databaseMap[type];
+  });
 
   @tracked isAddSourceVisible = false;
 
