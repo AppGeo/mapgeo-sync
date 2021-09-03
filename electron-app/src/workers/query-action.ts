@@ -32,12 +32,13 @@ export type FinishedResponse = {
   rule: SyncRule;
   source: Source;
   status: UploadStatus;
-  rows: unknown[] | FeatureCollection;
+  numItems: number;
 };
 export type ErrorResponse = {
   runId: string;
   rule: SyncRule;
   source: Source;
+  numItems: number;
   errors: {
     message: string;
     event: QueryActionMessage['event'];
@@ -107,6 +108,7 @@ if (parentPort) {
           logger.scope('query-action').warn(error);
           respond({
             runId: msg.data.runId,
+            numItems: 0,
             ...msg.data.ruleBundle,
             errors: [
               {
@@ -190,11 +192,14 @@ async function handleRule(
   logScope.log('notify uploader res: ', res);
   // Poll for upload-status.json file to know if error or success
   const status = (await s3.waitForFile(res.key)) as { content: UploadStatus };
-  logScope.log('upload status res: ', status.content);
+  logScope.log('upload-status.json content: ', status.content);
+
+  const numRows = !('features' in result) ? result.length : 0;
+  const numItems = 'features' in result ? result.features.length : numRows;
 
   return {
     status: status.content,
-    rows: result,
+    numItems,
     ...ruleBundle,
   };
 }

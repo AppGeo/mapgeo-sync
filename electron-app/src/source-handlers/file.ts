@@ -1,11 +1,18 @@
 import { RuleBundle } from 'mapgeo-sync-config';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as util from 'util';
+import * as stream from 'stream';
 import type { FeatureCollection } from 'geojson';
 import * as fgdb from 'fgdb';
 import * as csv from 'csvtojson';
+import { pipe } from 'pipeline-pipe';
+import * as StreamValues from 'stream-json/streamers/StreamValues';
 import logger from '../logger';
+import Batcher from '../utils/batcher';
+import ToGeoJSON from '../utils/geojson-transform';
 
+const pipeline = util.promisify(stream.pipeline);
 const logScope = logger.scope('source-handlers/file');
 
 export default async function fileAction(ruleBundle: RuleBundle) {
@@ -86,7 +93,33 @@ export default async function fileAction(ruleBundle: RuleBundle) {
     }
 
     case 'csv': {
+      // try {
+      //   console.time('pipe');
+      //   const data: unknown[] = [];
+      //   await pipeline(
+      //     fs.createReadStream(rule.sourceConfig.filePath),
+      //     csv(),
+      //     StreamValues.withParser(),
+      //     pipe(({ value }: { key: number; value: Record<string, unknown> }) => {
+      //       return value;
+      //     }),
+      //     // new ToGeoJSON(),
+      //     pipe((item) => {
+      //       data.push(item);
+      //       return item;
+      //     })
+      //   );
+      //   console.timeEnd('pipe');
+      //   debugger;
+      //   return { ext, data };
+      // } catch (e) {
+      //   logScope.error('Error processing csv: ', e);
+      //   throw 'end';
+      // }
+
+      console.time('direct');
       const file = await csv().fromFile(rule.sourceConfig.filePath);
+      console.timeEnd('direct');
       return { ext, data: file as Record<string, unknown>[] };
     }
 

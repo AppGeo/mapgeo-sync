@@ -908,10 +908,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.14.20.tgz#f7974863edd21d1f8a494a73e8e2b3658615c340"
   integrity sha512-Y93R97Ouif9JEOWPIUyU+eyIdyRqQR0I8Ez1dzku4hDx34NWh4HbtIc3WNzwB1Y9ULvNGeu5B8h8bVL5cAk4/A==
 
-"@types/node@^12.19.13":
-  version "12.19.13"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.19.13.tgz#888e2b34159fb91496589484ec169618212b51b7"
-  integrity sha512-qdixo2f0U7z6m0UJUugTJqVF94GNDkdgQhfBtMs8t5898JE7G/D2kJYw4rc1nzjIPLVAsDkY2MdABnLAP5lM1w==
+"@types/node@^14.17.6":
+  version "14.17.14"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.17.14.tgz#6fda9785b41570eb628bac27be4b602769a3f938"
+  integrity sha512-rsAj2u8Xkqfc332iXV12SqIsjVi07H479bOP4q94NAcjzmAvapumEhuVIt53koEf7JFrpjgNKjBga5Pnn/GL8A==
 
 "@types/node@^14.6.2":
   version "14.17.1"
@@ -948,6 +948,21 @@
   version "0.16.1"
   resolved "https://registry.yarnpkg.com/@types/scheduler/-/scheduler-0.16.1.tgz#18845205e86ff0038517aab7a18a62a6b9f71275"
   integrity sha512-EaCxbanVeyxDRTQBkdLb3Bvl/HK7PBK6UJjsSixB0iHKoWxE5uu2Q/DgtpOhPIojN0Zl1whvOd7PoHs2P0s5eA==
+
+"@types/stream-chain@*":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@types/stream-chain/-/stream-chain-2.0.1.tgz#4d3cc47a32609878bc188de0bae420bcfd3bf1f5"
+  integrity sha512-D+Id9XpcBpampptkegH7WMsEk6fUdf9LlCIX7UhLydILsqDin4L0QT7ryJR0oycwC7OqohIzdfcMHVZ34ezNGg==
+  dependencies:
+    "@types/node" "*"
+
+"@types/stream-json@^1.7.1":
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/@types/stream-json/-/stream-json-1.7.1.tgz#58b82a41161f2936c9bfc6c725a30e956bbd443b"
+  integrity sha512-BNIK/ix6iJvWvoXbDVVJhw5LNG1wie/rXcUo7jw4hBqY3FhIrg0e+RMXFN5UreKclBIStl9FDEHNSDLuuQ9/MQ==
+  dependencies:
+    "@types/node" "*"
+    "@types/stream-chain" "*"
 
 "@types/tap@^15.0.4":
   version "15.0.4"
@@ -2016,6 +2031,11 @@ currently-unhandled@^0.4.1:
   integrity sha1-mI3zP+qxke95mmE2nddsF635V+o=
   dependencies:
     array-find-index "^1.0.1"
+
+cyclist@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/cyclist/-/cyclist-1.0.1.tgz#596e9698fd0c80e12038c2b82d6eb1b35b6224d9"
+  integrity sha1-WW6WmP0MgOEgOMK4LW6xs1tiJNk=
 
 dashdash@^1.12.0:
   version "1.14.1"
@@ -5170,6 +5190,14 @@ pinkie@^2.0.0:
   resolved "https://registry.yarnpkg.com/pinkie/-/pinkie-2.0.4.tgz#72556b80cfa0d48a974e80e77248e80ed4f7f870"
   integrity sha1-clVrgM+g1IqXToDnckjoDtT3+HA=
 
+pipeline-pipe@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/pipeline-pipe/-/pipeline-pipe-0.3.0.tgz#7d29dd49f4a09a63bdfa0e74b723bfb202eb632e"
+  integrity sha512-7k9zFYAyCumT4yCqJiSK133vnsdQYnfdmFQOFRi2fjgHvNAYxpTs0FHykoPnTiQlA/0jPznhAPYhGq+hSR0Jow==
+  dependencies:
+    cyclist "^1.0.1"
+    readable-stream "^3.6.0"
+
 pkg-dir@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/pkg-dir/-/pkg-dir-2.0.0.tgz#f6d5d1109e19d63edf428e0bd57e12777615334b"
@@ -5987,12 +6015,24 @@ stack-utils@^2.0.1:
   dependencies:
     escape-string-regexp "^2.0.0"
 
+stream-chain@^2.2.4:
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/stream-chain/-/stream-chain-2.2.4.tgz#2e5e9858e00d25ebaf7e4339e8328ddcab5facad"
+  integrity sha512-9lsl3YM53V5N/I1C2uJtc3Kavyi3kNYN83VkKb/bMWRk7D9imiFyUPYa0PoZbLohSVOX1mYE9YsmwObZUsth6Q==
+
 stream-combiner@~0.0.4:
   version "0.0.4"
   resolved "https://registry.yarnpkg.com/stream-combiner/-/stream-combiner-0.0.4.tgz#4d5e433c185261dde623ca3f44c586bcf5c4ad14"
   integrity sha1-TV5DPBhSYd3mI8o/RMWGvPXErRQ=
   dependencies:
     duplexer "~0.1.1"
+
+stream-json@^1.7.2:
+  version "1.7.2"
+  resolved "https://registry.yarnpkg.com/stream-json/-/stream-json-1.7.2.tgz#5b3adf98896732b7e026031a378ccb9d8024b733"
+  integrity sha512-Z/33BkkInF6AIxJqwTjQkb6GLIxDEZEHolDLhalf5mwLCTkfwCzV7NQ5xIISkYt/S0GZCjJ0aofYeKmxJTvsFw==
+  dependencies:
+    stream-chain "^2.2.4"
 
 string-argv@^0.1.1:
   version "0.1.2"

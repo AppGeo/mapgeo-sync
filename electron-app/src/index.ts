@@ -408,6 +408,9 @@ crashReporter.start({
 logger.log('crash path', app.getPath('crashDumps'));
 logger.log('log path', app.getPath('userData'));
 
+// Increase max memory
+app.commandLine.appendSwitch('js-flags', '--max-old-space-size=4096');
+
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     logger.log('closing because windows closed');
@@ -517,6 +520,12 @@ process.on('uncaughtException', (err) => {
 async function initWorkers() {
   queryWorker = new Worker(path.join(__dirname, 'workers', 'query-action.js'), {
     workerData: { mapgeo: store.get('mapgeo') },
+    resourceLimits: {
+      maxOldGenerationSizeMb: 5000,
+      maxYoungGenerationSizeMb: 5000,
+      codeRangeSizeMb: 2000,
+      stackSizeMb: 2000,
+    },
   });
 }
 
@@ -558,12 +567,6 @@ function updateRuleStateAfterRun(
   const state = all.find((item) => item.ruleId === rule.id);
   const logs = state.logs || [];
   const runMode = wasScheduled ? 'scheduled' : 'manual';
-  const numRows =
-    'rows' in result && !('features' in result.rows) ? result.rows.length : 0;
-  const numItems =
-    'rows' in result && 'features' in result.rows
-      ? result.rows.features.length
-      : numRows;
 
   if (!logs.find((log) => log.runId === runId)) {
     if ('status' in result) {
@@ -571,7 +574,7 @@ function updateRuleStateAfterRun(
         ok: !!result.status.ok,
         runMode,
         runId,
-        numItems,
+        numItems: result.numItems,
         errors: result.status.messages,
         intersection: result.status.intersection,
         startedAt,
@@ -582,7 +585,7 @@ function updateRuleStateAfterRun(
         ok: result.errors === undefined || result.errors.length === 0,
         runMode,
         runId,
-        numItems,
+        numItems: result.numItems,
         errors: result.errors.map((err) => ({
           type: 'error',
           message: err.message,
