@@ -78,7 +78,6 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
 
   @tracked dataset?: Dataset;
   @tracked ruleInput: Partial<RuleInput> = {};
-  changeset = Changeset(this.ruleInput);
   frequencies: readonly ScheduleFrequency[] = [
     defaultFrequency,
     'weekly',
@@ -117,6 +116,11 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
       }
     }
   });
+
+  @cached
+  get changeset() {
+    return Changeset({});
+  }
 
   @cached
   get mappings() {

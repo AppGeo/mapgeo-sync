@@ -4,7 +4,7 @@
   </h2>
 
   <ul class='grid grid-cols-1 gap-4'>
-    {{#each this.syncRules as |rule|}}
+    {{#each this.syncRules key='id' as |rule|}}
       <li class='bg-white shadow-lg rounded-lg'>
         <Rule::Card
           @rule={{rule}}
@@ -52,7 +52,7 @@
     (set this.isEditRuleOpen false)
     (set this.ruleEditing undefined)
   }}
-  @onSubmit={{set this.test}}
+  @onSubmit={{pipe (set this.syncRules) (set this.isEditRuleOpen false)}}
   @onDelete={{set this.syncRules}}
   @rule={{this.ruleEditing}}
 />

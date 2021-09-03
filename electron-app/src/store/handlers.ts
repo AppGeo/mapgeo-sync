@@ -10,6 +10,7 @@ export function register(ipcMain: IpcMain) {
 
   add('findSyncRules', findSyncRules);
   add('addSyncRule', addSyncRule);
+  add('updateSyncRule', updateSyncRule);
   add('removeSyncRule', removeSyncRule);
   add('findSyncState', findSyncState);
   add('findSources', findSources);
@@ -28,6 +29,18 @@ export const addSyncRule = (rule: SyncRule) => {
   }
   rules.push(rule);
   store.set('syncRules', rules);
+  return rules;
+};
+
+export const updateSyncRule = (rule: SyncRule) => {
+  let rules = store.get('syncRules');
+
+  const currentRule = rules.find((item) => item.id === rule.id);
+  const index = rules.indexOf(currentRule);
+
+  rules.splice(index, 1, rule);
+  store.set('syncRules', rules);
+
   return rules;
 };
 

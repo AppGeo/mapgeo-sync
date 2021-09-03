@@ -8,12 +8,18 @@ interface RuleEditModalArgs {
   isOpen: boolean;
   rule: SyncRule;
   onClose: () => void;
-  onSubmit: (rule: SyncRule) => void;
+  onSubmit: (rules: SyncRule[]) => void;
   onDelete: (rules: SyncRule[]) => void;
 }
 
 export default class RuleEditModal extends Component<RuleEditModalArgs> {
   @service('platform') declare platform: Platform;
+
+  @task
+  async updateRule(rule: SyncRule) {
+    const rules = await this.platform.updateSyncRule(rule);
+    this.args.onSubmit(rules);
+  }
 
   @task
   async deleteRule() {

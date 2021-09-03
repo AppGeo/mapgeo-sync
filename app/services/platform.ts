@@ -142,6 +142,12 @@ export default class Platform extends Service {
   }
 
   @action
+  async updateSyncRule(rule: SyncRule): Promise<SyncRule[]> {
+    const rules = await ipcRenderer.invoke('store/updateSyncRule', rule);
+    return rules;
+  }
+
+  @action
   async removeSyncRule(rule: SyncRule): Promise<SyncRule[]> {
     const rules = await ipcRenderer.invoke('store/removeSyncRule', rule);
     return rules;
