@@ -5,6 +5,7 @@ import {
   crashReporter,
   dialog,
   ipcMain,
+  IpcMainEvent,
   Menu,
   MenuItem,
   shell,
@@ -40,13 +41,14 @@ import {
   ErrorResponse,
   FinishedResponse,
   QueryActionResponse,
-} from './workers/query-action';
+} from './process-rule';
 import { handleSquirrelEvent } from './squirrel-startup';
 import wrapRule from './utils/wrap-rule';
 import { v4 } from 'uuid';
 import { MenuItemConstructorOptions } from 'electron/main';
 import flatState from './utils/log-state';
 import { test } from './source-handlers/database';
+import { createBgRenderer } from './bg-renderer';
 
 const pkg = require('../package.json');
 
@@ -58,8 +60,8 @@ const version = pkg.version;
 
 let scheduler: Scheduler;
 let mainWindow: BrowserWindow;
+let bgWindow: BrowserWindow;
 let tray: Tray;
-let queryWorker: Worker;
 let mapgeoService: MapgeoService;
 let authService: Interpreter<
   AuthContext,
@@ -114,7 +116,6 @@ app.setLoginItemSettings({
 
 registerMapgeoHandlers(ipcMain);
 registerStoreHandlers(ipcMain);
-initWorkers();
 
 if (!scheduler) {
   const logScope = logger.scope('scheduler');
@@ -133,26 +134,26 @@ if (!scheduler) {
         running: true,
       });
 
-      queryWorker.postMessage({
-        event: 'handle-rule',
-        data: {
-          runId,
-          ruleBundle,
-          mapgeo: store.get('mapgeo'),
-        },
+      bgWindow.webContents.send('handle-rule', {
+        runId,
+        ruleBundle,
+        mapgeo: store.get('mapgeo'),
       });
 
       const result = await new Promise(
         (resolve: (msg: QueryActionResponse) => void, reject) => {
-          const handleMessage = (message: QueryActionResponse) => {
+          const handleMessage = (
+            event: IpcMainEvent,
+            message: QueryActionResponse
+          ) => {
             if (message.rule.id === rule.id && message.runId === runId) {
-              queryWorker.off('message', handleMessage);
+              ipcMain.off('rule-handled', handleMessage);
               logScope.log('handle-rule result: ' + message);
               resolve(message);
             }
           };
 
-          queryWorker.on('message', handleMessage);
+          ipcMain.on('rule-handled', handleMessage);
         }
       );
 
@@ -178,6 +179,10 @@ logger.log('starting auth service');
 
 authService.start();
 logger.log('initial state: ', flatState(authService));
+
+ipcMain.on('bg-ready', (event, arg) => {
+  logger.info('bg-ready');
+});
 
 ipcMain.handle('testConnection', async (event, source: Source) => {
   try {
@@ -333,21 +338,25 @@ function createBrowserWindow() {
           running: true,
         });
 
-        queryWorker.postMessage({
-          event: 'handle-rule',
-          data: { ruleBundle, runId, mapgeo: store.get('mapgeo') },
+        bgWindow.webContents.send('handle-rule', {
+          ruleBundle,
+          runId,
+          mapgeo: store.get('mapgeo'),
         });
 
-        const handleMessage = (message: QueryActionResponse) => {
+        const handleMessage = (
+          event: IpcMainEvent,
+          message: QueryActionResponse
+        ) => {
           if (message.rule.id === rule.id && message.runId === runId) {
-            queryWorker.off('message', handleMessage);
+            ipcMain.off('rule-handled', handleMessage);
             // logger.log(message);
             event.reply('action-result', message);
             updateRuleStateAfterRun(rule, message, runId, { startedAt });
           }
         };
 
-        queryWorker.on('message', handleMessage);
+        ipcMain.on('rule-handled', handleMessage);
       });
     } catch (e) {
       logger.scope('did-finish-load').error(e);
@@ -491,6 +500,7 @@ app.on('ready', async () => {
   await handleFileUrls(emberAppDir);
 
   mainWindow = createBrowserWindow();
+  bgWindow = createBgRenderer();
 });
 
 // Handle an unhandled error in the main thread
@@ -516,18 +526,6 @@ process.on('uncaughtException', (err) => {
   logger.log(`Exception: ${err}`);
   logger.log(err.stack);
 });
-
-async function initWorkers() {
-  queryWorker = new Worker(path.join(__dirname, 'workers', 'query-action.js'), {
-    workerData: { mapgeo: store.get('mapgeo') },
-    resourceLimits: {
-      maxOldGenerationSizeMb: 5000,
-      maxYoungGenerationSizeMb: 5000,
-      codeRangeSizeMb: 2000,
-      stackSizeMb: 2000,
-    },
-  });
-}
 
 function updateSyncState(rule: SyncRule, data: Omit<Partial<SyncState>, 'id'>) {
   const all = store.get('syncState') || [];

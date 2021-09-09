@@ -1,32 +1,26 @@
 import { URL } from 'url';
-import { parentPort } from 'worker_threads';
 import type { FeatureCollection } from 'geojson';
-import MapgeoService from '../mapgeo/service';
-import { query as queryDatabaseSource } from '../source-handlers/database';
-import handleFileSource from '../source-handlers/file';
-import S3Service from '../s3-service';
+import MapgeoService from './mapgeo/service';
+import { query as queryDatabaseSource } from './source-handlers/database';
+import handleFileSource from './source-handlers/file';
+import S3Service from './s3-service';
 import {
   UploadMetadata,
   RuleBundle,
   Source,
   SyncRule,
 } from 'mapgeo-sync-config';
-import { SyncStoreType } from '../store/store';
-import { typeConversion } from '../utils/table-mappings';
-import logger from '../logger';
+import { SyncStoreType } from './store/store';
+import { typeConversion } from './utils/table-mappings';
+import logger from './logger';
 
-const logScope = logger.scope('worker/query-action');
+const logScope = logger.scope('process-rule');
 
-type HandleRuleMessage = {
-  event: 'handle-rule';
-  data: {
-    runId: string;
-    ruleBundle: RuleBundle;
-    mapgeo: SyncStoreType['mapgeo'];
-  };
+type HandleRuleData = {
+  runId: string;
+  ruleBundle: RuleBundle;
+  mapgeo: SyncStoreType['mapgeo'];
 };
-type CloseMessage = { event: 'close' };
-export type QueryActionMessage = HandleRuleMessage | CloseMessage;
 export type FinishedResponse = {
   runId: string;
   rule: SyncRule;
@@ -41,7 +35,7 @@ export type ErrorResponse = {
   numItems: number;
   errors: {
     message: string;
-    event: QueryActionMessage['event'];
+    event: 'handle-rule';
   }[];
 };
 export type QueryActionResponse = FinishedResponse | ErrorResponse;
@@ -59,78 +53,56 @@ export interface UploadStatus {
   date: string;
 }
 
-function respond(response: QueryActionResponse) {
-  parentPort.postMessage(response);
-}
+export async function processRule(
+  data: HandleRuleData
+): Promise<QueryActionResponse> {
+  console.log(`Handling '${data.ruleBundle.rule.name}'...`);
 
-if (parentPort) {
-  parentPort.on('message', async (msg: string | QueryActionMessage) => {
-    if (typeof msg !== 'object') {
-      console.log('Low-level event: ', msg);
-      return;
+  try {
+    const mapgeoService = await setupMapGeo(data.mapgeo);
+    const resultData = await handleRule(
+      mapgeoService,
+      data.ruleBundle,
+      data.runId,
+      data.mapgeo
+    );
+    const ruleBundle = data.ruleBundle;
+
+    if (ruleBundle.rule.optoutRule) {
+      const optoutBundle = {
+        rule: ruleBundle.rule.optoutRule,
+        source: ruleBundle.source,
+      };
+      const optoutData = await loadData(optoutBundle);
+      const optoutResult = await handleOptoutRule(
+        mapgeoService,
+        optoutBundle,
+        optoutData as Record<string, unknown>[]
+      );
+
+      resultData.status.messages.push(optoutResult.message);
+      resultData.status.ok = optoutResult.ok;
     }
 
-    console.log(`Handling '${msg.event}'...`);
+    return {
+      runId: data.runId,
+      ...resultData,
+    };
+  } catch (error) {
+    logger.scope('query-action').warn(error);
 
-    switch (msg.event) {
-      case 'handle-rule': {
-        try {
-          const mapgeoService = await setupMapGeo(msg.data.mapgeo);
-          const data = await handleRule(
-            mapgeoService,
-            msg.data.ruleBundle,
-            msg.data.runId,
-            msg.data.mapgeo
-          );
-          const ruleBundle = msg.data.ruleBundle;
-
-          if (ruleBundle.rule.optoutRule) {
-            const optoutBundle = {
-              rule: ruleBundle.rule.optoutRule,
-              source: ruleBundle.source,
-            };
-            const optoutData = await loadData(optoutBundle);
-            const optoutResult = await handleOptoutRule(
-              mapgeoService,
-              optoutBundle,
-              optoutData as Record<string, unknown>[]
-            );
-
-            data.status.messages.push(optoutResult.message);
-            data.status.ok = optoutResult.ok;
-          }
-
-          respond({
-            runId: msg.data.runId,
-            ...data,
-          });
-        } catch (error) {
-          logger.scope('query-action').warn(error);
-          respond({
-            runId: msg.data.runId,
-            numItems: 0,
-            ...msg.data.ruleBundle,
-            errors: [
-              {
-                message: error.toString(),
-                event: msg.event,
-              },
-            ],
-          });
-        }
-        break;
-      }
-
-      case 'close': {
-        parentPort.postMessage('done');
-        break;
-      }
-
-      default:
-        const exhaustiveCheck: never = msg;
-        throw new Error(`Unhandled case: ${exhaustiveCheck}`);
-    }
-  });
+    return {
+      runId: data.runId,
+      numItems: 0,
+      ...data.ruleBundle,
+      errors: [
+        {
+          message: error.toString(),
+          event: 'handle-rule',
+        },
+      ],
+    };
+  }
 }
 
 async function setupMapGeo(mapgeo: SyncStoreType['mapgeo']) {

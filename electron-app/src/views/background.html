@@ -1,0 +1,17 @@
+<script type="text/javascript">
+  const { ipcRenderer } = require('electron');
+  const { processRule } = require('../process-rule');
+
+  ipcRenderer.send('bg-ready');
+
+  ipcRenderer.on('handle-rule', async (event, data) => {
+    try {
+      const result = await processRule(data);
+
+      ipcRenderer.send('rule-handled', result);
+    } catch (e) {
+      debugger;
+      ipcRenderer.send('rule-handled', e);
+    }
+  });
+</script>
