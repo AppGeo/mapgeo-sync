@@ -93,34 +93,39 @@ export default async function fileAction(ruleBundle: RuleBundle) {
     }
 
     case 'csv': {
-      // try {
-      //   console.time('pipe');
-      //   const data: unknown[] = [];
-      //   await pipeline(
-      //     fs.createReadStream(rule.sourceConfig.filePath),
-      //     csv(),
-      //     StreamValues.withParser(),
-      //     pipe(({ value }: { key: number; value: Record<string, unknown> }) => {
-      //       return value;
-      //     }),
-      //     // new ToGeoJSON(),
-      //     pipe((item) => {
-      //       data.push(item);
-      //       return item;
-      //     })
-      //   );
-      //   console.timeEnd('pipe');
-      //   debugger;
-      //   return { ext, data };
-      // } catch (e) {
-      //   logScope.error('Error processing csv: ', e);
-      //   throw 'end';
-      // }
+      try {
+        console.time('pipe');
+        // const data: unknown[] = [];
 
-      console.time('direct');
-      const file = await csv().fromFile(rule.sourceConfig.filePath);
-      console.timeEnd('direct');
-      return { ext, data: file as Record<string, unknown>[] };
+        const data = fs
+          .createReadStream(rule.sourceConfig.filePath)
+          .pipe(csv())
+          .pipe(StreamValues.withParser())
+          .pipe(
+            pipe(
+              ({ value }: { key: number; value: Record<string, unknown> }) => {
+                return value;
+              }
+            )
+          );
+        // new ToGeoJSON(),
+        // pipe((item) => {
+        //   data.push(item);
+        //   return item;
+        // })
+
+        console.timeEnd('pipe');
+        debugger;
+        return { ext, data };
+      } catch (e) {
+        logScope.error('Error processing csv: ', e);
+        throw 'end';
+      }
+
+      // console.time('direct');
+      // const file = await csv().fromFile(rule.sourceConfig.filePath);
+      // console.timeEnd('direct');
+      // return { ext, data: file as Record<string, unknown>[] };
     }
 
     default: {

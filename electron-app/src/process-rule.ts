@@ -13,6 +13,11 @@ import {
 import { SyncStoreType } from './store/store';
 import { typeConversion } from './utils/table-mappings';
 import logger from './logger';
+import { Readable, Stream } from 'stream';
+// @ts-ignore
+import { stringify } from 'JSONStream';
+import GeoJSONStringify from './utils/feature-collection-transform';
+import { pipe } from 'pipeline-pipe';
 
 const logScope = logger.scope('process-rule');
 
@@ -77,7 +82,7 @@ export async function processRule(
       const optoutResult = await handleOptoutRule(
         mapgeoService,
         optoutBundle,
-        optoutData as Record<string, unknown>[]
+        optoutData as any
       );
 
       resultData.status.messages.push(optoutResult.message);
@@ -128,8 +133,11 @@ async function handleRule(
 
   const result = await loadData(ruleBundle);
   const metadata = uploadMetadata(subdomain, ruleBundle);
+
+  logScope.info('Acquiring mapgeo credentials..');
   const tokens = await mapgeoService.getUploaderTokens();
 
+  logScope.info('Acquired mapgeo credentials.');
   // console.log('action result: ', result);
   const s3 = new S3Service(tokens);
   const folder = `ilya-test-${subdomain}`;
@@ -137,12 +145,23 @@ async function handleRule(
   const file = !Array.isArray(result)
     ? ruleFileName.replace('.json', '.geojson')
     : ruleFileName;
+
+  let stream: Readable;
+
+  if (result.isGeoJson) {
+    stream = result.stream.pipe(new GeoJSONStringify());
+  } else {
+    stream = result.stream.pipe(stringify());
+  }
+
+  logScope.info('Sending to s3..');
   const { key, fileName } = await s3.upload({
     folder,
     fileName: file,
-    data: JSON.stringify(result, null, 2),
+    data: stream,
   });
 
+  logScope.info('Waiting for upload to finish on mapgeo..');
   // Lets MapGeo know, which validates and uploads to carto
   // An upload-status.json is uploaded to s3 with results of process, failure or success
   const res = await mapgeoService.notifyUploader({
@@ -166,12 +185,12 @@ async function handleRule(
   const status = (await s3.waitForFile(res.key)) as { content: UploadStatus };
   logScope.log('upload-status.json content: ', status.content);
 
-  const numRows = !('features' in result) ? result.length : 0;
-  const numItems = 'features' in result ? result.features.length : numRows;
+  // const numRows = !('features' in result) ? result.length : 0;
+  // const numItems = 'features' in result ? result.features.length : numRows;
 
   return {
     status: status.content,
-    numItems,
+    numItems: 1,
     ...ruleBundle,
   };
 }
@@ -233,21 +252,20 @@ async function handleOptoutRule(
   };
 }
 
-async function loadData(
-  ruleBundle: RuleBundle
-): Promise<unknown[] | FeatureCollection> {
+async function loadData(ruleBundle: RuleBundle) {
   switch (ruleBundle.source.sourceType) {
     case 'file': {
       const { ext, data } = await handleFileSource(ruleBundle);
-      const transformed = transformData(data, { ext }) as unknown[];
-      return transformed;
+      const stream = transformData(data as any, { ext });
+      return { ext, stream, isGeoJson: false };
     }
     case 'database': {
       const data = await queryDatabaseSource(ruleBundle);
-      const transformed = transformData(data, {
-        toGeoJson: data.length && (data[0] as any).the_geom ? true : false,
-      }) as FeatureCollection;
-      return transformed;
+      const toGeoJson = data.length && (data[0] as any).the_geom ? true : false;
+      const stream = transformData(data as any, {
+        toGeoJson,
+      });
+      return { isGeoJson: toGeoJson, stream };
     }
     default:
       const exhaustiveCheck: never = ruleBundle.source;
@@ -256,47 +274,38 @@ async function loadData(
 }
 
 function transformData(
-  data: unknown[] | FeatureCollection,
+  data: Stream,
   options: { toGeoJson?: boolean; ext?: string } = {}
 ) {
-  if (Array.isArray(data)) {
-    if (options.toGeoJson) {
-      return data.reduce(
-        (all: any, row: any) => {
-          const { the_geom, ...properties } = row;
+  return data.pipe(
+    pipe((item) => {
+      if (options.ext === '.csv') {
+        if (options.toGeoJson) {
+          const { the_geom, ...properties } = item;
           const geometry =
             typeof the_geom === 'string'
               ? JSON.parse(the_geom)
               : typeof the_geom === 'object'
               ? the_geom
               : null;
-          all.features.push({
+
+          return {
             type: 'Feature',
             properties,
             geometry,
-          });
-          return all;
-        },
-        { type: 'FeatureCollection', features: [] }
-      );
-    }
-
-    return data.map((row: Record<string, unknown> & { the_geom: string }) => {
-      try {
-        return { ...row, the_geom: JSON.parse(row.the_geom) };
-      } catch (e) {
-        return row;
+          };
+        }
+      } else if (options.ext !== '.geojson') {
+        return { ...item, the_geom: JSON.parse(item.the_geom) };
       }
-    });
-  } else {
-    return data;
-  }
+
+      return item;
+    })
+  );
 }
 
 function uploadMetadata(community: string, ruleBundle: RuleBundle) {
   const fileName = `${community}_rule_${ruleBundle.rule.id}.json`;
-
-  console.log(`Uploading query file ${fileName} to cloud`);
 
   const res: UploadMetadata = {
     fieldname:

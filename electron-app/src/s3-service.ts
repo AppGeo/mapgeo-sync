@@ -1,4 +1,6 @@
 import * as AWS from 'aws-sdk';
+// @ts-ignore
+import * as StreamingS3 from 'streaming-s3';
 import { UploaderTokenResult } from './mapgeo/service';
 
 export type UploadedResults = {
@@ -11,18 +13,31 @@ export type WaitResults = {
   content: string | unknown;
 };
 
+AWS.config.update({
+  correctClockSkew: true,
+});
+
 const Bucket = 'MapGeo';
 const CHECK_TIME_MS = 1000;
 
 export default class S3Service {
   #aws?: AWS.S3;
+  #credentials?: {
+    accessKeyId: string;
+    secretAccessKey: string;
+    sessionToken: string;
+  };
 
   constructor(tokens: UploaderTokenResult) {
     console.log('s3 tokens: ', JSON.stringify(tokens));
-    const aws = new AWS.S3({
+    this.#credentials = {
       accessKeyId: tokens.AccessKeyId,
       secretAccessKey: tokens.SecretAccessKey,
       sessionToken: tokens.SessionToken,
+    };
+
+    const aws = new AWS.S3({
+      ...this.#credentials,
       params: {
         Bucket,
       },
@@ -46,23 +61,27 @@ export default class S3Service {
       Key: key,
       ContentType: `application/json`,
       Bucket,
-      Body: data,
     };
 
     return new Promise((resolve, reject) => {
       // create upload object to handle the uploading of data
-      this.#aws.upload(
-        uploadParams,
-        (err: AWS.AWSError, result: AWS.S3.ManagedUpload.SendData) => {
-          if (err) {
-            console.log('upload error: ', err);
-            return reject(err);
-          }
-          console.log('upload result: ', result);
-          // resolve(result);
-          resolve({ key, fileName } as UploadedResults);
-        }
-      );
+      const stream = new StreamingS3(data, this.#credentials, uploadParams, {
+        waitTime: 1000 * 2,
+      });
+
+      stream.on('part', (number: number) => {
+        console.log(`Part ${number} uploaded.`);
+      });
+
+      stream.on('finished', () => {
+        resolve({ key, fileName } as UploadedResults);
+      });
+
+      stream.on('error', (err: unknown) => {
+        reject(err);
+      });
+
+      stream.begin();
     });
   }
 
