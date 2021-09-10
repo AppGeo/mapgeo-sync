@@ -87,14 +87,21 @@ export default async function fileAction(ruleBundle: RuleBundle) {
     }
 
     case 'json': {
-      const fileBuffer = await fs.promises.readFile(rule.sourceConfig.filePath);
-      const file = fileBuffer.toString('utf-8');
-      return { ext, data: JSON.parse(file) as Record<string, unknown>[] };
+      const data = fs
+        .createReadStream(rule.sourceConfig.filePath)
+        .pipe(StreamValues.withParser())
+        .pipe(
+          pipe(({ value }: { key: number; value: Record<string, unknown> }) => {
+            return value;
+          })
+        );
+
+      return { ext, data };
     }
 
     case 'csv': {
       try {
-        console.time('pipe');
+        console.time(`pipe ${rule.sourceConfig.filePath}`);
         // const data: unknown[] = [];
 
         const data = fs
@@ -114,12 +121,12 @@ export default async function fileAction(ruleBundle: RuleBundle) {
         //   return item;
         // })
 
-        console.timeEnd('pipe');
-        debugger;
+        console.timeEnd(`pipe ${rule.sourceConfig.filePath}`);
+
         return { ext, data };
       } catch (e) {
         logScope.error('Error processing csv: ', e);
-        throw 'end';
+        throw e;
       }
 
       // console.time('direct');
