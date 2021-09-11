@@ -141,10 +141,8 @@ async function handleRule(
   // console.log('action result: ', result);
   const s3 = new S3Service(tokens);
   const folder = `ilya-test-${subdomain}`;
-  const ruleFileName = `rule_${ruleBundle.rule.id}__${runId}.json`;
-  const file = result.isGeoJson
-    ? ruleFileName.replace('.json', '.geojson')
-    : ruleFileName;
+  const fileExt = result.isGeoJson ? 'geojson' : 'json';
+  const file = `rule_${ruleBundle.rule.id}__${runId}.${fileExt}`;
 
   let stream: Readable;
 

@@ -1,4 +1,6 @@
 import * as AWS from 'aws-sdk';
+import { S3, waitUntilObjectExists } from '@aws-sdk/client-s3';
+
 // @ts-ignore
 import * as StreamingS3 from 'streaming-s3';
 import { UploaderTokenResult } from './mapgeo/service';
@@ -114,7 +116,16 @@ export default class S3Service {
     });
   }
 
-  waitForFile(key: string): Promise<WaitResults> {
+  async waitForFile(key: string): Promise<WaitResults> {
+    const res = await waitUntilObjectExists(
+      {
+        client: new S3({ credentials: this.#credentials }),
+        maxWaitTime: 60 * 60,
+      },
+      { Bucket, Key: key }
+    );
+    debugger;
+
     return new Promise((resolve, reject) => {
       let data: AWS.S3.Body;
       let timer = setInterval(() => {
@@ -122,31 +133,40 @@ export default class S3Service {
           clearInterval(timer);
           return;
         }
-        this.#aws.getObject(
-          {
-            Bucket,
-            Key: key,
-          },
-          (err: AWS.AWSError, result: AWS.S3.GetObjectOutput) => {
-            if (err) {
-              console.log('waitForFile error: ', err);
-              return reject(err);
-            }
-            let content: string | unknown;
-            try {
-              content = Buffer.isBuffer(result.Body)
-                ? JSON.parse((result.Body as Buffer).toString('utf-8'))
-                : result.Body;
-            } catch (e) {
-              // Ignore error
-              content = result.Body;
-            }
-            console.log(`waitForFile result ${key}: `, content);
-            // resolve(result);
-            resolve({ key, content } as WaitResults);
-            data = result.Body;
+
+        this.#aws.waitFor('objectExists', { Bucket, Key: key }, (e, res) => {
+          if (e && e.code === 'ResourceNotReady') {
+            return;
+          } else if (e) {
+            return reject(e);
           }
-        );
+
+          this.#aws.getObject(
+            {
+              Bucket,
+              Key: key,
+            },
+            (err: AWS.AWSError, result: AWS.S3.GetObjectOutput) => {
+              if (err) {
+                console.log('waitForFile error: ', err);
+                return reject(err);
+              }
+              let content: string | unknown;
+              try {
+                content = Buffer.isBuffer(result.Body)
+                  ? JSON.parse((result.Body as Buffer).toString('utf-8'))
+                  : result.Body;
+              } catch (e) {
+                // Ignore error
+                content = result.Body;
+              }
+              console.log(`waitForFile result ${key}: `, content);
+              // resolve(result);
+              resolve({ key, content } as WaitResults);
+              data = result.Body;
+            }
+          );
+        });
       }, CHECK_TIME_MS);
     });
   }

@@ -8,6 +8,7 @@ import * as fgdb from 'fgdb';
 import * as csv from 'csvtojson';
 import { pipe } from 'pipeline-pipe';
 import * as StreamValues from 'stream-json/streamers/StreamValues';
+import * as StreamArray from 'stream-json/streamers/StreamArray';
 import logger from '../logger';
 import Batcher from '../utils/batcher';
 import ToGeoJSON from '../utils/geojson-transform';
@@ -89,7 +90,7 @@ export default async function fileAction(ruleBundle: RuleBundle) {
     case 'json': {
       const data = fs
         .createReadStream(rule.sourceConfig.filePath)
-        .pipe(StreamValues.withParser())
+        .pipe(StreamArray.withParser())
         .pipe(
           pipe(({ value }: { key: number; value: Record<string, unknown> }) => {
             return value;
