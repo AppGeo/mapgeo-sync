@@ -140,9 +140,9 @@ async function handleRule(
   logScope.info('Acquired mapgeo credentials.');
   // console.log('action result: ', result);
   const s3 = new S3Service(tokens);
-  const folder = `ilya-test-${subdomain}`;
+  const folder = `ilya-test-${subdomain}/${ruleBundle.rule.id}/${runId}`;
   const fileExt = result.isGeoJson ? 'geojson' : 'json';
-  const file = `rule_${ruleBundle.rule.id}__${runId}.${fileExt}`;
+  const file = `rule_${ruleBundle.rule.name}.${fileExt}`;
 
   let stream: Readable;
 
