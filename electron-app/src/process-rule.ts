@@ -146,10 +146,14 @@ async function handleRule(
 
   let stream: Readable;
 
-  if (result.isGeoJson) {
-    stream = result.stream.pipe(new GeoJSONStringify());
+  if (result.stream instanceof Stream) {
+    if (result.isGeoJson) {
+      stream = result.stream.pipe(new GeoJSONStringify());
+    } else {
+      stream = result.stream.pipe(stringify());
+    }
   } else {
-    stream = result.stream.pipe(stringify());
+    stream = result.stream as any;
   }
 
   logScope.info('Sending to s3..');
@@ -272,43 +276,53 @@ async function loadData(ruleBundle: RuleBundle) {
 }
 
 function transformData(
-  data: Stream,
+  data: Stream | FeatureCollection | Record<string, unknown>[],
   options: { toGeoJson?: boolean; ext?: string } = {}
 ) {
-  return data.pipe(
-    pipe((item) => {
-      if (options.ext === '.csv') {
-        if (options.toGeoJson) {
-          const { the_geom, ...properties } = item;
-          const geometry =
-            typeof the_geom === 'string'
-              ? JSON.parse(the_geom)
-              : typeof the_geom === 'object'
-              ? the_geom
-              : null;
+  if (data instanceof Stream) {
+    return data.pipe(pipe(transformItem(options)));
+  }
 
-          return {
-            type: 'Feature',
-            properties,
-            geometry,
-          };
-        }
-      } else if (options.ext !== '.geojson') {
-        let geom;
+  if ('features' in data) {
+    return data;
+  }
 
-        if (item.the_geom) {
-          try {
-            geom = JSON.parse(item.the_geom);
-          } catch (e) {
-            //noop
-          }
-        }
-        return { ...item, the_geom: geom };
+  return data.map(transformItem(options));
+}
+
+function transformItem(options: { toGeoJson?: boolean; ext?: string }) {
+  return function transform(item: Record<string, unknown>) {
+    if (options.ext === '.csv') {
+      if (options.toGeoJson) {
+        const { the_geom, ...properties } = item;
+        const geometry =
+          typeof the_geom === 'string'
+            ? JSON.parse(the_geom)
+            : typeof the_geom === 'object'
+            ? the_geom
+            : null;
+
+        return {
+          type: 'Feature',
+          properties,
+          geometry,
+        };
       }
+    } else if (options.ext !== '.geojson') {
+      let geom;
 
-      return item;
-    })
-  );
+      if (item.the_geom && typeof item.the_geom === 'string') {
+        try {
+          geom = JSON.parse(item.the_geom);
+        } catch (e) {
+          //noop
+        }
+      }
+      return { ...item, the_geom: geom };
+    }
+
+    return item;
+  };
 }
 
 function uploadMetadata(community: string, ruleBundle: RuleBundle) {
