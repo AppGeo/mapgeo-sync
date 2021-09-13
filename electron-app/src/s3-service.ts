@@ -66,9 +66,7 @@ export default class S3Service {
 
     return new Promise((resolve, reject) => {
       // create upload object to handle the uploading of data
-      const stream = new StreamingS3(data, this.#credentials, uploadParams, {
-        waitTime: 1000 * 2,
-      });
+      const stream = new StreamingS3(data, this.#credentials, uploadParams);
 
       stream.on('part', (number: number) => {
         console.log(`Part ${number} uploaded.`);
