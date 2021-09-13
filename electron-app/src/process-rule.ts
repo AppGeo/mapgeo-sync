@@ -142,7 +142,7 @@ async function handleRule(
   const s3 = new S3Service(tokens);
   const folder = `ilya-test-${subdomain}/${ruleBundle.rule.id}/${runId}`;
   const fileExt = result.isGeoJson ? 'geojson' : 'json';
-  const file = `rule_${ruleBundle.rule.name}.${fileExt}`;
+  const file = `rule_${ruleBundle.rule.name.replace(/\s/g, '-')}.${fileExt}`;
 
   let stream: Readable;
 
@@ -262,16 +262,15 @@ async function loadData(ruleBundle: RuleBundle) {
   switch (ruleBundle.source.sourceType) {
     case 'file': {
       const { ext, data } = await handleFileSource(ruleBundle);
-      const stream = transformData(data as any, { ext });
+      const stream = transformData(data, { ext });
       return { ext, stream, isGeoJson: false };
     }
     case 'database': {
-      const data = await queryDatabaseSource(ruleBundle);
-      const toGeoJson = data.length && (data[0] as any).the_geom ? true : false;
-      const stream = transformData(data as any, {
-        toGeoJson,
+      const data = queryDatabaseSource(ruleBundle);
+      const stream = transformData(data, {
+        toGeoJson: true,
       });
-      return { isGeoJson: toGeoJson, stream };
+      return { isGeoJson: true, stream };
     }
     default:
       const exhaustiveCheck: never = ruleBundle.source;
@@ -283,36 +282,41 @@ function transformData(
   data: Stream | FeatureCollection | Record<string, unknown>[],
   options: { toGeoJson?: boolean; ext?: string } = {}
 ) {
-  if (data instanceof Stream) {
-    return data.pipe(pipe(transformItem(options)));
-  }
+  try {
+    if (data instanceof Stream) {
+      return data.pipe(pipe(transformItem(options)));
+    }
 
-  if ('features' in data) {
-    return data;
-  }
+    if ('features' in data && !Array.isArray(data)) {
+      return data;
+    }
 
-  return data.map(transformItem(options));
+    return data.map(transformItem(options));
+  } catch (e) {
+    debugger;
+    throw e;
+  }
 }
 
 function transformItem(options: { toGeoJson?: boolean; ext?: string }) {
   return function transform(item: Record<string, unknown>) {
-    if (options.ext === '.csv') {
-      if (options.toGeoJson) {
-        const { the_geom, ...properties } = item;
-        const geometry =
-          typeof the_geom === 'string'
-            ? JSON.parse(the_geom)
-            : typeof the_geom === 'object'
-            ? the_geom
-            : null;
+    if (options.toGeoJson) {
+      const { the_geom, ...properties } = item;
+      const geometry =
+        typeof the_geom === 'string'
+          ? JSON.parse(the_geom)
+          : typeof the_geom === 'object'
+          ? the_geom
+          : null;
 
-        return {
-          type: 'Feature',
-          properties,
-          geometry,
-        };
-      }
-    } else if (options.ext !== '.geojson') {
+      return {
+        type: 'Feature',
+        properties,
+        geometry,
+      };
+    }
+
+    if (options.ext !== '.geojson') {
       let geom;
 
       if (item.the_geom && typeof item.the_geom === 'string') {
