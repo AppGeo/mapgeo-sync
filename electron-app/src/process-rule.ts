@@ -294,7 +294,16 @@ function transformData(
           };
         }
       } else if (options.ext !== '.geojson') {
-        return { ...item, the_geom: JSON.parse(item.the_geom) };
+        let geom;
+
+        if (item.the_geom) {
+          try {
+            geom = JSON.parse(item.the_geom);
+          } catch (e) {
+            //noop
+          }
+        }
+        return { ...item, the_geom: geom };
       }
 
       return item;

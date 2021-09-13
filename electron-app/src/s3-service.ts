@@ -1,5 +1,4 @@
 import * as AWS from 'aws-sdk';
-import { S3, waitUntilObjectExists } from '@aws-sdk/client-s3';
 
 // @ts-ignore
 import * as StreamingS3 from 'streaming-s3';
@@ -117,15 +116,6 @@ export default class S3Service {
   }
 
   async waitForFile(key: string): Promise<WaitResults> {
-    const res = await waitUntilObjectExists(
-      {
-        client: new S3({ credentials: this.#credentials }),
-        maxWaitTime: 60 * 60,
-      },
-      { Bucket, Key: key }
-    );
-    debugger;
-
     return new Promise((resolve, reject) => {
       let data: AWS.S3.Body;
       let timer = setInterval(() => {
