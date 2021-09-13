@@ -187,12 +187,16 @@ async function handleRule(
   const status = (await s3.waitForFile(res.key)) as { content: UploadStatus };
   logScope.log('upload-status.json content: ', status.content);
 
-  // const numRows = !('features' in result) ? result.length : 0;
-  // const numItems = 'features' in result ? result.features.length : numRows;
+  const numRows =
+    !(result.stream instanceof Stream) && !('features' in result.stream)
+      ? result.stream.length
+      : 0;
+  const numItems =
+    'features' in result.stream ? result.stream.features.length : numRows;
 
   return {
     status: status.content,
-    numItems: 1,
+    numItems,
     ...ruleBundle,
   };
 }

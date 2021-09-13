@@ -99,7 +99,7 @@ export interface RuleLogItem {
   runMode: 'scheduled' | 'manual';
   startedAt: Date;
   endedAt: Date;
-  errors: { message: string }[];
+  errors: { message: string; type: 'error' | 'warning' | 'success' }[];
   numItems?: number;
   intersection?: {
     ok: boolean;

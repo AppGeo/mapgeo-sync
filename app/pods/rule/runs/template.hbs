@@ -23,9 +23,9 @@
     </h3>
 
     <ul>
-      {{#each this.state.logs as |logItem|}}
+      {{#each this.state.logs as |logItem index|}}
         <li>
-          <Rule::LogItem @item={{logItem}} />
+          <Rule::LogItem @item={{logItem}} @isOpen={{eq index 0}} />
         </li>
       {{/each}}
     </ul>

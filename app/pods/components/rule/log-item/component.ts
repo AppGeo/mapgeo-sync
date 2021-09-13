@@ -11,4 +11,8 @@ export default class RuleLogItemComponent extends Component<RuleLogItemArgs> {
   distance = helper(([log]: [RuleLogItem]) => {
     return formatDistance(new Date(log.endedAt), new Date(log.startedAt));
   });
+
+  get warnings() {
+    return this.args.item.errors.filter((item) => item.type === 'warning');
+  }
 }
