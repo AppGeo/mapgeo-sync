@@ -8,6 +8,10 @@
     @onSubmit={{perform this.updateRule}} as |Form changeset|
   >
     <m.Body>
+      <p class='text-gray-500'>
+        Rule ID: {{@rule.id}}
+      </p>
+
       {{#if changeset.sourceConfig.selectStatement}}
         <Form.Textarea
           @label='Select Statement'
