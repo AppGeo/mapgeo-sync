@@ -9,6 +9,8 @@ import * as csv from 'csvtojson';
 import { pipe } from 'pipeline-pipe';
 import * as StreamValues from 'stream-json/streamers/StreamValues';
 import * as StreamArray from 'stream-json/streamers/StreamArray';
+// @ts-ignore
+import { parse } from 'JSONStream';
 import logger from '../logger';
 import Batcher from '../utils/batcher';
 import ToGeoJSON from '../utils/geojson-transform';
@@ -82,9 +84,10 @@ export default async function fileAction(ruleBundle: RuleBundle) {
     // }
 
     case 'geojson': {
-      const fileBuffer = await fs.promises.readFile(rule.sourceConfig.filePath);
-      const file = fileBuffer.toString('utf-8');
-      return { ext, data: JSON.parse(file) as FeatureCollection };
+      const data = fs
+        .createReadStream(rule.sourceConfig.filePath)
+        .pipe(parse('features.*'));
+      return { ext, data };
     }
 
     case 'json': {

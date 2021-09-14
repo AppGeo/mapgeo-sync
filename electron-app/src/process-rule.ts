@@ -11,7 +11,7 @@ import {
   SyncRule,
 } from 'mapgeo-sync-config';
 import { SyncStoreType } from './store/store';
-import { typeConversion } from './utils/table-mappings';
+import { primary, PrimaryId, typeConversion } from './utils/table-mappings';
 import logger from './logger';
 import { Readable, Stream } from 'stream';
 // @ts-ignore
@@ -179,6 +179,7 @@ async function handleRule(
         filename: fileName,
         fieldname: metadata.fieldname,
         table: metadata.table, // for finding layers, unused for now
+        typeId: metadata.typeId,
       },
     ],
   });
@@ -263,7 +264,7 @@ async function loadData(ruleBundle: RuleBundle) {
     case 'file': {
       const { ext, data } = await handleFileSource(ruleBundle);
       const stream = transformData(data, { ext });
-      return { ext, stream, isGeoJson: false };
+      return { ext, stream, isGeoJson: ext === '.geojson' };
     }
     case 'database': {
       const data = queryDatabaseSource(ruleBundle);
@@ -337,11 +338,11 @@ function uploadMetadata(community: string, ruleBundle: RuleBundle) {
   const fileName = `${community}_rule_${ruleBundle.rule.id}.json`;
 
   const res: UploadMetadata = {
-    fieldname:
-      typeConversion.get(ruleBundle.rule.mappingId) ||
-      ruleBundle.rule.mappingId,
+    fieldname: primary.includes(ruleBundle.rule.mappingId as PrimaryId)
+      ? ruleBundle.rule.mappingId
+      : 'mapping',
     table: fileName.slice(0, fileName.lastIndexOf('.')),
-    typeId: fileName.slice(0, fileName.lastIndexOf('.')),
+    typeId: ruleBundle.rule.mappingId,
   };
 
   return res;
