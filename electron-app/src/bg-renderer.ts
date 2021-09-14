@@ -1,10 +1,15 @@
-import { BrowserWindow } from 'electron';
+import { BrowserWindow, Notification } from 'electron';
 import * as isDev from 'electron-is-dev';
 import logger from './logger';
 
 let bgWindow: BrowserWindow;
 
 export function createBgRenderer() {
+  const closedNotification = new Notification({
+    title: 'Background process has errored/closed.',
+    body: 'Please restart MapGeo Sync. If this keeps happening please contact customer support at support@mapgeo.io with details.',
+  });
+
   bgWindow = new BrowserWindow({
     show: isDev,
     webPreferences: {
@@ -23,10 +28,13 @@ export function createBgRenderer() {
   bgWindow.loadURL('file://' + __dirname + '/views/background.html');
 
   bgWindow.on('closed', () => {
-    console.log('background window closed');
+    closedNotification.show();
+    logger.log('background window closed');
   });
 
   bgWindow.webContents.on('render-process-gone', (_event, details) => {
+    closedNotification.show();
+
     if (details.reason !== 'killed') {
       logger.log(
         'Your BG processing app (or other code) in the main window has crashed.'
