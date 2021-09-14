@@ -6,7 +6,7 @@ let bgWindow: BrowserWindow;
 
 export function createBgRenderer() {
   bgWindow = new BrowserWindow({
-    // show: false,
+    show: isDev,
     webPreferences: {
       // So we can use electron-store on the client
       enableRemoteModule: true,

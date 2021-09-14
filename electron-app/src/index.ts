@@ -458,30 +458,47 @@ app.on('ready', async () => {
     },
   ];
 
+  const debuggingMenus = [
+    {
+      label: 'Open Config',
+      click: () => {
+        shell.openPath(store.path);
+      },
+    },
+    {
+      label: 'Open Logs',
+      click: () => {
+        // Copied path from https://github.com/megahertz/electron-log/issues/270#issuecomment-898495244
+        shell.openPath(logger.transports.file.getFile().path);
+      },
+    },
+    {
+      label: 'Open Crash Report',
+      click: () => {
+        shell.openPath(app.getPath('crashDumps'));
+      },
+    },
+  ];
+
+  if (isDev) {
+    // Used to debug the background processing
+    // Open the bg, and
+    debuggingMenus.push({
+      label: 'Toggle BG Window',
+      click: () => {
+        if (bgWindow.isVisible) {
+          bgWindow.hide();
+        } else {
+          bgWindow.show();
+        }
+      },
+    });
+  }
+
   menuItems.push({
     type: 'submenu',
     label: 'Debugging',
-    submenu: [
-      {
-        label: 'Open Config',
-        click: () => {
-          shell.openPath(store.path);
-        },
-      },
-      {
-        label: 'Open Logs',
-        click: () => {
-          // Copied path from https://github.com/megahertz/electron-log/issues/270#issuecomment-898495244
-          shell.openPath(logger.transports.file.getFile().path);
-        },
-      },
-      {
-        label: 'Open Crash Report',
-        click: () => {
-          shell.openPath(app.getPath('crashDumps'));
-        },
-      },
-    ],
+    submenu: debuggingMenus,
   });
 
   const contextMenu = Menu.buildFromTemplate([
@@ -496,6 +513,7 @@ app.on('ready', async () => {
   ]);
   tray.setToolTip('MapGeo Sync');
   tray.setContextMenu(contextMenu);
+  Menu.setApplicationMenu(contextMenu);
 
   await handleFileUrls(emberAppDir);
 
