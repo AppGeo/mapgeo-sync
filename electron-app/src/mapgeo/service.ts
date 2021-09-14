@@ -29,6 +29,7 @@ export type UploadedMetadata = {
   filename: string;
   fieldname: string;
   table: string;
+  typeId?: string;
 };
 
 export type CartoDirectResult = {
@@ -57,11 +58,7 @@ export default class MapgeoService {
     }
 
     try {
-      const result = await fetch(`${origin}/api/config/current`, {
-        agent: httpsAgent,
-      });
-      const data = await result.json();
-      const config = result.status < 400 && data;
+      const config = await MapgeoService.fetchConfig(origin);
 
       if (config) {
         const instance = new MapgeoService(origin, config);
@@ -73,6 +70,15 @@ export default class MapgeoService {
       logScope.log('setting up mapgeo service error: ', e);
       throw e;
     }
+  }
+
+  static async fetchConfig(origin: string) {
+    const result = await fetch(`${origin}/api/config/current`, {
+      agent: httpsAgent,
+    });
+    const data = await result.json();
+    const config = result.status < 400 && data;
+    return config?.community;
   }
 
   constructor(host: string, config: Record<string, unknown>) {

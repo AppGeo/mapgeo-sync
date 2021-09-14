@@ -52,7 +52,7 @@ const fileTypes: { [FileType in SyncFileConfig['fileType']]: string } = {
   json: '.json (Array With Rows)',
   geojson: '.geojson (Feature Collection)',
   csv: '.csv (Usually exported from Excel or a similar tool)',
-  gdb: 'File GeoDatabase (A folder containing all the files. Unzip your zip file.)',
+  gdb: 'File GeoDatabase (Experimental. A folder containing all the files. Unzip your zip file.)',
 } as const;
 const fileTypeKeys = Object.keys(fileTypes) as (keyof typeof fileTypes)[];
 const defaultFrequency: ScheduleFrequency = 'daily';

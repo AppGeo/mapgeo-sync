@@ -3,7 +3,7 @@ import * as Store from 'electron-store';
 import { RecurrenceRule, Range } from 'node-schedule';
 import { SyncStoreType } from './store/store';
 import { SyncRule, SyncState } from 'mapgeo-sync-config';
-import { QueryActionResponse } from './workers/query-action';
+import { QueryActionResponse } from './process-rule';
 import logger from './logger';
 
 const logScope = logger.scope('scheduler');

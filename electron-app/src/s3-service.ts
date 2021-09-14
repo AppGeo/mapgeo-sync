@@ -1,4 +1,7 @@
 import * as AWS from 'aws-sdk';
+
+// @ts-ignore
+import * as StreamingS3 from 'streaming-s3';
 import { UploaderTokenResult } from './mapgeo/service';
 
 export type UploadedResults = {
@@ -11,18 +14,31 @@ export type WaitResults = {
   content: string | unknown;
 };
 
+AWS.config.update({
+  correctClockSkew: true,
+});
+
 const Bucket = 'MapGeo';
 const CHECK_TIME_MS = 1000;
 
 export default class S3Service {
   #aws?: AWS.S3;
+  #credentials?: {
+    accessKeyId: string;
+    secretAccessKey: string;
+    sessionToken: string;
+  };
 
   constructor(tokens: UploaderTokenResult) {
     console.log('s3 tokens: ', JSON.stringify(tokens));
-    const aws = new AWS.S3({
+    this.#credentials = {
       accessKeyId: tokens.AccessKeyId,
       secretAccessKey: tokens.SecretAccessKey,
       sessionToken: tokens.SessionToken,
+    };
+
+    const aws = new AWS.S3({
+      ...this.#credentials,
       params: {
         Bucket,
       },
@@ -46,23 +62,25 @@ export default class S3Service {
       Key: key,
       ContentType: `application/json`,
       Bucket,
-      Body: data,
     };
 
     return new Promise((resolve, reject) => {
       // create upload object to handle the uploading of data
-      this.#aws.upload(
-        uploadParams,
-        (err: AWS.AWSError, result: AWS.S3.ManagedUpload.SendData) => {
-          if (err) {
-            console.log('upload error: ', err);
-            return reject(err);
-          }
-          console.log('upload result: ', result);
-          // resolve(result);
-          resolve({ key, fileName } as UploadedResults);
-        }
-      );
+      const stream = new StreamingS3(data, this.#credentials, uploadParams);
+
+      stream.on('part', (number: number) => {
+        console.log(`Part ${number} uploaded.`);
+      });
+
+      stream.on('finished', () => {
+        resolve({ key, fileName } as UploadedResults);
+      });
+
+      stream.on('error', (err: unknown) => {
+        reject(err);
+      });
+
+      stream.begin();
     });
   }
 
@@ -95,7 +113,7 @@ export default class S3Service {
     });
   }
 
-  waitForFile(key: string): Promise<WaitResults> {
+  async waitForFile(key: string): Promise<WaitResults> {
     return new Promise((resolve, reject) => {
       let data: AWS.S3.Body;
       let timer = setInterval(() => {
@@ -103,31 +121,40 @@ export default class S3Service {
           clearInterval(timer);
           return;
         }
-        this.#aws.getObject(
-          {
-            Bucket,
-            Key: key,
-          },
-          (err: AWS.AWSError, result: AWS.S3.GetObjectOutput) => {
-            if (err) {
-              console.log('waitForFile error: ', err);
-              return reject(err);
-            }
-            let content: string | unknown;
-            try {
-              content = Buffer.isBuffer(result.Body)
-                ? JSON.parse((result.Body as Buffer).toString('utf-8'))
-                : result.Body;
-            } catch (e) {
-              // Ignore error
-              content = result.Body;
-            }
-            console.log(`waitForFile result ${key}: `, content);
-            // resolve(result);
-            resolve({ key, content } as WaitResults);
-            data = result.Body;
+
+        this.#aws.waitFor('objectExists', { Bucket, Key: key }, (e, res) => {
+          if (e && e.code === 'ResourceNotReady') {
+            return;
+          } else if (e) {
+            return reject(e);
           }
-        );
+
+          this.#aws.getObject(
+            {
+              Bucket,
+              Key: key,
+            },
+            (err: AWS.AWSError, result: AWS.S3.GetObjectOutput) => {
+              if (err) {
+                console.log('waitForFile error: ', err);
+                return reject(err);
+              }
+              let content: string | unknown;
+              try {
+                content = Buffer.isBuffer(result.Body)
+                  ? JSON.parse((result.Body as Buffer).toString('utf-8'))
+                  : result.Body;
+              } catch (e) {
+                // Ignore error
+                content = result.Body;
+              }
+              console.log(`waitForFile result ${key}: `, content);
+              // resolve(result);
+              resolve({ key, content } as WaitResults);
+              data = result.Body;
+            }
+          );
+        });
       }, CHECK_TIME_MS);
     });
   }

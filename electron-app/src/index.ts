@@ -5,6 +5,7 @@ import {
   crashReporter,
   dialog,
   ipcMain,
+  IpcMainEvent,
   Menu,
   MenuItem,
   shell,
@@ -40,13 +41,14 @@ import {
   ErrorResponse,
   FinishedResponse,
   QueryActionResponse,
-} from './workers/query-action';
+} from './process-rule';
 import { handleSquirrelEvent } from './squirrel-startup';
 import wrapRule from './utils/wrap-rule';
 import { v4 } from 'uuid';
 import { MenuItemConstructorOptions } from 'electron/main';
 import flatState from './utils/log-state';
 import { test } from './source-handlers/database';
+import { createBgRenderer } from './bg-renderer';
 
 const pkg = require('../package.json');
 
@@ -58,8 +60,8 @@ const version = pkg.version;
 
 let scheduler: Scheduler;
 let mainWindow: BrowserWindow;
+let bgWindow: BrowserWindow;
 let tray: Tray;
-let queryWorker: Worker;
 let mapgeoService: MapgeoService;
 let authService: Interpreter<
   AuthContext,
@@ -114,7 +116,6 @@ app.setLoginItemSettings({
 
 registerMapgeoHandlers(ipcMain);
 registerStoreHandlers(ipcMain);
-initWorkers();
 
 if (!scheduler) {
   const logScope = logger.scope('scheduler');
@@ -133,26 +134,26 @@ if (!scheduler) {
         running: true,
       });
 
-      queryWorker.postMessage({
-        event: 'handle-rule',
-        data: {
-          runId,
-          ruleBundle,
-          mapgeo: store.get('mapgeo'),
-        },
+      bgWindow.webContents.send('handle-rule', {
+        runId,
+        ruleBundle,
+        mapgeo: store.get('mapgeo'),
       });
 
       const result = await new Promise(
         (resolve: (msg: QueryActionResponse) => void, reject) => {
-          const handleMessage = (message: QueryActionResponse) => {
+          const handleMessage = (
+            event: IpcMainEvent,
+            message: QueryActionResponse
+          ) => {
             if (message.rule.id === rule.id && message.runId === runId) {
-              queryWorker.off('message', handleMessage);
+              ipcMain.off('rule-handled', handleMessage);
               logScope.log('handle-rule result: ' + message);
               resolve(message);
             }
           };
 
-          queryWorker.on('message', handleMessage);
+          ipcMain.on('rule-handled', handleMessage);
         }
       );
 
@@ -178,6 +179,10 @@ logger.log('starting auth service');
 
 authService.start();
 logger.log('initial state: ', flatState(authService));
+
+ipcMain.on('bg-ready', (event, arg) => {
+  logger.info('bg-ready');
+});
 
 ipcMain.handle('testConnection', async (event, source: Source) => {
   try {
@@ -333,21 +338,25 @@ function createBrowserWindow() {
           running: true,
         });
 
-        queryWorker.postMessage({
-          event: 'handle-rule',
-          data: { ruleBundle, runId, mapgeo: store.get('mapgeo') },
+        bgWindow.webContents.send('handle-rule', {
+          ruleBundle,
+          runId,
+          mapgeo: store.get('mapgeo'),
         });
 
-        const handleMessage = (message: QueryActionResponse) => {
+        const handleMessage = (
+          event: IpcMainEvent,
+          message: QueryActionResponse
+        ) => {
           if (message.rule.id === rule.id && message.runId === runId) {
-            queryWorker.off('message', handleMessage);
+            ipcMain.off('rule-handled', handleMessage);
             // logger.log(message);
             event.reply('action-result', message);
             updateRuleStateAfterRun(rule, message, runId, { startedAt });
           }
         };
 
-        queryWorker.on('message', handleMessage);
+        ipcMain.on('rule-handled', handleMessage);
       });
     } catch (e) {
       logger.scope('did-finish-load').error(e);
@@ -408,6 +417,9 @@ crashReporter.start({
 logger.log('crash path', app.getPath('crashDumps'));
 logger.log('log path', app.getPath('userData'));
 
+// Increase max memory
+app.commandLine.appendSwitch('js-flags', '--max-old-space-size=4096');
+
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     logger.log('closing because windows closed');
@@ -446,30 +458,47 @@ app.on('ready', async () => {
     },
   ];
 
+  const debuggingMenus = [
+    {
+      label: 'Open Config',
+      click: () => {
+        shell.openPath(store.path);
+      },
+    },
+    {
+      label: 'Open Logs',
+      click: () => {
+        // Copied path from https://github.com/megahertz/electron-log/issues/270#issuecomment-898495244
+        shell.openPath(logger.transports.file.getFile().path);
+      },
+    },
+    {
+      label: 'Open Crash Report',
+      click: () => {
+        shell.openPath(app.getPath('crashDumps'));
+      },
+    },
+  ];
+
+  if (isDev) {
+    // Used to debug the background processing
+    // Open the bg, and
+    debuggingMenus.push({
+      label: 'Toggle BG Window',
+      click: () => {
+        if (bgWindow.isVisible) {
+          bgWindow.hide();
+        } else {
+          bgWindow.show();
+        }
+      },
+    });
+  }
+
   menuItems.push({
     type: 'submenu',
     label: 'Debugging',
-    submenu: [
-      {
-        label: 'Open Config',
-        click: () => {
-          shell.openPath(store.path);
-        },
-      },
-      {
-        label: 'Open Logs',
-        click: () => {
-          // Copied path from https://github.com/megahertz/electron-log/issues/270#issuecomment-898495244
-          shell.openPath(logger.transports.file.getFile().path);
-        },
-      },
-      {
-        label: 'Open Crash Report',
-        click: () => {
-          shell.openPath(app.getPath('crashDumps'));
-        },
-      },
-    ],
+    submenu: debuggingMenus,
   });
 
   const contextMenu = Menu.buildFromTemplate([
@@ -484,10 +513,12 @@ app.on('ready', async () => {
   ]);
   tray.setToolTip('MapGeo Sync');
   tray.setContextMenu(contextMenu);
+  Menu.setApplicationMenu(contextMenu);
 
   await handleFileUrls(emberAppDir);
 
   mainWindow = createBrowserWindow();
+  bgWindow = createBgRenderer();
 });
 
 // Handle an unhandled error in the main thread
@@ -513,12 +544,6 @@ process.on('uncaughtException', (err) => {
   logger.log(`Exception: ${err}`);
   logger.log(err.stack);
 });
-
-async function initWorkers() {
-  queryWorker = new Worker(path.join(__dirname, 'workers', 'query-action.js'), {
-    workerData: { mapgeo: store.get('mapgeo') },
-  });
-}
 
 function updateSyncState(rule: SyncRule, data: Omit<Partial<SyncState>, 'id'>) {
   const all = store.get('syncState') || [];
@@ -558,12 +583,6 @@ function updateRuleStateAfterRun(
   const state = all.find((item) => item.ruleId === rule.id);
   const logs = state.logs || [];
   const runMode = wasScheduled ? 'scheduled' : 'manual';
-  const numRows =
-    'rows' in result && !('features' in result.rows) ? result.rows.length : 0;
-  const numItems =
-    'rows' in result && 'features' in result.rows
-      ? result.rows.features.length
-      : numRows;
 
   if (!logs.find((log) => log.runId === runId)) {
     if ('status' in result) {
@@ -571,7 +590,7 @@ function updateRuleStateAfterRun(
         ok: !!result.status.ok,
         runMode,
         runId,
-        numItems,
+        numItems: result.numItems,
         errors: result.status.messages,
         intersection: result.status.intersection,
         startedAt,
@@ -582,7 +601,7 @@ function updateRuleStateAfterRun(
         ok: result.errors === undefined || result.errors.length === 0,
         runMode,
         runId,
-        numItems,
+        numItems: result.numItems,
         errors: result.errors.map((err) => ({
           type: 'error',
           message: err.message,

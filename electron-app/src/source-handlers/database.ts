@@ -2,6 +2,7 @@ import knex from 'knex';
 import { RuleBundle, Source, SyncDbConfig } from 'mapgeo-sync-config';
 // @ts-ignore
 import * as ConnectionsString from 'mssql/lib/connectionstring';
+import { PassThrough } from 'stream';
 
 export async function test(source: Source) {
   const { db, source: dbSource } = initDb(source);
@@ -26,7 +27,9 @@ export async function test(source: Source) {
   }
 }
 
-export async function query(ruleBundle: RuleBundle): Promise<unknown[]> {
+export function query(
+  ruleBundle: RuleBundle
+): PassThrough & AsyncIterable<unknown> {
   const source = ruleBundle.source;
 
   if (!source) {
@@ -35,13 +38,13 @@ export async function query(ruleBundle: RuleBundle): Promise<unknown[]> {
 
   const { db } = initDb(source);
 
-  let result = await db.raw(
+  let result = db.raw(
     (ruleBundle.rule.sourceConfig as SyncDbConfig).selectStatement
   );
 
-  console.log(`found ${result?.rows?.length} items`);
+  // console.log(`found ${result?.rows?.length} items`);
 
-  return result?.rows;
+  return result.stream();
 }
 
 function initDb(source: Source) {

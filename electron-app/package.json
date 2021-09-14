@@ -8,12 +8,17 @@
     "url": "https://github.com/AppGeo/mapgeo-sync"
   },
   "scripts": {
-    "start": "electron-forge start",
+    "start": "electron-forge start -- --js-flags='--max-old-space-size=12192 --max-heap-size=100000'",
     "predebug": "yarn build:ts",
-    "debug": "electron-forge start --inspect-electron",
+    "debug": "electron-forge start --inspect-electron -- --js-flags='--max-old-space-size=12192 --max-heap-size=100000'",
     "watch": "tsc-watch --onCompilationComplete 'yarn start'",
+    "prewatch": "npm run copy-all",
     "watch:debug": "tsc-watch --onCompilationComplete 'yarn debug'",
+    "prewatch:debug": "npm run copy-all",
     "build:ts": "tsc",
+    "postbuild:ts": "npm run copy-all",
+    "copy-all": "npm-run-all --parallel copy:*",
+    "copy:views": "copyfiles -u 1 src/views/**/*.html dist",
     "prepackage": "npm run build:ts",
     "package:macos": "electron-forge package",
     "package:windows": "yarn package -p win32",
@@ -77,6 +82,9 @@
     }
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.30.0",
+    "@aws-sdk/lib-storage": "^3.30.0",
+    "JSONStream": "^1.3.5",
     "aws-sdk": "^2.914.0",
     "csvtojson": "^2.0.10",
     "electron-devtools-installer": "^3.2.0",
@@ -92,6 +100,10 @@
     "node-schedule": "^2.0.0",
     "oracledb": "^5.1.0",
     "pg": "^8.6.0",
+    "pg-query-stream": "^4.2.1",
+    "pipeline-pipe": "^0.3.0",
+    "stream-json": "^1.7.2",
+    "streaming-s3": "^0.4.4",
     "update-electron-app": "^2.0.1",
     "uuid": "^8.3.2",
     "xstate": "^4.23.1"
@@ -107,15 +119,18 @@
     "@types/electron-devtools-installer": "^2.2.0",
     "@types/geojson": "^7946.0.8",
     "@types/mssql": "^7.1.3",
-    "@types/node": "^12.19.13",
+    "@types/node": "^14.17.6",
     "@types/node-fetch": "^2.5.10",
     "@types/node-schedule": "^1.3.1",
+    "@types/stream-json": "^1.7.1",
     "@types/tap": "^15.0.4",
     "@typescript-eslint/eslint-plugin": "^4.28.5",
     "@typescript-eslint/parser": "^4.28.5",
+    "copyfiles": "^2.4.1",
     "electron": "13.1.7",
     "eslint": "^7.17.0",
     "eslint-plugin-import": "^2.22.1",
+    "npm-run-all": "^4.1.5",
     "tap": "^15.0.9",
     "tap-spec": "^5.0.0",
     "ts-json-schema-generator": "^0.93.0",
@@ -123,7 +138,7 @@
     "typescript": "^4.4.2"
   },
   "volta": {
-    "node": "12.22.1",
+    "node": "14.17.6",
     "yarn": "1.22.5"
   }
 }

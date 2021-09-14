@@ -1,5 +1,5 @@
 <div ...attributes>
-  <details>
+  <details open={{@isOpen}}>
     <summary
       class='bg-gray-700 p-2 text-sm flex justify-between hover:bg-gray-600'
     >
@@ -49,17 +49,25 @@
 
                   {{error.message}}
                 </div>
-              {{else if (eq error.type 'warning')}}
-                <div class='text-yellow-400'>
-                  <FaIcon @icon='exclamation-triangle' />
-
-                  {{error.message}}
-                </div>
               {{/if}}
+            </li>
+          {{/each}}
+
+          {{#each this.warnings as |warning|}}
+            <li>
+              <div class='text-yellow-400'>
+                <FaIcon @icon='exclamation-triangle' />
+
+                {{warning.message}}
+              </div>
             </li>
           {{/each}}
         </ul>
       {{/if}}
+
+      <p class='text-gray-400 p-2 space-y-2'>
+        Run ID: {{@item.runId}}
+      </p>
     </div>
   </details>
 </div>
