@@ -7,7 +7,6 @@ import {
   ipcMain,
   IpcMainEvent,
   Menu,
-  MenuItem,
   shell,
   Tray,
 } from 'electron';
@@ -18,14 +17,12 @@ import type {
   LoginData,
   SetupData,
   Source,
-  SyncConfig,
   SyncRule,
   SyncState,
 } from 'mapgeo-sync-config';
 import * as path from 'path';
 import { pathToFileURL } from 'url';
 import * as os from 'os';
-import { Worker } from 'worker_threads';
 import { EventObject, Interpreter } from 'xstate';
 import { AuthContext } from './auth/machine';
 import { createService as createAuthService } from './auth/service';
@@ -478,25 +475,31 @@ app.on('ready', async () => {
         shell.openPath(app.getPath('crashDumps'));
       },
     },
+    {
+      label: 'Open Main DevTools',
+      click: () => {
+        mainWindow?.webContents.openDevTools();
+      },
+    },
   ];
 
-  if (isDev) {
-    // Used to debug the background processing
-    // Open the bg, and
-    debuggingMenus.push({
-      label: 'Toggle BG Window',
-      click: () => {
-        if (bgWindow.isVisible) {
-          bgWindow.hide();
-        } else {
-          bgWindow.show();
-        }
-      },
-    });
-  }
+  // if (isDev) {
+  // Used to debug the background processing
+  // Open the bg, and
+  debuggingMenus.push({
+    label: 'Toggle BG Window',
+    click: () => {
+      if (bgWindow.isVisible()) {
+        bgWindow.hide();
+      } else {
+        bgWindow.show();
+      }
+    },
+  });
+  // }
 
   menuItems.push({
-    type: 'submenu',
+    // type: 'submenu',
     label: 'Debugging',
     submenu: debuggingMenus,
   });
@@ -513,7 +516,16 @@ app.on('ready', async () => {
   ]);
   tray.setToolTip('MapGeo Sync');
   tray.setContextMenu(contextMenu);
-  Menu.setApplicationMenu(contextMenu);
+
+  const windowMenu = Menu.buildFromTemplate([
+    {
+      type: 'submenu',
+      label: 'Debugging',
+      submenu: debuggingMenus,
+    },
+  ]);
+
+  Menu.setApplicationMenu(windowMenu);
 
   await handleFileUrls(emberAppDir);
 

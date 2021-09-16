@@ -21,15 +21,14 @@ export function createBgRenderer() {
     },
   });
 
-  if (isDev) {
-    bgWindow.webContents.openDevTools();
-  }
+  bgWindow.webContents.openDevTools();
 
   bgWindow.loadURL('file://' + __dirname + '/views/background.html');
 
   bgWindow.on('closed', () => {
-    closedNotification.show();
-    logger.log('background window closed');
+    logger.log(
+      'background window closed. If this was unintentional (not when the rest of the app closed), restart the app.'
+    );
   });
 
   bgWindow.webContents.on('render-process-gone', (_event, details) => {
