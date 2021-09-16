@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import {
   app,
   BrowserWindow,
@@ -13,6 +12,7 @@ import {
 import installExtension, { EMBER_INSPECTOR } from 'electron-devtools-installer';
 import * as isDev from 'electron-is-dev';
 import * as windowStateKeeper from 'electron-window-state';
+import { MenuItemConstructorOptions } from 'electron/main';
 import type {
   LoginData,
   SetupData,
@@ -20,32 +20,30 @@ import type {
   SyncRule,
   SyncState,
 } from 'mapgeo-sync-config';
+import * as os from 'os';
 import * as path from 'path';
 import { pathToFileURL } from 'url';
-import * as os from 'os';
+import { v4 } from 'uuid';
 import { EventObject, Interpreter } from 'xstate';
 import { AuthContext } from './auth/machine';
 import { createService as createAuthService } from './auth/service';
+import { createBgRenderer } from './bg-renderer';
 import handleFileUrls from './handle-file-urls';
 import logger from './logger';
 import { register as registerMapgeoHandlers } from './mapgeo/handlers';
 import MapgeoService from './mapgeo/service';
-import Scheduler from './scheduler';
-import { register as registerStoreHandlers } from './store/handlers';
-import { store } from './store/store';
-import { waitForState } from './utils/wait-for-state';
 import {
   ErrorResponse,
   FinishedResponse,
   QueryActionResponse,
 } from './process-rule';
-import { handleSquirrelEvent } from './squirrel-startup';
-import wrapRule from './utils/wrap-rule';
-import { v4 } from 'uuid';
-import { MenuItemConstructorOptions } from 'electron/main';
-import flatState from './utils/log-state';
+import Scheduler from './scheduler';
 import { test } from './source-handlers/database';
-import { createBgRenderer } from './bg-renderer';
+import { handleSquirrelEvent } from './squirrel-startup';
+import { register as registerStoreHandlers } from './store/handlers';
+import { store } from './store/store';
+import flatState from './utils/log-state';
+import wrapRule from './utils/wrap-rule';
 
 const pkg = require('../package.json');
 
@@ -234,7 +232,7 @@ ipcMain.handle('selectSourceFolder', async (event, sourceId: string) => {
 ipcMain.handle('loadClient', async (event) => {
   return new Promise((resolve) => {
     mainWindow.webContents.once('did-finish-load', () => {
-      resolve(true);
+      resolve({ isAuthenticated: !!mapgeoService?.token });
     });
   });
 });
@@ -268,7 +266,12 @@ ipcMain.handle('checkMapgeo', async (event, data: SetupData) => {
 
 ipcMain.handle('logout', async (event, data: SetupData) => {
   authService.send({ type: 'LOGOUT' });
-  return waitForState(authService, ['unauthenticated.idle']);
+  return true;
+});
+
+ipcMain.handle('reset', async (event, data: SetupData) => {
+  authService.send({ type: 'RESET' });
+  return true;
 });
 
 function createBrowserWindow() {
@@ -304,10 +307,11 @@ function createBrowserWindow() {
     mainWindow.webContents.openDevTools();
   }
 
-  const hash =
-    flatState(authService) === 'unauthenticated.withConfig.validated'
-      ? '#/login'
-      : '';
+  const hash = store.get('mapgeo.login')
+    ? ''
+    : store.get('mapgeo.host')
+    ? '#/login'
+    : '#/setup';
   // Load the ember application
   mainWindow.loadURL(`${emberAppURL}${hash}`);
 

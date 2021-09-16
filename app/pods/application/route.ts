@@ -3,6 +3,7 @@ import { inject as service } from '@ember/service';
 import RouterService from '@ember/routing/router-service';
 import Session from 'mapgeo-sync/services/session';
 import Platform from 'mapgeo-sync/services/platform';
+import { CommunityConfig } from 'mapgeo';
 
 export default class Application extends Route {
   @service('router') declare router: RouterService;
@@ -15,5 +16,10 @@ export default class Application extends Route {
 
   async model() {
     await this.platform.loadClient();
+    return {
+      config: (await this.platform.getValue(
+        'mapgeo.config'
+      )) as Promise<CommunityConfig>,
+    };
   }
 }

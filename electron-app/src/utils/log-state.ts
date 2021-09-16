@@ -14,5 +14,5 @@ export default function logState(
 ): string {
   const strings = service.state.toStrings();
   const last = strings[strings.length - 1];
-  return last;
+  return `${service.state.event.type} => ${last}`;
 }

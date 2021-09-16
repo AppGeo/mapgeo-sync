@@ -17,6 +17,7 @@ export interface AuthContext {
 export type AuthEvent =
   | { type: 'SETUP'; payload: SetupData }
   | { type: 'LOGIN'; payload: LoginData }
+  | { type: 'RESET' }
   | { type: 'LOGOUT' };
 
 export type AuthState =
@@ -37,7 +38,7 @@ export const authMachine = createMachine<AuthContext, AuthEvent, AuthState>({
   states: {
     log: {
       on: {
-        '*': { actions: log((ctx, e) => e) },
+        // '*': { actions: log((ctx, e) => e) },
       },
     },
     active: {
@@ -102,6 +103,15 @@ export const authMachine = createMachine<AuthContext, AuthEvent, AuthState>({
                         login: (context, event) => {
                           store.set('mapgeo.login', event.payload);
                           return event.payload;
+                        },
+                      }),
+                    },
+                    RESET: {
+                      target: '#auth.unauthenticated.withoutConfig',
+                      actions: assign({
+                        config: (context, event) => {
+                          store.clear();
+                          return undefined;
                         },
                       }),
                     },

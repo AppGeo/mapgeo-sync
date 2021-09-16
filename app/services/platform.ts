@@ -5,11 +5,14 @@ import type { IpcRendererEvent } from 'electron';
 import { tracked } from '@glimmer/tracking';
 import { NotificationsService } from '@frontile/notifications';
 import RouterService from '@ember/routing/router-service';
+import Session from './session';
+import { next } from '@ember/runloop';
 const { ipcRenderer } = requireNode('electron/renderer');
 
 export default class Platform extends Service {
   @service declare notifications: NotificationsService;
   @service declare router: RouterService;
+  @service declare session: Session;
 
   // once(name: string, cb: (...args: any[]) => void) {
   //   ipcRenderer.once(name, cb);
@@ -47,9 +50,17 @@ export default class Platform extends Service {
       }
     );
 
-    const isOk = await ipcRenderer.invoke('loadClient');
+    const { isAuthenticated } = await ipcRenderer.invoke('loadClient');
 
-    return isOk as boolean;
+    this.session.isAuthenticated = isAuthenticated;
+
+    if (!isAuthenticated) {
+      next(() => {
+        this.router.transitionTo('login');
+      });
+    }
+
+    return true;
   }
 
   @action
@@ -79,9 +90,11 @@ export default class Platform extends Service {
 
   @action
   async testDbConnection(source: Source) {
-    const value = await ipcRenderer.invoke('testConnection', source);
+    const value = (await ipcRenderer.invoke('testConnection', source)) as
+      | boolean
+      | { code: string; message: string };
 
-    if (value.code) {
+    if (typeof value !== 'boolean' && 'code' in value) {
       throw new Error(value.message || value.code);
     }
 
@@ -192,6 +205,12 @@ export default class Platform extends Service {
   @action
   async logout() {
     const value = await ipcRenderer.invoke('logout');
+    return value;
+  }
+
+  @action
+  async reset() {
+    const value = await ipcRenderer.invoke('reset');
     return value;
   }
 }

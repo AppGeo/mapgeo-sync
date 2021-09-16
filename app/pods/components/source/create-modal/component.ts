@@ -1,13 +1,14 @@
+import { helper } from '@ember/component/helper';
 import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
+import { NotificationsService } from '@frontile/notifications';
 import Component from '@glimmer/component';
-import { tracked } from '@glimmer/tracking';
-import { v4 } from 'uuid';
+import { task } from 'ember-concurrency';
 import { DbType, Source } from 'mapgeo-sync-config';
 import Platform from 'mapgeo-sync/services/platform';
-import { NotificationsService } from '@frontile/notifications';
-import { task } from 'ember-concurrency';
-import { helper } from '@ember/component/helper';
+import { trackedReset } from 'tracked-toolbox';
+import { v4 } from 'uuid';
+import { BufferedChangeset } from 'validated-changeset';
 
 const databaseTypes: DbType[] = ['pg', 'mssql', 'mysql', 'oracle'];
 const databaseMap: { [DbKey in DbType]: string } = {
@@ -34,10 +35,16 @@ export default class SourceCreateModal extends Component<SourceCreateModalArgs> 
     return databaseMap[type];
   });
 
-  @tracked isAddSourceVisible = false;
+  @trackedReset<boolean, SourceCreateModal>({
+    memo: 'args.sources.length',
+    update() {
+      return this.args.sources.length === 0;
+    },
+  })
+  isAddSourceVisible = false;
 
   @task
-  async testConnection(changeset: any) {
+  async testConnection(changeset: BufferedChangeset) {
     return this.platform.testDbConnection(changeset.pendingData as Source);
   }
 
