@@ -80,9 +80,9 @@ export const createService = ({
           async setupMapgeoService(context) {
             const mapgeoService = await MapgeoService.fromUrl(context.host);
             setMapgeoService(mapgeoService);
-            store.set('mapgeo.config', mapgeoService.config.community);
+            store.set('mapgeo.config', mapgeoService.config);
             console.log('mapgeo service setup');
-            return mapgeoService.config.community;
+            return mapgeoService.config;
           },
           loginMapgeo(context) {
             return getMapgeoService().login(

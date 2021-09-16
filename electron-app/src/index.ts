@@ -258,23 +258,12 @@ ipcMain.handle('login', async (event, data: LoginData) => {
 
   authService.send({ type: 'LOGIN', payload: data } as any);
 
-  try {
-    await waitForState(authService, ['authenticated']);
-  } catch (e) {
-    if (authService.state.context.loginError) {
-      throw new Error(authService.state.context.loginError);
-    }
-    throw new Error('Encountered an issue logging in.');
-  }
   return true;
 });
 
 ipcMain.handle('checkMapgeo', async (event, data: SetupData) => {
   authService.send({ type: 'SETUP', payload: data } as any);
-  return waitForState(authService, [
-    'unauthenticated.withConfig.idle',
-    'unauthenticated.withConfig.validated',
-  ]);
+  return true;
 });
 
 ipcMain.handle('logout', async (event, data: SetupData) => {
@@ -420,6 +409,7 @@ app.commandLine.appendSwitch('js-flags', '--max-old-space-size=4096');
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     logger.log('closing because windows closed');
+    bgWindow?.close();
     app.quit();
     tray?.destroy();
   }
@@ -481,25 +471,19 @@ app.on('ready', async () => {
         mainWindow?.webContents.openDevTools();
       },
     },
+    {
+      label: 'Toggle BG Window',
+      click: () => {
+        if (bgWindow.isVisible()) {
+          bgWindow.hide();
+        } else {
+          bgWindow.show();
+        }
+      },
+    },
   ];
 
-  // if (isDev) {
-  // Used to debug the background processing
-  // Open the bg, and
-  debuggingMenus.push({
-    label: 'Toggle BG Window',
-    click: () => {
-      if (bgWindow.isVisible()) {
-        bgWindow.hide();
-      } else {
-        bgWindow.show();
-      }
-    },
-  });
-  // }
-
   menuItems.push({
-    // type: 'submenu',
     label: 'Debugging',
     submenu: debuggingMenus,
   });
@@ -517,15 +501,7 @@ app.on('ready', async () => {
   tray.setToolTip('MapGeo Sync');
   tray.setContextMenu(contextMenu);
 
-  const windowMenu = Menu.buildFromTemplate([
-    {
-      type: 'submenu',
-      label: 'Debugging',
-      submenu: debuggingMenus,
-    },
-  ]);
-
-  Menu.setApplicationMenu(windowMenu);
+  Menu.setApplicationMenu(contextMenu);
 
   await handleFileUrls(emberAppDir);
 
