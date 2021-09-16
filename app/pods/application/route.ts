@@ -3,8 +3,6 @@ import { inject as service } from '@ember/service';
 import RouterService from '@ember/routing/router-service';
 import Session from 'mapgeo-sync/services/session';
 import Platform from 'mapgeo-sync/services/platform';
-import { next } from '@ember/runloop';
-import { waitForProperty } from 'ember-concurrency';
 
 export default class Application extends Route {
   @service('router') declare router: RouterService;
@@ -17,20 +15,5 @@ export default class Application extends Route {
 
   async model() {
     await this.platform.loadClient();
-    // await waitForProperty(
-    //   this.session,
-    //   'isAuthenticated',
-    //   (value) => value !== undefined && value !== null
-    // );
   }
-
-  // afterModel() {
-  //   next(() => {
-  //     if (!this.session.isAuthenticated) {
-  //       this.router.transitionTo('setup');
-  //     } else {
-  //       this.router.transitionTo('index');
-  //     }
-  //   });
-  // }
 }
