@@ -1,8 +1,12 @@
-import Component from '@glimmer/component';
+import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
-import { Source, SyncRule } from 'mapgeo-sync-config';
+import Component from '@glimmer/component';
 import { task } from 'ember-concurrency';
+import { Source, SyncRule } from 'mapgeo-sync-config';
 import Platform from 'mapgeo-sync/services/platform';
+import { BufferedChangeset } from 'validated-changeset';
+import { Changeset } from 'ember-changeset';
+import { cached } from '@glimmer/tracking';
 
 interface RuleEditModalArgs {
   isOpen: boolean;
@@ -16,10 +20,21 @@ interface RuleEditModalArgs {
 export default class RuleEditModal extends Component<RuleEditModalArgs> {
   @service('platform') declare platform: Platform;
 
+  @cached
+  get changeset() {
+    return Changeset(this.args.rule);
+  }
+
   get source() {
     return this.args.sources.find(
-      (source) => source.id === this.args.rule.sourceId
+      (source) => source.id === this.changeset.sourceId
     );
+  }
+
+  @action
+  changeSource(changeset: BufferedChangeset, selected: Source) {
+    changeset.set('sourceId', selected.id);
+    changeset.set('sourceConfig', {});
   }
 
   @task
