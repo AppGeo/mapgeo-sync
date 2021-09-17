@@ -2,17 +2,18 @@ import { helper } from '@ember/component/helper';
 import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
 import Component from '@glimmer/component';
-import { SyncFileConfig } from 'mapgeo-sync-config';
+import { Source, SyncFileConfig } from 'mapgeo-sync-config';
 import Platform from 'mapgeo-sync/services/platform';
 import { BufferedChangeset } from 'validated-changeset';
 
 interface RuleFileSelectArgs {
-  Form: unknown;
+  Form: Component;
   changeset: BufferedChangeset;
+  source: Source;
 }
 
 const fileTypes: { [FileType in SyncFileConfig['fileType']]: string } = {
-  json: '.json (Array With Rows)',
+  json: '.json (Array with rows of data)',
   geojson: '.geojson (Feature Collection)',
   csv: '.csv (Usually exported from Excel or a similar tool)',
   gdb: 'File GeoDatabase (Experimental. A folder containing all the files. Unzip your zip file.)',
@@ -29,8 +30,8 @@ export default class RuleFileSelect extends Component<RuleFileSelectArgs> {
   });
 
   @action
-  async selectFile(sourceId: string) {
-    const file = await this.platform.selectSourceFile(sourceId);
+  async selectFile(sourceId: string, fileType: SyncFileConfig['fileType']) {
+    const file = await this.platform.selectSourceFile(sourceId, fileType);
     return file;
   }
 

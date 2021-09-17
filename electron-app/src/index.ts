@@ -17,6 +17,7 @@ import type {
   LoginData,
   SetupData,
   Source,
+  SyncFileConfig,
   SyncRule,
   SyncState,
 } from 'mapgeo-sync-config';
@@ -196,22 +197,25 @@ ipcMain.handle('selectSourceBaseFolder', async (event) => {
   return result.filePaths[0];
 });
 
-ipcMain.handle('selectSourceFile', async (event, sourceId: string) => {
-  const sources = store.get('sources');
-  const source = sources.find((source) => source.id === sourceId);
+ipcMain.handle(
+  'selectSourceFile',
+  async (event, sourceId: string, fileType: SyncFileConfig['fileType']) => {
+    const sources = store.get('sources');
+    const source = sources.find((source) => source.id === sourceId);
 
-  if (source.sourceType === 'file') {
-    const result = await dialog.showOpenDialog(mainWindow, {
-      defaultPath: source.folder,
-      properties: ['openFile'],
-      filters: [{ name: 'Default', extensions: ['json', 'geojson', 'csv'] }],
-    });
+    if (source.sourceType === 'file') {
+      const result = await dialog.showOpenDialog(mainWindow, {
+        defaultPath: source.folder,
+        properties: ['openFile'],
+        filters: [{ name: 'Default', extensions: [fileType] }],
+      });
 
-    return result.filePaths[0];
+      return result.filePaths[0];
+    }
+
+    return [];
   }
-
-  return [];
-});
+);
 
 ipcMain.handle('selectSourceFolder', async (event, sourceId: string) => {
   const sources = store.get('sources');

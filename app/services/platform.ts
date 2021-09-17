@@ -1,6 +1,11 @@
 import { action } from '@ember/object';
 import Service, { inject as service } from '@ember/service';
-import { Source, SyncRule, SyncState } from 'mapgeo-sync-config';
+import {
+  Source,
+  SyncFileConfig,
+  SyncRule,
+  SyncState,
+} from 'mapgeo-sync-config';
 import type { IpcRendererEvent } from 'electron';
 import { tracked } from '@glimmer/tracking';
 import { NotificationsService } from '@frontile/notifications';
@@ -197,8 +202,15 @@ export default class Platform extends Service {
   }
 
   @action
-  async selectSourceFile(sourceId: string): Promise<string> {
-    const file = await ipcRenderer.invoke('selectSourceFile', sourceId);
+  async selectSourceFile(
+    sourceId: string,
+    fileType: SyncFileConfig['fileType']
+  ): Promise<string> {
+    const file = await ipcRenderer.invoke(
+      'selectSourceFile',
+      sourceId,
+      fileType
+    );
     return file;
   }
 
