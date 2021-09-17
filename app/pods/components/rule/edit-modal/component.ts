@@ -1,12 +1,13 @@
 import Component from '@glimmer/component';
 import { inject as service } from '@ember/service';
-import { SyncRule } from 'mapgeo-sync-config';
+import { Source, SyncRule } from 'mapgeo-sync-config';
 import { task } from 'ember-concurrency';
 import Platform from 'mapgeo-sync/services/platform';
 
 interface RuleEditModalArgs {
   isOpen: boolean;
   rule: SyncRule;
+  sources: Source[];
   onClose: () => void;
   onSubmit: (rules: SyncRule[]) => void;
   onDelete: (rules: SyncRule[]) => void;
@@ -14,6 +15,12 @@ interface RuleEditModalArgs {
 
 export default class RuleEditModal extends Component<RuleEditModalArgs> {
   @service('platform') declare platform: Platform;
+
+  get source() {
+    return this.args.sources.find(
+      (source) => source.id === this.args.rule.sourceId
+    );
+  }
 
   @task
   async updateRule(rule: SyncRule) {

@@ -5,7 +5,7 @@ module('Unit | Route | dataset/mapping/setup', function(hooks) {
   setupTest(hooks);
 
   test('it exists', function(assert) {
-    let route = this.owner.lookup('route:dataset/mapping/setup');
+    const route = this.owner.lookup('route:dataset/mapping/setup');
     assert.ok(route);
   });
 });

@@ -12,23 +12,23 @@
         Rule ID: {{@rule.id}}
       </p>
 
-      {{#if changeset.sourceConfig.selectStatement}}
-        <Form.Textarea
-          @label='Select Statement'
-          @hint='Select should return a the_geom column in the GeoJSON format'
-          @fieldName='sourceConfig.selectStatement'
-          @containerClass='mt-4'
-          placeholder='select *, ST_AsGeoJSON(geom) as the_geom from "sync-test"'
-          rows='5'
-        />
-      {{else if @rule.sourceConfig.filePath}}
-        <Form.Input
-          @label='File'
-          @fieldName='sourceConfig.filePath'
-          @containerClass='mt-4'
-          disabled={{true}}
-        />
-      {{/if}}
+      <div class='mt-4'>
+        {{#if changeset.sourceConfig.selectStatement}}
+          <Form.Textarea
+            @label='Select Statement'
+            @hint='Select should return a the_geom column in the GeoJSON format'
+            @fieldName='sourceConfig.selectStatement'
+            placeholder='select *, ST_AsGeoJSON(geom) as the_geom from "properties"'
+            rows='5'
+          />
+        {{else if changeset.sourceConfig.filePath}}
+          <Rule::FileSelect
+            @Form={{Form}}
+            @changeset={{changeset}}
+            @source={{this.source}}
+          />
+        {{/if}}
+      </div>
 
       <div class='flex space-x-2 mt-4'>
         {{#if @rule.schedule}}
