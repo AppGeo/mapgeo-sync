@@ -42,10 +42,20 @@
     </nav>
   </div>
 
-  <div>
+  <div class='flex space-x-2 items-center'>
+    {{#if this.config}}
+      <div class='text-gray-800'>
+        {{this.config.name}}
+      </div>
+    {{/if}}
+
     {{#if this.session.isAuthenticated}}
       <Button @size='xs' @appearance='minimal' {{on 'click' this.logout}}>
         Logout
+      </Button>
+    {{else if this.config}}
+      <Button @size='xs' @appearance='minimal' {{on 'click' this.reset}}>
+        Reset
       </Button>
     {{/if}}
   </div>

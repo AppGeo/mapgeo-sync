@@ -12,7 +12,7 @@ export async function test(source: Source) {
       const result = await db
         .select<{ test: number }[]>(db.raw('1 as test'))
         .from('dual');
-      return result.length && result[0].test === 1;
+      return Array.isArray(result) && result.length > 0 && result[0].test === 1;
     } catch (e) {
       throw e;
     }

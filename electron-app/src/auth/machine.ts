@@ -16,6 +16,7 @@ export interface AuthContext {
 export type AuthEvent =
   | { type: 'SETUP'; payload: SetupData }
   | { type: 'LOGIN'; payload: LoginData }
+  | { type: 'RESET' }
   | { type: 'LOGOUT' };
 
 export type AuthState =
@@ -96,6 +97,15 @@ export const authMachine = createMachine<AuthContext, AuthEvent, AuthState>({
                     },
                   }),
                 },
+                RESET: {
+                  target: '#auth.unauthenticated.withoutConfig',
+                  actions: assign({
+                    config: (context, event) => {
+                      store.clear();
+                      return undefined;
+                    },
+                  }),
+                },
               },
             },
             login: {
@@ -128,12 +138,26 @@ export const authMachine = createMachine<AuthContext, AuthEvent, AuthState>({
             idle: {
               on: {
                 SETUP: {
-                  target: '#auth.unauthenticated.idle',
+                  target: 'fetchConfig',
                   actions: assign({
                     host: (context, event) => {
                       store.set('mapgeo.host', event.payload.mapgeoUrl);
                       return event.payload.mapgeoUrl;
                     },
+                  }),
+                },
+              },
+            },
+            fetchConfig: {
+              invoke: {
+                id: 'fetchConfig',
+                src: 'setupMapgeoService',
+                onDone: '#auth.unauthenticated.withConfig',
+                onError: {
+                  target: '#auth.unauthenticated.withoutConfig',
+                  actions: assign({
+                    host: () => null,
+                    config: () => null,
                   }),
                 },
               },

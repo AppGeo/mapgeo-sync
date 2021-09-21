@@ -1,0 +1,75 @@
+<div ...attributes>
+  <@Form.Select
+    @label='File Type'
+    @fieldName='sourceConfig.fileType'
+    @options={{this.fileTypeKeys}}
+    @placeholder='Select File Type' as |type|
+  >
+    {{this.fileTypeFormat type}}
+  </@Form.Select>
+
+  {{#if @changeset.sourceConfig.fileType}}
+    {{#if (eq @changeset.sourceConfig.fileType 'gdb')}}
+      <div class='flex space-x-2 mt-4'>
+        <@Form.Input
+          @label='Folder'
+          @fieldName='sourceConfig.filePath'
+          @size='sm'
+          @containerClass='flex-1'
+          disabled={{true}}
+        />
+
+        <Button
+          class='self-end'
+          @size='sm'
+          {{on
+            'click'
+            (pipe
+              (fn this.selectFolder @source.id)
+              (set @changeset.sourceConfig.filePath)
+            )
+          }}
+        >
+          Browse Folders
+        </Button>
+      </div>
+    {{else}}
+      <div class='flex space-x-2 mt-4'>
+        <@Form.Input
+          @label='File'
+          @fieldName='sourceConfig.filePath'
+          @size='sm'
+          @containerClass='flex-1'
+          disabled={{true}}
+        />
+
+        <Button
+          class='self-end'
+          @size='sm'
+          {{on
+            'click'
+            (pipe
+              (fn this.selectFile @source.id @changeset.sourceConfig.fileType)
+              (set @changeset.sourceConfig.filePath)
+            )
+          }}
+        >
+          Browse Files
+        </Button>
+      </div>
+    {{/if}}
+  {{/if}}
+
+  {{#if @changeset.sourceConfig.filePath}}
+    {{#if (eq @changeset.sourceConfig.fileType 'gdb')}}
+      <@Form.Input
+        @label='Layer Name'
+        @hint='The layer name inside the File GeoDatabase'
+        @fieldName='sourceConfig.gdbLayerName'
+        @containerClass='mt-4'
+        required={{true}}
+        placeholder='layer1'
+      />
+    {{/if}}
+  {{/if}}
+</div>

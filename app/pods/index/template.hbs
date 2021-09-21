@@ -55,6 +55,7 @@
   @onSubmit={{pipe (set this.syncRules) (set this.isEditRuleOpen false)}}
   @onDelete={{set this.syncRules}}
   @rule={{this.ruleEditing}}
+  @sources={{this.sources}}
 />
 
 <Source::CreateModal

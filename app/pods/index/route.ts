@@ -17,10 +17,18 @@ export default class Index extends Route {
   @service('router') declare router: RouterService;
   @service('session') declare session: Session;
 
-  model(): Promise<Model> {
+  async model(): Promise<Model> {
+    let community;
+
+    try {
+      community = await this.platform.fetchCommunity();
+    } catch (e) {
+      console.error(e);
+      return this.transitionTo('setup');
+    }
+
     return hash({
-      community: this.platform.fetchCommunity(),
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      community,
       config: this.platform.getValue('config') as Promise<SyncConfig>,
       syncRules: this.platform.findSyncRules(),
       sources: this.platform.findSources(),

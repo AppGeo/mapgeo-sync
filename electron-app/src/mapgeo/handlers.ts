@@ -16,7 +16,13 @@ export function register(ipcMain: IpcMain) {
 }
 
 export const fetchConfig = async (store: SyncStore) => {
-  const config = await MapgeoService.fetchConfig(store.get('mapgeo.host'));
+  const url = store.get<string, string>('mapgeo.host');
+
+  if (!url) {
+    throw new Error('MapGeo host not set, please setup/login first');
+  }
+
+  const config = await MapgeoService.fetchConfig(url);
 
   if (config) {
     store.set('mapgeo.config', config);

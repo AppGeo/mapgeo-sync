@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import {
   app,
   BrowserWindow,
@@ -7,48 +6,45 @@ import {
   ipcMain,
   IpcMainEvent,
   Menu,
-  MenuItem,
   shell,
   Tray,
 } from 'electron';
 import installExtension, { EMBER_INSPECTOR } from 'electron-devtools-installer';
 import * as isDev from 'electron-is-dev';
 import * as windowStateKeeper from 'electron-window-state';
+import { MenuItemConstructorOptions } from 'electron/main';
 import type {
   LoginData,
   SetupData,
   Source,
-  SyncConfig,
+  SyncFileConfig,
   SyncRule,
   SyncState,
 } from 'mapgeo-sync-config';
+import * as os from 'os';
 import * as path from 'path';
 import { pathToFileURL } from 'url';
-import * as os from 'os';
-import { Worker } from 'worker_threads';
+import { v4 } from 'uuid';
 import { EventObject, Interpreter } from 'xstate';
 import { AuthContext } from './auth/machine';
 import { createService as createAuthService } from './auth/service';
+import { createBgRenderer } from './bg-renderer';
 import handleFileUrls from './handle-file-urls';
 import logger from './logger';
 import { register as registerMapgeoHandlers } from './mapgeo/handlers';
 import MapgeoService from './mapgeo/service';
-import Scheduler from './scheduler';
-import { register as registerStoreHandlers } from './store/handlers';
-import { store } from './store/store';
-import { waitForState } from './utils/wait-for-state';
 import {
   ErrorResponse,
   FinishedResponse,
   QueryActionResponse,
 } from './process-rule';
-import { handleSquirrelEvent } from './squirrel-startup';
-import wrapRule from './utils/wrap-rule';
-import { v4 } from 'uuid';
-import { MenuItemConstructorOptions } from 'electron/main';
-import flatState from './utils/log-state';
+import Scheduler from './scheduler';
 import { test } from './source-handlers/database';
-import { createBgRenderer } from './bg-renderer';
+import { handleSquirrelEvent } from './squirrel-startup';
+import { register as registerStoreHandlers } from './store/handlers';
+import { store } from './store/store';
+import flatState from './utils/log-state';
+import wrapRule from './utils/wrap-rule';
 
 const pkg = require('../package.json');
 
@@ -201,22 +197,25 @@ ipcMain.handle('selectSourceBaseFolder', async (event) => {
   return result.filePaths[0];
 });
 
-ipcMain.handle('selectSourceFile', async (event, sourceId: string) => {
-  const sources = store.get('sources');
-  const source = sources.find((source) => source.id === sourceId);
+ipcMain.handle(
+  'selectSourceFile',
+  async (event, sourceId: string, fileType: SyncFileConfig['fileType']) => {
+    const sources = store.get('sources');
+    const source = sources.find((source) => source.id === sourceId);
 
-  if (source.sourceType === 'file') {
-    const result = await dialog.showOpenDialog(mainWindow, {
-      defaultPath: source.folder,
-      properties: ['openFile'],
-      filters: [{ name: 'Default', extensions: ['json', 'geojson', 'csv'] }],
-    });
+    if (source.sourceType === 'file') {
+      const result = await dialog.showOpenDialog(mainWindow, {
+        defaultPath: source.folder,
+        properties: ['openFile'],
+        filters: [{ name: 'Default', extensions: [fileType] }],
+      });
 
-    return result.filePaths[0];
+      return result.filePaths[0];
+    }
+
+    return [];
   }
-
-  return [];
-});
+);
 
 ipcMain.handle('selectSourceFolder', async (event, sourceId: string) => {
   const sources = store.get('sources');
@@ -237,7 +236,7 @@ ipcMain.handle('selectSourceFolder', async (event, sourceId: string) => {
 ipcMain.handle('loadClient', async (event) => {
   return new Promise((resolve) => {
     mainWindow.webContents.once('did-finish-load', () => {
-      resolve(true);
+      resolve({ isAuthenticated: !!mapgeoService?.token });
     });
   });
 });
@@ -261,28 +260,22 @@ ipcMain.handle('login', async (event, data: LoginData) => {
 
   authService.send({ type: 'LOGIN', payload: data } as any);
 
-  try {
-    await waitForState(authService, ['authenticated']);
-  } catch (e) {
-    if (authService.state.context.loginError) {
-      throw new Error(authService.state.context.loginError);
-    }
-    throw new Error('Encountered an issue logging in.');
-  }
   return true;
 });
 
 ipcMain.handle('checkMapgeo', async (event, data: SetupData) => {
   authService.send({ type: 'SETUP', payload: data } as any);
-  return waitForState(authService, [
-    'unauthenticated.withConfig.idle',
-    'unauthenticated.withConfig.validated',
-  ]);
+  return true;
 });
 
 ipcMain.handle('logout', async (event, data: SetupData) => {
   authService.send({ type: 'LOGOUT' });
-  return waitForState(authService, ['unauthenticated.idle']);
+  return true;
+});
+
+ipcMain.handle('reset', async (event, data: SetupData) => {
+  authService.send({ type: 'RESET' });
+  return true;
 });
 
 function createBrowserWindow() {
@@ -318,10 +311,11 @@ function createBrowserWindow() {
     mainWindow.webContents.openDevTools();
   }
 
-  const hash =
-    flatState(authService) === 'unauthenticated.withConfig.validated'
-      ? '#/login'
-      : '';
+  const hash = store.get('mapgeo.login')
+    ? ''
+    : store.get('mapgeo.host')
+    ? '#/login'
+    : '#/setup';
   // Load the ember application
   mainWindow.loadURL(`${emberAppURL}${hash}`);
 
@@ -423,6 +417,7 @@ app.commandLine.appendSwitch('js-flags', '--max-old-space-size=4096');
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     logger.log('closing because windows closed');
+    bgWindow?.close();
     app.quit();
     tray?.destroy();
   }
@@ -478,25 +473,25 @@ app.on('ready', async () => {
         shell.openPath(app.getPath('crashDumps'));
       },
     },
-  ];
-
-  if (isDev) {
-    // Used to debug the background processing
-    // Open the bg, and
-    debuggingMenus.push({
+    {
+      label: 'Open Main DevTools',
+      click: () => {
+        mainWindow?.webContents.openDevTools();
+      },
+    },
+    {
       label: 'Toggle BG Window',
       click: () => {
-        if (bgWindow.isVisible) {
+        if (bgWindow.isVisible()) {
           bgWindow.hide();
         } else {
           bgWindow.show();
         }
       },
-    });
-  }
+    },
+  ];
 
   menuItems.push({
-    type: 'submenu',
     label: 'Debugging',
     submenu: debuggingMenus,
   });
@@ -513,6 +508,7 @@ app.on('ready', async () => {
   ]);
   tray.setToolTip('MapGeo Sync');
   tray.setContextMenu(contextMenu);
+
   Menu.setApplicationMenu(contextMenu);
 
   await handleFileUrls(emberAppDir);

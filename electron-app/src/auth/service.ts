@@ -5,7 +5,7 @@ import { authMachine } from './machine';
 import logger from '../logger';
 import logState from '../utils/log-state';
 
-const log = logger.scope('auth service');
+const logScope = logger.scope('auth service');
 
 interface ServiceOptions {
   send: (event: string, payload?: unknown) => void;
@@ -80,9 +80,9 @@ export const createService = ({
           async setupMapgeoService(context) {
             const mapgeoService = await MapgeoService.fromUrl(context.host);
             setMapgeoService(mapgeoService);
-            store.set('mapgeo.config', mapgeoService.config.community);
+            store.set('mapgeo.config', mapgeoService.config);
             console.log('mapgeo service setup');
-            return mapgeoService.config.community;
+            return mapgeoService.config;
           },
           loginMapgeo(context) {
             return getMapgeoService().login(
@@ -92,8 +92,10 @@ export const createService = ({
           },
         },
       })
-  ).onTransition((state) =>
-    log.log('auth transition: ', logState({ state } as any))
+  );
+
+  authService.subscribe((state) =>
+    logScope.log('auth state: ', logState({ state } as any))
   );
 
   return authService;
