@@ -4,6 +4,11 @@ import RouterService from '@ember/routing/router-service';
 import Session from 'mapgeo-sync/services/session';
 import Platform from 'mapgeo-sync/services/platform';
 import { CommunityConfig } from 'mapgeo';
+import { hash } from 'rsvp';
+
+interface Model {
+  config: CommunityConfig;
+}
 
 export default class Application extends Route {
   @service('router') declare router: RouterService;
@@ -14,12 +19,12 @@ export default class Application extends Route {
     this.session.setup();
   }
 
-  async model() {
+  async model(): Promise<Model> {
     await this.platform.loadClient();
-    return {
-      config: (await this.platform.getValue(
-        'mapgeo.config'
-      )) as Promise<CommunityConfig>,
-    };
+
+    return hash({
+      config: this.platform.getValue('mapgeo.config'),
+      host: this.platform.getValue('mapgeo.host'),
+    });
   }
 }
