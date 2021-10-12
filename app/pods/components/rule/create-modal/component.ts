@@ -95,8 +95,9 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
       case 'schedule':
       case 'optouts': {
         return (
-          'selectStatement' in changeset.sourceConfig ||
-          'filePath' in changeset.sourceConfig
+          changeset.sourceConfig &&
+          ('selectStatement' in changeset.sourceConfig ||
+            'filePath' in changeset.sourceConfig)
         );
       }
       default: {
