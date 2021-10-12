@@ -9,6 +9,8 @@ import Platform from 'mapgeo-sync/services/platform';
 import { trackedReset } from 'tracked-toolbox';
 import { v4 } from 'uuid';
 import { BufferedChangeset } from 'validated-changeset';
+import { Changeset } from 'ember-changeset';
+import { cached } from '@glimmer/tracking';
 
 const databaseTypes: DbType[] = ['pg', 'mssql', 'mysql', 'oracle'];
 const databaseMap: { [DbKey in DbType]: string } = {
@@ -43,9 +45,26 @@ export default class SourceCreateModal extends Component<SourceCreateModalArgs> 
   })
   isAddSourceVisible = false;
 
+  @cached
+  get changeset() {
+    return Changeset({});
+  }
+
   @task
   async testConnection(changeset: BufferedChangeset) {
     return this.platform.testDbConnection(changeset.pendingData as Source);
+  }
+
+  @action
+  confirmCloseIfDirty() {
+    if (this.changeset.isDirty) {
+      if (confirm('Are you sure you want to cancel creating this source?')) {
+        this.changeset.rollback();
+        this.args.onClose();
+      }
+    } else {
+      this.args.onClose();
+    }
   }
 
   @action
