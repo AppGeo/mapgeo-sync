@@ -108,7 +108,7 @@ export default class RuleCreateModal extends Component<RuleCreateModalArgs> {
 
   @cached
   get changeset() {
-    return Changeset({});
+    return Changeset({ sourceConfig: {} });
   }
 
   @cached
