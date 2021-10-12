@@ -43,9 +43,9 @@
   </div>
 
   <div class='flex space-x-2 items-center'>
-    {{#if this.config}}
-      <div class='text-gray-800' title={{@model.host}}>
-        {{this.config.name}}
+    {{#if this.platform.config}}
+      <div class='text-gray-800' title={{this.platform.host}}>
+        {{this.platform.config.name}}
       </div>
     {{/if}}
 
@@ -53,7 +53,7 @@
       <Button @size='xs' @appearance='minimal' {{on 'click' this.logout}}>
         Logout
       </Button>
-    {{else if this.config}}
+    {{else if this.platform.config}}
       <Button @size='xs' @appearance='minimal' {{on 'click' this.reset}}>
         Reset
       </Button>

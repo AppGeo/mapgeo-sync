@@ -12,6 +12,7 @@ import { NotificationsService } from '@frontile/notifications';
 import RouterService from '@ember/routing/router-service';
 import Session from './session';
 import { next } from '@ember/runloop';
+import { CommunityConfig } from 'mapgeo';
 const { ipcRenderer } = requireNode('electron/renderer');
 
 export default class Platform extends Service {
@@ -19,10 +20,9 @@ export default class Platform extends Service {
   @service declare router: RouterService;
   @service declare session: Session;
 
-  // once(name: string, cb: (...args: any[]) => void) {
-  //   ipcRenderer.once(name, cb);
-  // }
   @tracked syncState: SyncState[] = [];
+  @tracked host: string | undefined;
+  @tracked config: CommunityConfig | undefined;
 
   // @ts-ignore
   constructor(...params) {
@@ -55,11 +55,15 @@ export default class Platform extends Service {
       }
     );
 
-    const { isAuthenticated } = await ipcRenderer.invoke('loadClient');
+    const { isAuthenticated, host, config } = await ipcRenderer.invoke(
+      'loadClient'
+    );
 
     this.session.isAuthenticated = isAuthenticated;
+    this.host = host;
+    this.config = config;
 
-    if (!isAuthenticated) {
+    if (!!host && !isAuthenticated) {
       next(() => {
         this.router.transitionTo('login');
       });
@@ -70,9 +74,14 @@ export default class Platform extends Service {
 
   @action
   async checkMapGeo(mapgeoUrl: string) {
-    const isOk = await ipcRenderer.invoke('checkMapgeo', { mapgeoUrl });
+    const { config, host } = await ipcRenderer.invoke('checkMapgeo', {
+      mapgeoUrl,
+    });
 
-    return isOk as boolean;
+    this.host = host;
+    this.config = config;
+
+    return true;
   }
 
   @action
@@ -217,12 +226,15 @@ export default class Platform extends Service {
   @action
   async logout() {
     const value = await ipcRenderer.invoke('logout');
+
     return value;
   }
 
   @action
   async reset() {
     const value = await ipcRenderer.invoke('reset');
+    this.host = undefined;
+    this.config = undefined;
     return value;
   }
 }

@@ -16,9 +16,7 @@ export default class SetupIndex extends Controller {
     try {
       const isOk = await this.platform.checkMapGeo(mapgeoUrl);
 
-      if (isOk) {
-        await this.router.transitionTo('login');
-      } else {
+      if (!isOk) {
         this.notifications.add('Looks like something is up with that URL', {
           appearance: 'warning',
         });

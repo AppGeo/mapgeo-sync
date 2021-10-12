@@ -236,7 +236,11 @@ ipcMain.handle('selectSourceFolder', async (event, sourceId: string) => {
 ipcMain.handle('loadClient', async (event) => {
   return new Promise((resolve) => {
     mainWindow.webContents.once('did-finish-load', () => {
-      resolve({ isAuthenticated: !!mapgeoService?.token });
+      resolve({
+        isAuthenticated: !!mapgeoService?.token,
+        host: mapgeoService?.host,
+        config: store.get('mapgeo.config'),
+      });
     });
   });
 });
@@ -264,8 +268,15 @@ ipcMain.handle('login', async (event, data: LoginData) => {
 });
 
 ipcMain.handle('checkMapgeo', async (event, data: SetupData) => {
+  const promise = new Promise((resolve) => {
+    store.onDidChange('mapgeo.config' as any, (config) => {
+      resolve({ config, host: store.get('mapgeo.host') });
+    });
+  });
+
   authService.send({ type: 'SETUP', payload: data } as any);
-  return true;
+
+  return promise;
 });
 
 ipcMain.handle('logout', async (event, data: SetupData) => {

@@ -11,7 +11,7 @@ export default class Login extends Route {
   async model() {
     const config = (await this.platform.getValue(
       'mapgeo.config'
-    )) as Promise<CommunityConfig>;
+    )) as CommunityConfig;
 
     return config;
   }
