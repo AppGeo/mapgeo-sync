@@ -20,6 +20,7 @@
           <Form.Select
             @label='Dataset'
             @fieldName='dataset'
+            @searchField='name'
             @options={{@datasets}}
             @onChange={{pipe
               (perform this.findDataset changeset.dataset.id)
@@ -46,6 +47,7 @@
               <Form.Select
                 @label='Mapping'
                 @fieldName='mapping'
+                @searchField='name'
                 @options={{this.mappings}}
                 @containerClass='mt-4'
                 @placeholder='Select Table Mapping' as |mapping|
@@ -59,6 +61,7 @@
             <Form.Select
               @label='Source'
               @fieldName='source'
+              @searchField='name'
               @options={{@sources}}
               @containerClass='mt-4'
               @onChange={{w.transition-to-next}}
