@@ -22,13 +22,7 @@
         <Button
           class='self-end'
           @size='sm'
-          {{on
-            'click'
-            (pipe
-              (fn this.selectFolder @source.id)
-              (set @changeset.sourceConfig.filePath)
-            )
-          }}
+          {{on 'click' (fn this.selectFolder @source.id)}}
         >
           Browse Folders
         </Button>
@@ -48,10 +42,7 @@
           @size='sm'
           {{on
             'click'
-            (pipe
-              (fn this.selectFile @source.id @changeset.sourceConfig.fileType)
-              (set @changeset.sourceConfig.filePath)
-            )
+            (fn this.selectFile @source.id @changeset.sourceConfig.fileType)
           }}
         >
           Browse Files

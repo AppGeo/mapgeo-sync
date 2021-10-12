@@ -32,12 +32,18 @@ export default class RuleFileSelect extends Component<RuleFileSelectArgs> {
   @action
   async selectFile(sourceId: string, fileType: SyncFileConfig['fileType']) {
     const file = await this.platform.selectSourceFile(sourceId, fileType);
+
+    this.args.changeset.set('sourceConfig.filePath', file);
+
     return file;
   }
 
   @action
   async selectFolder(sourceId: string) {
     const file = await this.platform.selectSourceFolder(sourceId);
+
+    this.args.changeset.set('sourceConfig.filePath', file);
+
     return file;
   }
 }
