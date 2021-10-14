@@ -45,10 +45,12 @@ export default class RuleEditModal extends Component<RuleEditModalArgs> {
 
   @task
   async deleteRule() {
-    const rules = await this.platform.removeSyncRule(this.args.rule);
+    if (window.confirm('Are you sure?')) {
+      const rules = await this.platform.removeSyncRule(this.args.rule);
 
-    this.args.onDelete(rules);
-    this.args.onClose();
+      this.args.onDelete(rules);
+      this.args.onClose();
+    }
   }
 
   @task
