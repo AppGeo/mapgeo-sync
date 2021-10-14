@@ -335,7 +335,7 @@ function createBrowserWindow() {
     try {
       logger.log('did-finish-load');
 
-      ipcMain.on('runRule', async (event, rule: SyncRule, runId: string) => {
+      ipcMain.on('runRule', async (runEvent, rule: SyncRule, runId: string) => {
         const ruleBundle = wrapRule(rule);
         const startedAt = new Date();
 
@@ -356,7 +356,7 @@ function createBrowserWindow() {
           if (message.rule.id === rule.id && message.runId === runId) {
             ipcMain.off('rule-handled', handleMessage);
             // logger.log(message);
-            event.reply('action-result', message);
+            runEvent.reply('action-result', message);
             updateRuleStateAfterRun(rule, message, runId, { startedAt });
           }
         };
