@@ -44,9 +44,15 @@
 
   <div class='flex space-x-2 items-center'>
     {{#if this.platform.config}}
-      <div class='text-gray-800' title={{this.platform.host}}>
+      <a
+        class='text-gray-800'
+        href={{this.platform.host}}
+        title={{this.platform.host}}
+        rel='noreferrer noopener'
+        target='_blank'
+      >
         {{this.platform.config.name}}
-      </div>
+      </a>
     {{/if}}
 
     {{#if this.session.isAuthenticated}}

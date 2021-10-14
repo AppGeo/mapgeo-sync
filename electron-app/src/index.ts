@@ -369,6 +369,12 @@ function createBrowserWindow() {
     }
   });
 
+  // Open external links in default browser
+  mainWindow.webContents.setWindowOpenHandler(function (details) {
+    shell.openExternal(details.url);
+    return { action: 'deny' };
+  });
+
   // If a loading operation goes wrong, we'll send Electron back to
   // Ember App entry point
   mainWindow.webContents.on('did-fail-load', () => {
