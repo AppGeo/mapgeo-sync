@@ -9,6 +9,7 @@ export default class GeoJSONFeatureCollectionStream extends Transform {
   }
 
   _transform(chunk: Record<string, unknown>, _: unknown, next: () => void) {
+    console.log('transforming');
     if (this.first) {
       this.push('{"type":"FeatureCollection","features":[');
       this.first = false;
@@ -20,7 +21,10 @@ export default class GeoJSONFeatureCollectionStream extends Transform {
   }
 
   _final(done: () => void) {
-    this.push(']}');
+    if (!this.first) {
+      this.push(']}');
+    }
+    console.log('done');
     done();
   }
 }

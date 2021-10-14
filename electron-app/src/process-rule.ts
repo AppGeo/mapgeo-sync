@@ -11,7 +11,7 @@ import {
   SyncRule,
 } from 'mapgeo-sync-config';
 import { SyncStoreType } from './store/store';
-import { primary, PrimaryId, typeConversion } from './utils/table-mappings';
+import { primary, PrimaryId } from './utils/table-mappings';
 import logger from './logger';
 import { Readable, Stream } from 'stream';
 // @ts-ignore
@@ -263,8 +263,16 @@ async function loadData(ruleBundle: RuleBundle) {
   switch (ruleBundle.source.sourceType) {
     case 'file': {
       const { ext, data } = await handleFileSource(ruleBundle);
-      const stream = transformData(data, { ext });
-      return { ext, stream, isGeoJson: ext === '.geojson' };
+      const stream = transformData(data, {
+        ext,
+        toGeoJson: ruleBundle.rule.sourceConfig.formatAsGeoJSON,
+      });
+      return {
+        ext,
+        stream,
+        isGeoJson:
+          ruleBundle.rule.sourceConfig.formatAsGeoJSON || ext === '.geojson',
+      };
     }
     case 'database': {
       const data = queryDatabaseSource(ruleBundle);

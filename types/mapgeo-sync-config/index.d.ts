@@ -59,12 +59,14 @@ export interface LoginData {
 
 export interface SyncDbConfig {
   selectStatement: string;
+  formatAsGeoJSON?: boolean;
 }
 
 export interface SyncFileConfig {
   filePath: string;
   fileType: 'json' | 'geojson' | 'gdb' | 'csv';
   gdbLayerName?: string;
+  formatAsGeoJSON?: boolean;
 }
 
 export interface RuleBundle {

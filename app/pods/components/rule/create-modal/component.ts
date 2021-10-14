@@ -29,7 +29,7 @@ interface RuleCreateModalArgs {
   onSubmit: (rules: SyncRule[]) => void;
 }
 
-interface RuleInput {
+export interface RuleInput {
   name?: string;
   dataset: Dataset;
   mapping: TableMapping;

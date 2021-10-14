@@ -12,6 +12,7 @@ interface RuleFileSelectArgs {
   source: Source;
 }
 
+const fileTypesNotGeoJSON: SyncFileConfig['fileType'][] = ['csv', 'json'];
 const fileTypes: { [FileType in SyncFileConfig['fileType']]: string } = {
   json: '.json (Array with rows of data)',
   geojson: '.geojson (Feature Collection)',
@@ -28,6 +29,14 @@ export default class RuleFileSelect extends Component<RuleFileSelectArgs> {
   fileTypeFormat = helper(([type]: [SyncFileConfig['fileType']]) => {
     return fileTypes[type];
   });
+
+  get mightNeedGeoJsonFormatting() {
+    const fileType = this.args.changeset.get(
+      'sourceConfig.fileType'
+    ) as SyncFileConfig['fileType'];
+
+    return fileTypesNotGeoJSON.includes(fileType);
+  }
 
   @action
   async selectFile(sourceId: string, fileType: SyncFileConfig['fileType']) {

@@ -52,6 +52,15 @@
   {{/if}}
 
   {{#if @changeset.sourceConfig.filePath}}
+    {{#if this.mightNeedGeoJsonFormatting}}
+      <@Form.Checkbox
+        @label='Format As GeoJSON'
+        @hint="Specifically for data that doesn't have geometry in MapGeo"
+        @fieldName='sourceConfig.formatAsGeoJSON'
+        @containerClass='mt-4'
+      />
+    {{/if}}
+
     {{#if (eq @changeset.sourceConfig.fileType 'gdb')}}
       <@Form.Input
         @label='Layer Name'
