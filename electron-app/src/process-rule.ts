@@ -13,7 +13,7 @@ import {
 import { SyncStoreType } from './store/store';
 import { primary, PrimaryId } from './utils/table-mappings';
 import logger from './logger';
-import { Readable, Stream } from 'stream';
+import { PassThrough, Readable, Stream, Transform } from 'stream';
 // @ts-ignore
 import { stringify } from 'JSONStream';
 import GeoJSONStringify from './utils/feature-collection-transform';
@@ -148,7 +148,17 @@ async function handleRule(
 
   if (result.stream instanceof Stream) {
     if (result.isGeoJson) {
-      stream = result.stream.pipe(new GeoJSONStringify());
+      stream = result.stream
+        .on('error', (err) => {
+          debugger;
+          console.error('passThrough encountered an error:', err);
+        })
+        // .pipe(new PassThrough())
+        .pipe(new GeoJSONStringify())
+        .on('error', (err) => {
+          debugger;
+          console.error('passThrough encountered an error:', err);
+        });
     } else {
       stream = result.stream.pipe(stringify());
     }
@@ -293,7 +303,17 @@ function transformData(
 ) {
   try {
     if (data instanceof Stream) {
-      return data.pipe(pipe(transformItem(options)));
+      const transform = transformItem(options);
+      return data.pipe(
+        new Transform({
+          objectMode: true,
+          transform(item, _, next) {
+            const result = transform(item);
+
+            next(null, result);
+          },
+        })
+      );
     }
 
     if ('features' in data && !Array.isArray(data)) {
