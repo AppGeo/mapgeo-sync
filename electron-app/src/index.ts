@@ -451,7 +451,7 @@ app.on('ready', async () => {
     }
   }
 
-  tray = new Tray(path.join(__dirname, '..', 'resources/icon-16.png'));
+  tray = new Tray(path.join(__dirname, '..', 'resources/iconTemplate.png'));
   const menuItems: MenuItemConstructorOptions[] = [
     {
       label: 'Preferences',
