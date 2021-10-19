@@ -31,7 +31,9 @@ The project uses an addon called `ember-electron` that facilitates the interacti
 
 ## How It Works
 
-If you want to update the main table of a single table setup, the action must set `FormatAsGeoJson` to `true`, this way the geometry is inserted.
+This app takes data from the local machine it runs on and transforms that data and pushes it to S3, where MapGeo can get at it. It then notifies MapGeo that the data is there and how to handle that data and where it should go. Then it waits for a upload-status.json in that same folder in S3 for the results of that upload. Once the file is there it shows the results in Sync.
+
+The actual work of getting the data into Studio (carto) is on the MapGeo side, under the uploader route.
 
 ## Running
 
@@ -49,12 +51,6 @@ To create a File GeoDatabase, you can use GeoJSON to create it using this comman
 ```sh
 ogr2ogr -f "FileGDB" output.gdb input.geojson
 ```
-
-## Changed Config
-
-- `UploadActions` now requires a `DbType` filed, valid values include 'pg'
-- `UploadActions` can now specify a `DatasetId` (defaults to 'properties' if not specified)
-- `UploadActions` requires a `GeometryColumn` if `FormatAsGeoJson` is set to true.
 
 ## Electron
 
@@ -91,7 +87,7 @@ yarn build:ts
 # Publish
 # MacOS
 GITHUB_TOKEN=<token> yarn publish:macos
-# Windows, running this macos should work, but currently doesn't due to a bug in the squirrel maker
+# Windows, running this on macos should work, but currently doesn't due to a bug in the squirrel maker
 GITHUB_TOKEN=<token> yarn publish:windows
 ```
 
