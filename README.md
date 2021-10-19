@@ -35,16 +35,31 @@ This app takes data from the local machine it runs on and transforms that data a
 
 The actual work of getting the data into Studio (carto) is on the MapGeo side, under the uploader route.
 
-## Running
+## Running Locally
 
 When running MapGeo with HTTPS locally, you need to copy the `caPath` when you start MapGeo.
 Then start the electron app (`cd electron-app/`) with something like this, remember to replace the cert path:`
 
 ```sh
 NODE_EXTRA_CA_CERTS="/Users/iradchenko/Library/Application Support/devcert/certificate-authority/certificate.cert" yarn debug
+# Can also run yarn watch:debug
 ```
 
-### Testing File Formats
+When the client app (Ember app) rebuilds (using `yarn watch`) you need to close the main UI window, and in the taskbar (top right on mac, bottom right on windows) click the logo and click "Preferences" to reload that UI.
+
+### Config
+
+The app uses electron-store to save a configuration of the rules, sources, and mapgeo settings, and any cached data. This file path is printed when you start the electron app (`yarn watch` or `yarn watch:debug` in `./electron-app`).
+
+You can also get to this file easily using the Debugging menu (top left on mac, or in taskbar on both) and "Open Config".
+
+If you get into a situation where there is an error, you can delete this file to reset everything.
+
+### Testing
+
+Generally test against https://tester.alpha.mapgeo.io or https://appgeo.mapgeo.io
+
+#### Generating File Formats
 
 To create a File GeoDatabase, you can use GeoJSON to create it using this command:
 
@@ -53,6 +68,8 @@ ogr2ogr -f "FileGDB" output.gdb input.geojson
 ```
 
 ## Electron
+
+> Note: these instructions don't work, see the publish section further down. Probably want to setup a Github Action to auto publish instead of opening Workspaces every time.
 
 On mac you need to install Wine and mono, `brew install wine-stable && brew install mono` to build for Windows.
 
