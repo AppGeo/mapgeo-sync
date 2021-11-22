@@ -452,7 +452,7 @@ app.on('ready', async () => {
   }
 
   tray = new Tray(path.join(__dirname, '..', 'resources/iconTemplate.png'));
-  const menuItems: MenuItemConstructorOptions[] = [
+  const menuItems: any[] = [
     {
       label: 'Preferences',
       type: 'normal',
@@ -507,6 +507,23 @@ app.on('ready', async () => {
       },
     },
   ];
+
+  menuItems.push({
+    label: 'Edit',
+    submenu: [
+      { label: 'Undo', accelerator: 'CmdOrCtrl+Z', selector: 'undo:' },
+      { label: 'Redo', accelerator: 'Shift+CmdOrCtrl+Z', selector: 'redo:' },
+      { type: 'separator' },
+      { label: 'Cut', accelerator: 'CmdOrCtrl+X', selector: 'cut:' },
+      { label: 'Copy', accelerator: 'CmdOrCtrl+C', selector: 'copy:' },
+      { label: 'Paste', accelerator: 'CmdOrCtrl+V', selector: 'paste:' },
+      {
+        label: 'Select All',
+        accelerator: 'CmdOrCtrl+A',
+        selector: 'selectAll:',
+      },
+    ],
+  });
 
   menuItems.push({
     label: 'Debugging',
